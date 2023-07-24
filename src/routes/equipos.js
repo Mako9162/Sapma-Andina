@@ -9,8 +9,8 @@ const fs = require("fs");
 const path = require("path");
 const nodemailer = require('nodemailer');
 
-const correo = "sapmadet@sercoing.cl";
-const pass = "2m[FDus[Tym4@ew6";
+const correo = "sapmadand@sercoing.cl";
+const pass = "FL918,VoHvwE=za.";
 
 const transporter = nodemailer.createTransport({
                         host: "mail.sercoing.cl",
@@ -329,9 +329,9 @@ router.post('/elimequi', isLoggedIn, authRole(['Plan', 'Admincli']), async (req,
                       );
                     
                       await transporter.sendMail({
-                        from: "SAPMA <sapmadet@sercoing.cl>",
+                        from: "SAPMA <sapmadand@sercoing.cl>",
                         to: [email_plan],
-                        bcc: "sapmadet@sercoing.cl",
+                        bcc: "sapmadand@sercoing.cl",
                         subject: "SAPMA - Baja de Equipos",
                         html,
                         attachments: [
@@ -541,10 +541,10 @@ router.post('/elimlista', isLoggedIn, authRole(['Plan', 'Admincli']), async (req
                       );
                     
                       await transporter.sendMail({
-                        from: "SAPMA <sapmadet@sercoing.cl>",
+                        from: "SAPMA <sapmadand@sercoing.cl>",
                         // to: "marancibia@sercoing.cl",
                         to: [email_plan],
-                        bcc: "sapmadet@sercoing.cl",
+                        bcc: "sapmadand@sercoing.cl",
                         subject: "SAPMA - Baja de Equipos",
                         html,
                         attachments: [

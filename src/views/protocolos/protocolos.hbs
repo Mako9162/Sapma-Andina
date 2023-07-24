@@ -68,7 +68,7 @@
 								<th>Gerencia</th>
 								<th>Area</th>
 								<th>Sector</th>
-								<th>Repuestos</th>
+								{{!-- <th>Repuestos</th> --}}
 								<th>Tipo de servicio</th>
 								<th>Estado de tarea</th>
 								<th>Ver</th>
@@ -83,7 +83,7 @@
 								<td>{{GERENCIA}}</td>
 								<td>{{AREA}}</td>
 								<td>{{SECTOR}}</td>
-								<td>{{REPUESTO}}</td>
+								{{!-- <td>{{REPUESTO}}</td> --}}
 								<td>{{SERVICIO}}</td>
 								<td>{{ESTADO}}</td>
 								<td><center><a href="/protocolo/{{ IDT }}" class="btn btn-inline btn-primary btn-sm ladda-button" target="_blank"><i class="fa fa-file-archive-o"></i></a></center></td>	
@@ -449,8 +449,6 @@
 			});
 				window.location.href = "/archivo/" + idpdf + "/" + codigo;		
 			});
-
-
 	});
     </script>
 </body>

@@ -12,8 +12,8 @@ const request = require('request');
 const hbs = require("handlebars");
 
 
-const correo = "sapmadet@sercoing.cl";
-const pass = "2m[FDus[Tym4@ew6";
+const correo = "sapmadand@sercoing.cl";
+const pass = "FL918,VoHvwE=za.";
 
 const transporter = nodemailer.createTransport({
   host: "mail.sercoing.cl",
@@ -57,22 +57,11 @@ router.post("/protocoloss", isLoggedIn,  async (req, res) => {
       "	VC.vcgas_gerenciaN AS GERENCIA,\n" +
       "	VC.vcgas_areaN AS AREA,\n" +
       "	VC.vcgas_sectorN AS SECTOR,\n" +
-      "IF\n" +
-      "	(\n" +
-      "		TRIM(\n" +
-      "			TRAILING ',' \n" +
-      "		FROM\n" +
-      "		GROUP_CONCAT( IF ( TR.Respuesta = 'SC', '', TR.Respuesta ) SEPARATOR ' - ' )) = '',\n" +
-      "		' - ',\n" +
-      "		TRIM(\n" +
-      "			TRAILING ',' \n" +
-      "		FROM\n" +
-      "		GROUP_CONCAT( IF ( TR.Respuesta = 'SC', '', TR.Respuesta ) SEPARATOR ' - ' ))) AS REPUESTO,\n" +
       "	TP.Descripcion AS SERVICIO,\n" +
       "	ES.Descripcion AS ESTADO \n" +
       "FROM\n" +
       "	Tareas T\n" +
-      "	INNER JOIN VIEW_tareaCliente V ON V.tareaId = T.Id\n" +
+      "	INNER JOIN VIEW_tareaCliente V ON V.vtc_tareaId = T.Id\n" +
       "	INNER JOIN Protocolos P ON P.Id = T.Id_Protocolo\n" +
       "	INNER JOIN Protocolo_Capitulo PCA ON PCA.Id_Protocolo = P.Id\n" +
       "	INNER JOIN Protocolo_Capturas PCAP ON PCAP.Id_Protocolo = P.Id \n" +
@@ -83,14 +72,14 @@ router.post("/protocoloss", isLoggedIn,  async (req, res) => {
       "	INNER JOIN VIEW_equiposCteGerAreSec VC ON VC.vce_idEquipo = T.Id_Equipo\n" +
       "	INNER JOIN TipoProtocolo TP ON TP.Id = P.Id_TipoProtocolo\n" +
       "	INNER JOIN Estados ES ON ES.Id = T.Id_Estado\n" +
-      "	INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = T.Id \n" +
+      "	INNER JOIN Tareas_Estado TE ON TE.te_Id_Tarea = T.Id \n" +
       "WHERE\n" +
-      "	V.clienteId = "+Id_Cliente+" \n" +
-      "	AND V.tareaId = "+tarea+"\n" +
-      "	AND T.Id_Estado = 5\n" +
-      "	AND TV.Tv_Id_aux_estado = 5\n" +
-      "	AND TV.Tv_Estado_val = 0\n" +
-      "	AND PCA.Descripcion LIKE '%REPUESTOS' GROUP BY T.Id;",
+      "	V.vtc_idCliente = "+Id_Cliente+"\n" +
+      "	AND V.vtc_tareaId = "+tarea+"\n" +
+      "	AND T.Id_Estado = 5 \n" +
+      "	AND TE.te_Id_aux_estado = 5 \n" +
+      "	AND TE.te_Estado_val = 0 \n" +
+      " GROUP BY T.Id;",
         (err, result) => {
           if (!result.length) {
             res.render("protocolos/protocolos", { title: "No se encuentran tareas en el rango seleccionado!!!" });
@@ -101,51 +90,42 @@ router.post("/protocoloss", isLoggedIn,  async (req, res) => {
         }
       );
     } else {
-      await pool.query("SELECT\n" +
-      "	T.Id AS IDT,\n" +
-      "	date_format( T.Fecha, '%d-%m-%Y' ) AS FECHA,\n" +
-      "	VC.vce_codigo AS CODIGO,\n" +
-      "	VC.vcgas_gerenciaN AS GERENCIA,\n" +
-      "	VC.vcgas_areaN AS AREA,\n" +
-      "	VC.vcgas_sectorN AS SECTOR,\n" +
-      "IF\n" +
-      "	(\n" +
-      "		TRIM(\n" +
-      "			TRAILING ',' \n" +
-      "		FROM\n" +
-      "		GROUP_CONCAT( IF ( TR.Respuesta = 'SC', '', TR.Respuesta ) SEPARATOR ' - ' )) = '',\n" +
-      "		' - ',\n" +
-      "		TRIM(\n" +
-      "			TRAILING ',' \n" +
-      "		FROM\n" +
-      "		GROUP_CONCAT( IF ( TR.Respuesta = 'SC', '', TR.Respuesta ) SEPARATOR ' - ' ))) AS REPUESTO,\n" +
-      "	TP.Descripcion AS SERVICIO,\n" +
-      "	ES.Descripcion AS ESTADO \n" +
-      "FROM\n" +
-      "	Tareas T\n" +
-      "	INNER JOIN VIEW_tareaCliente V ON V.tareaId = T.Id\n" +
-      "	INNER JOIN Protocolos P ON P.Id = T.Id_Protocolo\n" +
-      "	INNER JOIN Protocolo_Capitulo PCA ON PCA.Id_Protocolo = P.Id\n" +
-      "	INNER JOIN Protocolo_Capturas PCAP ON PCAP.Id_Protocolo = P.Id \n" +
-      "	AND PCAP.Capitulo = PCA.Capitulo\n" +
-      "	LEFT JOIN Tarea_Respuesta TR ON TR.Id_Tarea = T.Id \n" +
-      "	AND TR.Capitulo = PCA.Capitulo \n" +
-      "	AND TR.Correlativo = PCAP.Correlativo\n" +
-      "	INNER JOIN VIEW_equiposCteGerAreSec VC ON VC.vce_idEquipo = T.Id_Equipo\n" +
-      "	INNER JOIN TipoProtocolo TP ON TP.Id = P.Id_TipoProtocolo\n" +
-      "	INNER JOIN Estados ES ON ES.Id = T.Id_Estado\n" +
-      "	INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = T.Id \n" +
-      "WHERE \n" +
-      "	V.clienteId = "+Id_Cliente+" \n" +
-      "	AND T.Id_Estado = 5\n" +
-      "	AND TV.Tv_Id_aux_estado = 5\n" +
-      "	AND TV.Tv_Estado_val = 0\n" +
-      "	AND PCA.Descripcion LIKE '%REPUESTOS'\n" +
-      "	AND T.Fecha BETWEEN \""+date1+"\" AND \""+date2+"\" GROUP BY T.Id\n" +
-      "	ORDER BY T.Fecha DESC;",
+      await pool.query(
+        "SELECT\n" +
+        "    T.Id AS IDT,\n" +
+        "    DATE_FORMAT(T.Fecha, '%d-%m-%Y') AS FECHA,\n" +
+        "    VC.vce_codigo AS CODIGO,\n" +
+        "    VC.vcgas_gerenciaN AS GERENCIA,\n" +
+        "    VC.vcgas_areaN AS AREA,\n" +
+        "    VC.vcgas_sectorN AS SECTOR,\n" +
+        "    TP.Descripcion AS SERVICIO,\n" +
+        "    ES.Descripcion AS ESTADO \n" +
+        "FROM\n" +
+        "    Tareas T\n" +
+        "    INNER JOIN VIEW_tareaCliente V ON V.vtc_tareaId = T.Id\n" +
+        "    INNER JOIN Protocolos P ON P.Id = T.Id_Protocolo\n" +
+        "    INNER JOIN Protocolo_Capitulo PCA ON PCA.Id_Protocolo = P.Id\n" +
+        "    INNER JOIN Protocolo_Capturas PCAP ON PCAP.Id_Protocolo = P.Id \n" +
+        "    AND PCAP.Capitulo = PCA.Capitulo\n" +
+        "    LEFT JOIN Tarea_Respuesta TR ON TR.Id_Tarea = T.Id \n" +
+        "    AND TR.Capitulo = PCA.Capitulo \n" +
+        "    AND TR.Correlativo = PCAP.Correlativo\n" +
+        "    INNER JOIN VIEW_equiposCteGerAreSec VC ON VC.vce_idEquipo = T.Id_Equipo\n" +
+        "    INNER JOIN TipoProtocolo TP ON TP.Id = P.Id_TipoProtocolo\n" +
+        "    INNER JOIN Estados ES ON ES.Id = T.Id_Estado\n" +
+        "    INNER JOIN Tareas_Estado TE ON TE.te_Id_Tarea = T.Id \n" +
+        "WHERE\n" +
+        "    V.vtc_idCliente = "+Id_Cliente+"\n" +
+        "    AND T.Id_Estado = 5 \n" +
+        "    AND TE.te_Id_aux_estado = 5 \n" +
+        "    AND TE.te_Estado_val = 0 \n" +
+        "	   AND T.Fecha BETWEEN \""+date1+"\" AND \""+date2+"\"\n" +
+        "GROUP BY\n" +
+        "    T.Id \n" +
+        "ORDER BY\n" +
+        "    T.Fecha DESC;",
         (err, result) => {
           if (!result.length) {
-            console.log(result);
             res.render("protocolos/protocolos", { title: "No se encuentran tareas en el rango seleccionado!!!" });
           } else {
             enviar(req, res, result);
@@ -160,6 +140,7 @@ router.post("/protocoloss", isLoggedIn,  async (req, res) => {
 
 
 router.get("/protocolo/:IDT", isLoggedIn, async (req, res) => {
+
     const { IDT } = req.params;
     const { Id_Cliente } = req.user;
     const { Login } = req.user;
@@ -975,7 +956,7 @@ router.post("/protocolo/validar", isLoggedIn, async (req, res) => {
     const datas = Object.values(req.body);
     const { Id_Cliente } = req.user;
 
-    await pool.query(`UPDATE Tareas_Validacion SET Tv_Estado_val = 1 WHERE Tv_Id_Tarea IN (${datas})`, async (err, result) => {
+    await pool.query(`UPDATE Tareas_Estado SET te_Estado_val = 1 WHERE te_Id_Tarea IN (${datas})`, async (err, result) => {
         if (err) {
           console.log(err);
         } else {
@@ -1102,7 +1083,7 @@ router.post("/protocolo/validar", isLoggedIn, async (req, res) => {
           const html = template(context);
 
           await transporter.sendMail({
-            from: "SAPMA <sapmadet@sercoing.cl>",
+            from: "SAPMA <sapmadand@sercoing.cl>",
             // to: 'marancibia@sercoing.cl',
             to: [arremailgen, arremail],
             cc: arremailp,
@@ -1124,7 +1105,7 @@ router.post("/protocolo/validar", isLoggedIn, async (req, res) => {
                 console.log(err);
               }else{
                 await pool.query(
-                  "UPDATE Tareas_Det\n" +
+                  "UPDATE Tareas_Detalle\n" +
                   "INNER JOIN (\n" +
                   "	SELECT\n" +
                   "		A.IDTAREA,\n" +
@@ -1138,8 +1119,8 @@ router.post("/protocolo/validar", isLoggedIn, async (req, res) => {
                   "			TR.Respuesta ESTADO \n" +
                   "		FROM\n" +
                   "			VIEW_tareasDET V\n" +
-                  "			INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = V.idTarea\n" +
-                  "			LEFT JOIN Tareas_Det TD ON TD.tdet_Id_Tarea = V.idTarea\n" +
+                  "			INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = V.idTarea\n" +
+                  "			LEFT JOIN Tareas_Detalle TD ON TD.tdet_Id_Tarea = V.idTarea\n" +
                   "			INNER JOIN Protocolos P ON P.Id = V.idProtocolo\n" +
                   "			INNER JOIN Protocolo_Capitulo PCA ON PCA.Id_Protocolo = P.Id\n" +
                   "			INNER JOIN Protocolo_Capturas PCAP ON PCAP.Id_Protocolo = PCA.Id_Protocolo \n" +
@@ -1151,9 +1132,9 @@ router.post("/protocolo/validar", isLoggedIn, async (req, res) => {
                   "			PCA.Descripcion LIKE '%. Estado%' \n" +
                   "			AND PCAP.Descripcion = '1. Estado' \n" +
                   "			AND TD.tdet_Estado_Equipo IS NULL \n" +
-                  "			AND TV.Tv_Id_Tarea IN ( "+datas+" ) \n" +
+                  "			AND TV.te_Id_Tarea IN ("+datas+") \n" +
                   "		) AS A\n" +
-                  "		INNER JOIN (\n" +
+                  "		LEFT JOIN (\n" +
                   "		SELECT\n" +
                   "			V.idTarea IDTAREA,\n" +
                   "		IF\n" +
@@ -1164,8 +1145,8 @@ router.post("/protocolo/validar", isLoggedIn, async (req, res) => {
                   "			) AS 'REPUESTO' \n" +
                   "		FROM\n" +
                   "			VIEW_tareasDET V\n" +
-                  "			INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = V.idTarea\n" +
-                  "			LEFT JOIN Tareas_Det TD ON TD.tdet_Id_Tarea = V.idTarea\n" +
+                  "			INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = V.idTarea\n" +
+                  "			LEFT JOIN Tareas_Detalle TD ON TD.tdet_Id_Tarea = V.idTarea\n" +
                   "			INNER JOIN Protocolos P ON P.Id = V.idProtocolo\n" +
                   "			INNER JOIN Protocolo_Capitulo PCA ON PCA.Id_Protocolo = P.Id\n" +
                   "			INNER JOIN Protocolo_Capturas PCAP ON PCAP.Id_Protocolo = PCA.Id_Protocolo \n" +
@@ -1177,7 +1158,7 @@ router.post("/protocolo/validar", isLoggedIn, async (req, res) => {
                   "			PCA.Descripcion LIKE '%. REPUE%' \n" +
                   "			AND PCAP.Descripcion LIKE '%REPUES%' \n" +
                   "			AND TD.tdet_Estado_Equipo IS NULL \n" +
-                  "			AND TV.Tv_Id_Tarea IN ( "+datas+" ) \n" +
+                  "			AND TV.te_Id_Tarea IN ("+datas+") \n" +
                   "		GROUP BY\n" +
                   "			1 \n" +
                   "		) AS B ON B.IDTAREA = A.IDTAREA\n" +
@@ -1187,8 +1168,8 @@ router.post("/protocolo/validar", isLoggedIn, async (req, res) => {
                   "			TR.Respuesta OBS \n" +
                   "		FROM\n" +
                   "			VIEW_tareasDET V\n" +
-                  "			INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = V.idTarea\n" +
-                  "			LEFT JOIN Tareas_Det TD ON TD.tdet_Id_Tarea = V.idTarea\n" +
+                  "			INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = V.idTarea\n" +
+                  "			LEFT JOIN Tareas_Detalle TD ON TD.tdet_Id_Tarea = V.idTarea\n" +
                   "			INNER JOIN Protocolos P ON P.Id = V.idProtocolo\n" +
                   "			INNER JOIN Protocolo_Capitulo PCA ON PCA.Id_Protocolo = P.Id\n" +
                   "			INNER JOIN Protocolo_Capturas PCAP ON PCAP.Id_Protocolo = PCA.Id_Protocolo \n" +
@@ -1200,7 +1181,7 @@ router.post("/protocolo/validar", isLoggedIn, async (req, res) => {
                   "			PCA.Descripcion LIKE '%. Estado%' \n" +
                   "			AND PCAP.Descripcion REGEXP 'Observaciones EST' \n" +
                   "			AND TD.tdet_Estado_Equipo IS NULL \n" +
-                  "			AND TV.Tv_Id_Tarea IN ( "+datas+" ) \n" +
+                  "			AND TV.te_Id_Tarea IN ("+datas+") \n" +
                   "		) AS D ON D.IDTAREA = A.IDTAREA \n" +
                   "	) AS C ON C.IDTAREA = tdet_Id_Tarea \n" +
                   "	SET tdet_Estado_Equipo = C.ESTADO,\n" +
@@ -1213,93 +1194,93 @@ router.post("/protocolo/validar", isLoggedIn, async (req, res) => {
                       console.log(err);
                     }else{
                       await pool.query(
-                        "UPDATE Tareas_Det\n" +
+                        "UPDATE Tareas_Detalle \n" +
                         "INNER JOIN (\n" +
-                        "	SELECT\n" +
-                        "		NEW.TAREANEW,\n" +
-                        "		OLD.Fecha_old,\n" +
-                        "		OLD.TareaId_old,\n" +
-                        "		OLD.RespuestaEstado_old \n" +
+                        "	 SELECT\n" +
+                        "	 NEW.TAREANEW,\n" +
+                        "	 OLD.Fecha_old,\n" +
+                        "	 OLD.TareaId_old,\n" +
+                        "	 OLD.RespuestaEstado_old  \n" +
                         "	FROM\n" +
-                        "		(\n" +
-                        "		SELECT\n" +
-                        "			T.Id_Equipo,\n" +
-                        "			T.Id TAREANEW \n" +
+                        "		 (\n" +
+                        "			 SELECT\n" +
+                        "			 T.Id_Equipo,\n" +
+                        "			 T.Id TAREANEW  \n" +
                         "		FROM\n" +
-                        "			Tareas T\n" +
-                        "			INNER JOIN Usuarios U ON U.Id = T.Id_Tecnico\n" +
-                        "			INNER JOIN VIEW_tareaCliente VTC ON VTC.tareaId = T.Id\n" +
-                        "			JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = T.Id\n" +
-                        "			JOIN Validacion_Tareas VT ON VT.Val_tarea_id = T.Id \n" +
+                        "			 Tareas T \n" +
+                        "			INNER JOIN Usuarios U ON U.Id = T.Id_Tecnico \n" +
+                        "			INNER JOIN VIEW_tareaCliente VTC ON VTC.vtc_tareaId = T.Id \n" +
+                        "			JOIN Tareas_Estado TV ON TV.te_Id_Tarea = T.Id \n" +
+                        "			JOIN Validacion_Tareas VT ON VT.Val_tarea_id = T.Id  \n" +
                         "		WHERE\n" +
-                        "			U.Descripcion NOT LIKE '%TEST%' \n" +
-                        "			AND VTC.clienteId = "+Id_Cliente+" \n" +
-                        "			AND T.Id_Estado = 5 \n" +
-                        "			AND VT.Val_rechazo = 0 \n" +
-                        "			AND TV.Tv_Estado_val = 1 \n" +
-                        "		) AS NEW\n" +
+                        "			 U.Descripcion NOT LIKE '%TEST%'  \n" +
+                        "			AND VTC.vtc_idCliente = "+Id_Cliente+" \n" +
+                        "			AND T.Id_Estado = 5  \n" +
+                        "			AND VT.Val_rechazo = 0  \n" +
+                        "			AND TV.te_Estado_val = 1  \n" +
+                        "		) AS NEW \n" +
                         "		LEFT JOIN (\n" +
-                        "		SELECT\n" +
-                        "			T.Id AS 'TareaId_old',\n" +
-                        "			T.Fecha AS 'Fecha_old',\n" +
-                        "			T.Id_Equipo AS 'EquipoId_old',\n" +
-                        "			TR.Respuesta AS 'RespuestaEstado_old' \n" +
+                        "			 SELECT\n" +
+                        "			 T.Id AS 'TareaId_old',\n" +
+                        "			 T.Fecha AS 'Fecha_old',\n" +
+                        "			 T.Id_Equipo AS 'EquipoId_old',\n" +
+                        "			 TR.Respuesta AS 'RespuestaEstado_old'  \n" +
                         "		FROM\n" +
-                        "			Tareas T\n" +
-                        "			INNER JOIN Protocolos P ON P.Id = T.Id_Protocolo\n" +
-                        "			INNER JOIN Protocolo_Capitulo PC ON PC.Id_Protocolo = P.Id\n" +
-                        "			INNER JOIN Protocolo_Capturas PCA ON PCA.Capitulo = PC.Capitulo \n" +
-                        "			AND PCA.Id_Protocolo = P.Id\n" +
-                        "			INNER JOIN Tarea_Respuesta TR ON TR.Id_Tarea = T.Id \n" +
-                        "			AND TR.Capitulo = PC.Capitulo \n" +
-                        "			AND TR.Correlativo = PCA.Correlativo \n" +
+                        "			 Tareas T \n" +
+                        "			INNER JOIN Protocolos P ON P.Id = T.Id_Protocolo \n" +
+                        "			INNER JOIN Protocolo_Capitulo PC ON PC.Id_Protocolo = P.Id \n" +
+                        "			INNER JOIN Protocolo_Capturas PCA ON PCA.Capitulo = PC.Capitulo  \n" +
+                        "			AND PCA.Id_Protocolo = P.Id \n" +
+                        "			INNER JOIN Tarea_Respuesta TR ON TR.Id_Tarea = T.Id  \n" +
+                        "			AND TR.Capitulo = PC.Capitulo  \n" +
+                        "			AND TR.Correlativo = PCA.Correlativo  \n" +
                         "		WHERE\n" +
-                        "			T.Id IN (\n" +
-                        "			SELECT\n" +
-                        "				MAX( T2.Id ) TareaAnterior \n" +
+                        "			 T.Id IN (\n" +
+                        "				 SELECT\n" +
+                        "				 MAX( T2.Id ) TareaAnterior  \n" +
                         "			FROM\n" +
-                        "				Tareas T2\n" +
+                        "				 Tareas T2 \n" +
                         "				INNER JOIN (\n" +
-                        "				SELECT\n" +
-                        "					MAX( T.Fecha ) FECHA,\n" +
-                        "					T.Id_Equipo \n" +
+                        "					 SELECT\n" +
+                        "					 MAX( T.Fecha ) FECHA,\n" +
+                        "					 T.Id_Equipo  \n" +
                         "				FROM\n" +
-                        "					Tareas T \n" +
+                        "					 Tareas T  \n" +
                         "				WHERE\n" +
-                        "					T.Id_Estado = 4 \n" +
+                        "					 T.Id_Estado = 4  \n" +
                         "					AND T.Id_Equipo IN (\n" +
-                        "					SELECT\n" +
-                        "						T.Id_Equipo \n" +
+                        "						 SELECT\n" +
+                        "						 T.Id_Equipo  \n" +
                         "					FROM\n" +
-                        "						Tareas T\n" +
-                        "						INNER JOIN Usuarios U ON U.Id = T.Id_Tecnico\n" +
-                        "						INNER JOIN VIEW_tareaCliente VTC ON VTC.tareaId = T.Id\n" +
-                        "						JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = T.Id\n" +
-                        "						JOIN Validacion_Tareas VT ON VT.Val_tarea_id = T.Id \n" +
+                        "						 Tareas T \n" +
+                        "						INNER JOIN Usuarios U ON U.Id = T.Id_Tecnico \n" +
+                        "						INNER JOIN VIEW_tareaCliente VTC ON VTC.vtc_tareaId = T.Id \n" +
+                        "						JOIN Tareas_Estado TV ON TV.te_Id_Tarea = T.Id \n" +
+                        "						JOIN Validacion_Tareas VT ON VT.Val_tarea_id = T.Id  \n" +
                         "					WHERE\n" +
-                        "						U.Descripcion NOT LIKE '%TEST%' \n" +
-                        "						AND VTC.clienteId = "+Id_Cliente+" \n" +
-                        "						AND T.Id_Estado = 5 \n" +
-                        "						AND VT.Val_rechazo = 0 \n" +
-                        "						AND TV.Tv_Estado_val = 1 \n" +
-                        "					) \n" +
+                        "						 U.Descripcion NOT LIKE '%TEST%'  \n" +
+                        "						AND VTC.vtc_idCliente = "+Id_Cliente+"  \n" +
+                        "						AND T.Id_Estado = 5  \n" +
+                        "						AND VT.Val_rechazo = 0  \n" +
+                        "						AND TV.te_Estado_val = 1  \n" +
+                        "					)  \n" +
                         "				GROUP BY\n" +
-                        "					T.Id_Equipo \n" +
-                        "				) AS W ON W.Id_Equipo = T2.Id_Equipo \n" +
-                        "				AND T2.Fecha = W.FECHA \n" +
+                        "					 T.Id_Equipo  \n" +
+                        "				) AS W ON W.Id_Equipo = T2.Id_Equipo  \n" +
+                        "				AND T2.Fecha = W.FECHA  \n" +
                         "			GROUP BY\n" +
-                        "				T2.Id_Equipo,\n" +
-                        "				T2.Fecha \n" +
-                        "			) \n" +
-                        "			AND PC.Descripcion LIKE '%. Estado%' \n" +
-                        "			AND PCA.Descripcion LIKE '1. Estado' \n" +
-                        "		) AS OLD ON OLD.EquipoId_old = NEW.Id_Equipo \n" +
-                        "	) AS N ON N.TAREANEW = tdet_Id_Tarea \n" +
-                        "	SET tdet_Id_Tarea_Anterior = N.TareaId_old,\n" +
-                        "	tdet_Estado_Equipo_Anterior = N.RespuestaEstado_old,\n" +
-                        "	tdet_Fecha_Tarea_Anterior = N.Fecha_old \n" +
+                        "				 T2.Id_Equipo,\n" +
+                        "				 T2.Fecha  \n" +
+                        "			)  \n" +
+                        "			AND PC.Descripcion LIKE '%. Estado%'  \n" +
+                        "			AND PCA.Descripcion LIKE '1. Estado'  \n" +
+                        "		) AS OLD ON OLD.EquipoId_old = NEW.Id_Equipo  \n" +
+                        "	) AS N ON N.TAREANEW = tdet_Id_Tarea  \n" +
+                        "	SET tdet_Id_TareaAnterior = N.TareaId_old,\n" +
+                        "	 tdet_Estado_EquipoAnterior = N.RespuestaEstado_old,\n" +
+                        "	 tdet_Fecha_TareaAnterior = N.Fecha_old  \n" +
                         "WHERE\n" +
-                        "	tdet_Id_Tarea > 1;",
+                        "	 tdet_Id_Tarea > 1;",
                          (err, result) => {
                           if (err){
                             console.log(err);
@@ -1412,7 +1393,7 @@ router.get("/pdf/:IDT/:CODIGO", isLoggedIn, async (req, res) => {
               }
             },
           localUrlAccess: true,
-          base: ('http://143.202.12.36:3000', 'https://localhost:3000')
+          base: ('https://sapmadand.sercoing.cl:3000', 'https://localhost:3000')
         };
 
         const imagendebd = await pool.query("SELECT * FROM Adjuntos WHERE Id_Tarea = ?", [IDT]);
@@ -1618,7 +1599,7 @@ router.get("/pdfc/:IDT/:CODIGO", isLoggedIn, authRole(['Cli_C']), async (req, re
               }
             },
           localUrlAccess: true,
-          base: ('http://143.202.12.36:3000', 'https://localhost:3000')
+          base: ('https://sapmadand.sercoing.cl:3000', 'https://localhost:3000')
         };
 
         const imagendebd = await pool.query("SELECT * FROM Adjuntos WHERE Id_Tarea = ?", [IDT]);
@@ -1823,7 +1804,7 @@ router.get("/pdfb/:IDT/:CODIGO", isLoggedIn, authRole(['Cli_B']), async (req, re
               }
             },
           localUrlAccess: true,
-          base: ('http://143.202.12.36:3000', 'https://localhost:3000')
+          base: ('https://sapmadand.sercoing.cl:3000', 'https://localhost:3000')
         };
 
         const imagendebd = await pool.query("SELECT * FROM Adjuntos WHERE Id_Tarea = ?", [IDT]);
@@ -2028,7 +2009,7 @@ router.get("/pdfa/:IDT/:CODIGO", isLoggedIn, authRole(['Cli_A']), async (req, re
               }
             },
           localUrlAccess: true,
-          base: ('http://143.202.12.36:3000', 'https://localhost:3000')
+          base: ('https://sapmadand.sercoing.cl:3000', 'https://localhost:3000')
         };
 
         const imagendebd = await pool.query("SELECT * FROM Adjuntos WHERE Id_Tarea = ?", [IDT]);
@@ -2233,7 +2214,7 @@ router.get("/pdfd/:IDT/:CODIGO", isLoggedIn, authRole(['Cli_D']), async (req, re
               }
             },
           localUrlAccess: true,
-          base: ('http://143.202.12.36:3000', 'https://localhost:3000')
+          base: ('https://sapmadand.sercoing.cl:3000', 'https://localhost:3000')
         };
 
         const imagendebd = await pool.query("SELECT * FROM Adjuntos WHERE Id_Tarea = ?", [IDT]);
@@ -2431,7 +2412,7 @@ router.get("/pdfe/:IDT/:CODIGO", isLoggedIn, authRole(['Cli_E']), async (req, re
               }
             },
           localUrlAccess: true,
-          base: ('http://143.202.12.36:3000', 'https://localhost:3000')
+          base: ('https://sapmadand.sercoing.cl:3000', 'https://localhost:3000')
         };
 
         const imagendebd = await pool.query("SELECT * FROM Adjuntos WHERE Id_Tarea = ?", [IDT]);

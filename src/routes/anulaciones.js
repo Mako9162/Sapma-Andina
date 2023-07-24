@@ -13,8 +13,8 @@ const multer = require('multer');
 const upload = multer();
 
 
-const correo = "sapmadet@sercoing.cl";
-const pass = "2m[FDus[Tym4@ew6";
+const correo = "sapmadand@sercoing.cl";
+const pass = "FL918,VoHvwE=za.";
 
 const transporter = nodemailer.createTransport({
                         host: "mail.sercoing.cl",
@@ -97,14 +97,14 @@ router.post("/tgenerales", isLoggedIn, authRole(['Plan', 'Admincli']), async (re
     "			COUNT(*) OVER ( PARTITION BY VE.vce_codigo ) AS CuentaCodigo \n" +
     "		FROM\n" +
     "			VIEW_tareaCliente V\n" +
-    "			INNER JOIN Tareas T ON T.Id = V.tareaId\n" +
+    "			INNER JOIN Tareas T ON T.Id = V.vtc_tareaId\n" +
     "			INNER JOIN Usuarios U ON U.Id = T.Id_Tecnico\n" +
     "			INNER JOIN VIEW_equiposCteGerAreSec VE ON VE.vce_idEquipo = T.Id_Equipo\n" +
     "			INNER JOIN Protocolos P ON P.Id = T.Id_Protocolo\n" +
     "			INNER JOIN TipoProtocolo TP ON TP.Id = P.Id_TipoProtocolo\n" +
     "			INNER JOIN Estados E ON E.Id = T.Id_Estado \n" +
     "		WHERE\n" +
-    "			V.clienteId = "+Id_Cliente+" \n" +
+    "			V.vtc_idCliente = "+Id_Cliente+" \n" +
     "			AND T.Id_Estado IN ( 5, 1, 2, 4, 6 ) \n" +
     "			AND T.Id = "+tarea+" \n" +
     "			AND U.Descripcion NOT LIKE '%TEST%' \n" +
@@ -131,14 +131,14 @@ router.post("/tgenerales", isLoggedIn, authRole(['Plan', 'Admincli']), async (re
     "			'CuentaCodigo' \n" +
     "		FROM\n" +
     "			VIEW_tareaCliente V\n" +
-    "			INNER JOIN Tareas T ON T.Id = V.tareaId\n" +
+    "			INNER JOIN Tareas T ON T.Id = V.vtc_tareaId\n" +
     "			INNER JOIN Usuarios U ON U.Id = T.Id_Tecnico\n" +
     "			INNER JOIN VIEW_equiposCteGerAreSec VE ON VE.vce_idEquipo = T.Id_Equipo\n" +
     "			INNER JOIN Protocolos P ON P.Id = T.Id_Protocolo\n" +
     "			INNER JOIN TipoProtocolo TP ON TP.Id = P.Id_TipoProtocolo\n" +
     "			INNER JOIN Estados E ON E.Id = T.Id_Estado \n" +
     "		WHERE\n" +
-    "			V.clienteId = "+Id_Cliente+" \n" +
+    "			V.vtc_idCliente = "+Id_Cliente+" \n" +
     "			AND T.Id_Estado IN ( 3 ) \n" +
     "			AND T.Id = "+tarea+" \n" +
     "			AND U.Descripcion NOT LIKE '%TEST%' \n" +
@@ -150,7 +150,7 @@ router.post("/tgenerales", isLoggedIn, authRole(['Plan', 'Admincli']), async (re
     "			T.Id_Equipo ASC \n" +
     "		) AS X \n" +
     "	) AS P\n" +
-    "	LEFT JOIN Tareas_Det TD ON P.IDT = TD.tdet_Id_Tarea;",
+    "	LEFT JOIN Tareas_Detalle TD ON P.IDT = TD.tdet_Id_Tarea;",
       (err, result) => {
         if (!result.length) {
           res.render("protocolos/protocolos", { title: "No se encuentran tareas en el rango seleccionado!!!" });
@@ -217,14 +217,14 @@ router.post("/tgenerales", isLoggedIn, authRole(['Plan', 'Admincli']), async (re
           "			COUNT(*) OVER ( PARTITION BY VE.vce_codigo ) AS CuentaCodigo \n" +
           "		FROM\n" +
           "			VIEW_tareaCliente V\n" +
-          "			INNER JOIN Tareas T ON T.Id = V.tareaId\n" +
+          "			INNER JOIN Tareas T ON T.Id = V.vtc_tareaId\n" +
           "			INNER JOIN Usuarios U ON U.Id = T.Id_Tecnico\n" +
           "			INNER JOIN VIEW_equiposCteGerAreSec VE ON VE.vce_idEquipo = T.Id_Equipo\n" +
           "			INNER JOIN Protocolos P ON P.Id = T.Id_Protocolo\n" +
           "			INNER JOIN TipoProtocolo TP ON TP.Id = P.Id_TipoProtocolo\n" +
           "			INNER JOIN Estados E ON E.Id = T.Id_Estado \n" +
           "		WHERE\n" +
-          "			V.clienteId = "+Id_Cliente+" \n" +
+          "			V.vtc_idCliente = "+Id_Cliente+" \n" +
           "			AND T.Id_Estado IN ( 5, 1, 2, 4, 6 ) \n" +
           "     AND T.Fecha BETWEEN \""+firstDayString+"\" AND \""+lastDayString+"\" \n" +
           "			AND U.Descripcion NOT LIKE '%TEST%' \n" +
@@ -251,14 +251,14 @@ router.post("/tgenerales", isLoggedIn, authRole(['Plan', 'Admincli']), async (re
           "			'CuentaCodigo' \n" +
           "		FROM\n" +
           "			VIEW_tareaCliente V\n" +
-          "			INNER JOIN Tareas T ON T.Id = V.tareaId\n" +
+          "			INNER JOIN Tareas T ON T.Id = V.vtc_tareaId\n" +
           "			INNER JOIN Usuarios U ON U.Id = T.Id_Tecnico\n" +
           "			INNER JOIN VIEW_equiposCteGerAreSec VE ON VE.vce_idEquipo = T.Id_Equipo\n" +
           "			INNER JOIN Protocolos P ON P.Id = T.Id_Protocolo\n" +
           "			INNER JOIN TipoProtocolo TP ON TP.Id = P.Id_TipoProtocolo\n" +
           "			INNER JOIN Estados E ON E.Id = T.Id_Estado \n" +
           "		WHERE\n" +
-          "			V.clienteId = "+Id_Cliente+" \n" +
+          "			V.vtc_idCliente = "+Id_Cliente+" \n" +
           "			AND T.Id_Estado IN ( 3 ) \n" +
           "     AND T.Fecha BETWEEN \""+firstDayString+"\" AND \""+lastDayString+"\" \n" +
           "			AND U.Descripcion NOT LIKE '%TEST%' \n" +
@@ -270,7 +270,7 @@ router.post("/tgenerales", isLoggedIn, authRole(['Plan', 'Admincli']), async (re
           "			T.Id_Equipo ASC \n" +
           "		) AS X \n" +
           "	) AS P\n" +
-          "	LEFT JOIN Tareas_Det TD ON P.IDT = TD.tdet_Id_Tarea;",
+          "	LEFT JOIN Tareas_Detalle TD ON P.IDT = TD.tdet_Id_Tarea;",
             (err, result) => {
               if (!result.length) {
                 console.log(result);
@@ -322,14 +322,14 @@ const tareas_res = await pool.query("SELECT\n" +
 "		COUNT(*) OVER ( PARTITION BY VE.vce_codigo ) AS CuentaCodigo \n" +
 "	FROM\n" +
 "		VIEW_tareaCliente V\n" +
-"		INNER JOIN Tareas T ON T.Id = V.tareaId\n" +
+"		INNER JOIN Tareas T ON T.Id = V.vtc_tareaId\n" +
 "		INNER JOIN Usuarios U ON U.Id = T.Id_Tecnico\n" +
 "		INNER JOIN VIEW_equiposCteGerAreSec VE ON VE.vce_idEquipo = T.Id_Equipo\n" +
 "		INNER JOIN Protocolos P ON P.Id = T.Id_Protocolo\n" +
 "		INNER JOIN TipoProtocolo TP ON TP.Id = P.Id_TipoProtocolo\n" +
 "		INNER JOIN Estados E ON E.Id = T.Id_Estado \n" +
 "	WHERE\n" +
-"		V.clienteId = "+Id_Cliente+" \n" +
+"		V.vtc_idCliente = "+Id_Cliente+" \n" +
 "		AND T.Id_Estado IN ( 5, 1, 2, 4, 6 ) \n" +
 "		AND T.Id IN ("+idt+") \n" +
 "		AND U.Descripcion NOT LIKE '%TEST%' \n" +
@@ -356,14 +356,14 @@ const tareas_res = await pool.query("SELECT\n" +
 "		'CuentaCodigo' \n" +
 "	FROM\n" +
 "		VIEW_tareaCliente V\n" +
-"		INNER JOIN Tareas T ON T.Id = V.tareaId\n" +
+"		INNER JOIN Tareas T ON T.Id = V.vtc_tareaId\n" +
 "		INNER JOIN Usuarios U ON U.Id = T.Id_Tecnico\n" +
 "		INNER JOIN VIEW_equiposCteGerAreSec VE ON VE.vce_idEquipo = T.Id_Equipo\n" +
 "		INNER JOIN Protocolos P ON P.Id = T.Id_Protocolo\n" +
 "		INNER JOIN TipoProtocolo TP ON TP.Id = P.Id_TipoProtocolo\n" +
 "		INNER JOIN Estados E ON E.Id = T.Id_Estado \n" +
 "	WHERE\n" +
-"		V.clienteId = "+Id_Cliente+" \n" +
+"		V.vtc_idCliente = "+Id_Cliente+" \n" +
 "		AND T.Id_Estado IN ( 3 ) \n" +
 "		AND T.Id IN ("+idt+") \n" +
 "		AND U.Descripcion NOT LIKE '%TEST%' \n" +
@@ -463,10 +463,10 @@ for (var i = 0; i < tareas_res.length; i++) {
               );     
               const {Email} = req.user;  
               await transporter.sendMail({
-                from: "SAPMA <sapmadet@sercoing.cl>",
+                from: "SAPMA <sapmadand@sercoing.cl>",
                 // to: "marancibia@sercoing.cl",
                 to: [email_plan, Email],
-                bcc: "sapmadet@sercoing.cl",
+                bcc: "sapmadand@sercoing.cl",
                 subject: "SAPMA - Tareas Anuladas",
                 html,
                 attachments: [
@@ -532,10 +532,10 @@ for (var i = 0; i < tareas_res.length; i++) {
               );     
               const {Email} = req.user;        
               await transporter.sendMail({
-                from: "SAPMA <sapmadet@sercoing.cl>",
+                from: "SAPMA <sapmadand@sercoing.cl>",
                 // to: "marancibia@sercoing.cl",
                 to: [email_plan, Email],
-                bcc: "sapmadet@sercoing.cl",
+                bcc: "sapmadand@sercoing.cl",
                 subject: "SAPMA - Tareas Anuladas",
                 html,
                 attachments: [
@@ -581,14 +581,14 @@ router.post("/anular_lista", isLoggedIn, authRole(['Plan', 'Admincli']), async (
   "		COUNT(*) OVER ( PARTITION BY VE.vce_codigo ) AS CuentaCodigo \n" +
   "	FROM\n" +
   "		VIEW_tareaCliente V\n" +
-  "		INNER JOIN Tareas T ON T.Id = V.tareaId\n" +
+  "		INNER JOIN Tareas T ON T.Id = V.vtc_tareaId\n" +
   "		INNER JOIN Usuarios U ON U.Id = T.Id_Tecnico\n" +
   "		INNER JOIN VIEW_equiposCteGerAreSec VE ON VE.vce_idEquipo = T.Id_Equipo\n" +
   "		INNER JOIN Protocolos P ON P.Id = T.Id_Protocolo\n" +
   "		INNER JOIN TipoProtocolo TP ON TP.Id = P.Id_TipoProtocolo\n" +
   "		INNER JOIN Estados E ON E.Id = T.Id_Estado \n" +
   "	WHERE\n" +
-  "		V.clienteId = "+Id_Cliente+" \n" +
+  "		V.vtc_idCliente = "+Id_Cliente+" \n" +
   "		AND T.Id_Estado IN ( 5, 1, 2, 4, 6 ) \n" +
   "		AND T.Id IN ("+idt+") \n" +
   "		AND U.Descripcion NOT LIKE '%TEST%' \n" +
@@ -615,14 +615,14 @@ router.post("/anular_lista", isLoggedIn, authRole(['Plan', 'Admincli']), async (
   "		'CuentaCodigo' \n" +
   "	FROM\n" +
   "		VIEW_tareaCliente V\n" +
-  "		INNER JOIN Tareas T ON T.Id = V.tareaId\n" +
+  "		INNER JOIN Tareas T ON T.Id = V.vtc_tareaId\n" +
   "		INNER JOIN Usuarios U ON U.Id = T.Id_Tecnico\n" +
   "		INNER JOIN VIEW_equiposCteGerAreSec VE ON VE.vce_idEquipo = T.Id_Equipo\n" +
   "		INNER JOIN Protocolos P ON P.Id = T.Id_Protocolo\n" +
   "		INNER JOIN TipoProtocolo TP ON TP.Id = P.Id_TipoProtocolo\n" +
   "		INNER JOIN Estados E ON E.Id = T.Id_Estado \n" +
   "	WHERE\n" +
-  "		V.clienteId = "+Id_Cliente+" \n" +
+  "		V.vtc_idCliente = "+Id_Cliente+" \n" +
   "		AND T.Id_Estado IN ( 3 ) \n" +
   "		AND T.Id IN ("+idt+") \n" +
   "		AND U.Descripcion NOT LIKE '%TEST%' \n" +
@@ -730,10 +730,10 @@ router.post("/anular_lista", isLoggedIn, authRole(['Plan', 'Admincli']), async (
                     };
               const html = template(context);        
               await transporter.sendMail({
-                from: "SAPMA <sapmadet@sercoing.cl>",
+                from: "SAPMA <sapmadand@sercoing.cl>",
                 // to: "marancibia@sercoing.cl",
                 to: [Email, email_plan],
-                bcc: "sapmadet@sercoing.cl",
+                bcc: "sapmadand@sercoing.cl",
                 subject: "SAPMA - Tareas Anuladas",
                 html,
                 attachments: [
@@ -792,14 +792,14 @@ const dates = new Date().toLocaleString('es-CL', options);
   "		COUNT(*) OVER ( PARTITION BY VE.vce_codigo ) AS CuentaCodigo \n" +
   "	FROM\n" +
   "		VIEW_tareaCliente V\n" +
-  "		INNER JOIN Tareas T ON T.Id = V.tareaId\n" +
+  "		INNER JOIN Tareas T ON T.Id = V.vtc_tareaId\n" +
   "		INNER JOIN Usuarios U ON U.Id = T.Id_Tecnico\n" +
   "		INNER JOIN VIEW_equiposCteGerAreSec VE ON VE.vce_idEquipo = T.Id_Equipo\n" +
   "		INNER JOIN Protocolos P ON P.Id = T.Id_Protocolo\n" +
   "		INNER JOIN TipoProtocolo TP ON TP.Id = P.Id_TipoProtocolo\n" +
   "		INNER JOIN Estados E ON E.Id = T.Id_Estado \n" +
   "	WHERE\n" +
-  "		V.clienteId = "+Id_Cliente+" \n" +
+  "		V.vtc_idCliente = "+Id_Cliente+" \n" +
   "		AND T.Id_Estado IN ( 5, 1, 2, 4, 6 ) \n" +
   "		AND T.Id IN ("+idt+") \n" +
   "		AND U.Descripcion NOT LIKE '%TEST%' \n" +
@@ -826,14 +826,14 @@ const dates = new Date().toLocaleString('es-CL', options);
   "		'CuentaCodigo' \n" +
   "	FROM\n" +
   "		VIEW_tareaCliente V\n" +
-  "		INNER JOIN Tareas T ON T.Id = V.tareaId\n" +
+  "		INNER JOIN Tareas T ON T.Id = V.vtc_tareaId\n" +
   "		INNER JOIN Usuarios U ON U.Id = T.Id_Tecnico\n" +
   "		INNER JOIN VIEW_equiposCteGerAreSec VE ON VE.vce_idEquipo = T.Id_Equipo\n" +
   "		INNER JOIN Protocolos P ON P.Id = T.Id_Protocolo\n" +
   "		INNER JOIN TipoProtocolo TP ON TP.Id = P.Id_TipoProtocolo\n" +
   "		INNER JOIN Estados E ON E.Id = T.Id_Estado \n" +
   "	WHERE\n" +
-  "		V.clienteId = "+Id_Cliente+" \n" +
+  "		V.vtc_idCliente = "+Id_Cliente+" \n" +
   "		AND T.Id_Estado IN ( 3 ) \n" +
   "		AND T.Id IN ("+idt+") \n" +
   "		AND U.Descripcion NOT LIKE '%TEST%' \n" +
@@ -941,10 +941,10 @@ const dates = new Date().toLocaleString('es-CL', options);
                     };
               const html = template(context);        
               await transporter.sendMail({
-                from: "SAPMA <sapmadet@sercoing.cl>",
+                from: "SAPMA <sapmadand@sercoing.cl>",
                 to: [Email, email_plan],
                 // to: "marancibia@sercoing.cl",
-                bcc: "sapmadet@sercoing.cl",
+                bcc: "sapmadand@sercoing.cl",
                 subject: "SAPMA - Tareas Anuladas",
                 html,
                 attachments: [

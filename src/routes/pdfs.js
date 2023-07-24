@@ -145,7 +145,7 @@ router.post('/pdfs', isLoggedIn, async (req, res)=> {
                     }
                     },
                 localUrlAccess: true,
-                base: ('http://143.202.12.36:3000', 'https://localhost:3000')
+                base: ('https://sapmadand.sercoing.cl:3000', 'https://localhost:3000')
                 };
     
                 const imagendebd =  await pool.query("SELECT * FROM Adjuntos WHERE Id_Tarea = ?", [TAREA]);
@@ -405,7 +405,7 @@ router.get('/archivo/:IDT/:CODIGO', isLoggedIn, async (req, res) => {
               }
             },
           localUrlAccess: true,
-          base: ('143.202.12.36:3000', 'https://localhost:3000')
+          base: ('https://sapmadand.sercoing.cl:3000', 'https://localhost:3000')
         };
 
         const imagendebd = await pool.query("SELECT * FROM Adjuntos WHERE Id_Tarea = ?", [IDT]);

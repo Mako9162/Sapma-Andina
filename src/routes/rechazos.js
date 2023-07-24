@@ -12,8 +12,8 @@ const path = require("path");
 const request = require('request');
 const hbs = require("handlebars");
 
-const correo = "sapmadet@sercoing.cl";
-const pass = "2m[FDus[Tym4@ew6";
+const correo = "sapmadand@sercoing.cl";
+const pass = "FL918,VoHvwE=za.";
 
 const transporter = nodemailer.createTransport({
   host: "mail.sercoing.cl",
@@ -71,12 +71,12 @@ router.get('/rechazadas', isLoggedIn, authRole(['Cli_C']), async (req, res)=>{
         "FROM\n" +
         "	VIEW_DetalleEquiposDET VD\n" +
         "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-        "	INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = VD.TAREA\n" +
+        "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
         "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
         "   INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
         "WHERE\n" +
         "	T.Id_Estado = 5 \n" +
-        "	AND TV.Tv_Estado_val = 1 \n" +
+        "	AND TV.te_Estado_val = 1 \n" +
         "   AND U.Descripcion  NOT LIKE '%test' \n" +
         "	AND VT.Val_rechazo = 1 \n" +
         "ORDER BY\n" +
@@ -136,12 +136,12 @@ router.get('/rechazadasb', isLoggedIn, authRole(['Cli_B', 'GerVer']), async (req
         "	userger US,\n" +
         "	VIEW_DetalleEquiposDET VD\n" +
         "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-        "	INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = VD.TAREA\n" +
+        "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
         "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
         "   INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
         "WHERE\n" +
         "	T.Id_Estado = 5 \n" +
-        "	AND TV.Tv_Estado_val = 1 \n" +
+        "	AND TV.te_Estado_val = 1 \n" +
         "   AND U.Descripcion  NOT LIKE '%test'\n" +
         "	AND VT.Val_rechazo = 1 \n" +
         "   AND VD.GERENCIA_ID = US.id_ger \n" +
@@ -204,12 +204,12 @@ router.get('/rechazadasa', isLoggedIn, authRole(['Cli_A']), async (req, res)=>{
         "	userarea US,\n" +
         "	VIEW_DetalleEquiposDET VD\n" +
         "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-        "	INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = VD.TAREA\n" +
+        "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
         "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
         "   INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
         "WHERE\n" +
         "	T.Id_Estado = 5 \n" +
-        "	AND TV.Tv_Estado_val = 1 \n" +
+        "	AND TV.te_Estado_val = 1 \n" +
         "	AND VT.Val_rechazo = 1 \n" +
         "   AND U.Descripcion  NOT LIKE '%test'\n" +
         "   AND VD.AREA_ID = US.id_area \n" +
@@ -271,12 +271,12 @@ router.get('/rechazadasd', isLoggedIn, authRole(['Cli_D']), async (req, res)=>{
        "	usersector US,\n" +
        "	VIEW_DetalleEquiposDET VD\n" +
        "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-       "	INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = VD.TAREA\n" +
+       "	INNER JOIN Tareas_Estado TV ON TV.Te_Id_Tarea = VD.TAREA\n" +
        "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
        "    INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
        "WHERE\n" +
        "	T.Id_Estado = 5 \n" +
-       "	AND TV.Tv_Estado_val = 1 \n" +
+       "	AND TV.te_Estado_val = 1 \n" +
        "    AND U.Descripcion  NOT LIKE '%test'\n" +
        "	AND VT.Val_rechazo = 1 \n" +
        "    AND VD.SECTOR_ID = US.id_sector \n" +
@@ -336,12 +336,12 @@ router.get('/rechazadasp', isLoggedIn, async (req, res)=>{
         "FROM\n" +
         "	VIEW_DetalleEquiposDET VD\n" +
         "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-        "	INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = VD.TAREA\n" +
+        "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
         "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
         "    INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
         "WHERE\n" +
         "	T.Id_Estado = 5 \n" +
-        "	AND TV.Tv_Estado_val = 1 \n" +
+        "	AND TV.te_Estado_val = 1 \n" +
         "    AND U.Descripcion  NOT LIKE '%test'\n" +
         "	AND VT.Val_rechazo = 1 \n" +
         "ORDER BY\n" +
@@ -400,12 +400,12 @@ router.get('/rechazadase', isLoggedIn, authRole(['Cli_E']), async (req, res)=>{
        "	userequipo US,\n" +
        "	VIEW_DetalleEquiposDET VD\n" +
        "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-       "	INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = VD.TAREA\n" +
+       "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
        "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
        "    INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
        "WHERE\n" +
        "	T.Id_Estado = 5 \n" +
-       "	AND TV.Tv_Estado_val = 1 \n" +
+       "	AND TV.te_Estado_val = 1 \n" +
        "	AND VT.Val_rechazo = 1 \n" +
        "    AND U.Descripcion  NOT LIKE '%test'\n" +
        "   AND VD.EQUIPO_ID = US.id_equipo \n" +
@@ -559,7 +559,7 @@ router.post('/aprorech', isLoggedIn, authRole(['Cli_C']), async (req, res)=>{
                           const html = template(context);
                 
                           await transporter.sendMail({
-                            from: "SAPMA <sapmadet@sercoing.cl>",
+                            from: "SAPMA <sapmadand@sercoing.cl>",
                             to: arremailp,
                             cc: [arremail, arremailgen],
                             bcc: correo,
@@ -716,7 +716,7 @@ router.post('/aprorech', isLoggedIn, authRole(['Cli_C']), async (req, res)=>{
                                   const html = template(context);
                         
                                   await transporter.sendMail({
-                                    from: "SAPMA <sapmadet@sercoing.cl>",
+                                    from: "SAPMA <sapmadand@sercoing.cl>",
                                     to: arremailp,
                                     cc: [arremail, arremailgen],
                                     bcc: correo,
@@ -878,7 +878,7 @@ router.post('/aprorechb', isLoggedIn, authRole(['Cli_B', 'GerVer']), async (req,
                           const html = template(context);
                 
                           await transporter.sendMail({
-                            from: "SAPMA <sapmadet@sercoing.cl>",
+                            from: "SAPMA <sapmadand@sercoing.cl>",
                             to: arremailp,
                             cc: [arremail, arremailgen],
                             bcc: correo,
@@ -1036,7 +1036,7 @@ router.post('/aprorechb', isLoggedIn, authRole(['Cli_B', 'GerVer']), async (req,
                                   const html = template(context);
                         
                                   await transporter.sendMail({
-                                    from: "SAPMA <sapmadet@sercoing.cl>",
+                                    from: "SAPMA <sapmadand@sercoing.cl>",
                                     to: arremailp,
                                     cc: [arremail, arremailgen],
                                     bcc: correo,
@@ -1198,7 +1198,7 @@ router.post('/aprorecha', isLoggedIn, authRole(['Cli_A']), async (req, res)=>{
                           const html = template(context);
                 
                           await transporter.sendMail({
-                            from: "SAPMA <sapmadet@sercoing.cl>",
+                            from: "SAPMA <sapmadand@sercoing.cl>",
                             to: arremailp,
                             cc: [arremail, arremailgen],
                             bcc: correo,
@@ -1356,7 +1356,7 @@ router.post('/aprorecha', isLoggedIn, authRole(['Cli_A']), async (req, res)=>{
                                   const html = template(context);
                         
                                   await transporter.sendMail({
-                                    from: "SAPMA <sapmadet@sercoing.cl>",
+                                    from: "SAPMA <sapmadand@sercoing.cl>",
                                     to: arremailp,
                                     cc: [arremail, arremailgen],
                                     bcc: correo,
@@ -1518,7 +1518,7 @@ router.post('/aprorechd', isLoggedIn, authRole(['Cli_D']), async (req, res)=>{
                           const html = template(context);
                 
                           await transporter.sendMail({
-                            from: "SAPMA <sapmadet@sercoing.cl>",
+                            from: "SAPMA <sapmadand@sercoing.cl>",
                             to: arremailp,
                             cc: [arremail, arremailgen],
                             bcc: correo,
@@ -1676,7 +1676,7 @@ router.post('/aprorechd', isLoggedIn, authRole(['Cli_D']), async (req, res)=>{
                                   const html = template(context);
                         
                                   await transporter.sendMail({
-                                    from: "SAPMA <sapmadet@sercoing.cl>",
+                                    from: "SAPMA <sapmadand@sercoing.cl>",
                                     to: arremailp,
                                     cc: [arremail, arremailgen],
                                     bcc: correo,
@@ -1838,7 +1838,7 @@ router.post('/aproreche', isLoggedIn, authRole(['Cli_E']), async (req, res)=>{
                           const html = template(context);
                 
                           await transporter.sendMail({
-                            from: "SAPMA <sapmadet@sercoing.cl>",
+                            from: "SAPMA <sapmadand@sercoing.cl>",
                             to: arremailp,
                             cc: [arremail, arremailgen],
                             bcc: correo,
@@ -1996,7 +1996,7 @@ router.post('/aproreche', isLoggedIn, authRole(['Cli_E']), async (req, res)=>{
                                   const html = template(context);
                         
                                   await transporter.sendMail({
-                                    from: "SAPMA <sapmadet@sercoing.cl>",
+                                    from: "SAPMA <sapmadand@sercoing.cl>",
                                     to: arremailp,
                                     cc: [arremail, arremailgen],
                                     bcc: correo,
@@ -2078,7 +2078,7 @@ router.post('/rechazos', isLoggedIn, async (req, res)=>{
                         const html = template(context);
 
                         await transporter.sendMail({
-                            from: "SAPMA <sapmadet@sercoing.cl>",
+                            from: "SAPMA <sapmadand@sercoing.cl>",
                             to: arremailp,
                             cc: Email,
                             bcc: correo,
@@ -2156,7 +2156,7 @@ router.post('/rechazos', isLoggedIn, async (req, res)=>{
                                 const html = template(context);
         
                                 await transporter.sendMail({
-                                    from: "SAPMA <sapmadet@sercoing.cl>",
+                                    from: "SAPMA <sapmadand@sercoing.cl>",
                                     to: arremailp,
                                     cc: Email,
                                     bcc: correo,
@@ -2235,7 +2235,7 @@ router.post('/rechazosb', isLoggedIn, authRole(['Cli_B', 'GerVer']), async (req,
                         const html = template(context);
 
                         await transporter.sendMail({
-                            from: "SAPMA <sapmadet@sercoing.cl>",
+                            from: "SAPMA <sapmadand@sercoing.cl>",
                             to: arremailp,
                             cc: Email,
                             bcc: correo,
@@ -2312,7 +2312,7 @@ router.post('/rechazosb', isLoggedIn, authRole(['Cli_B', 'GerVer']), async (req,
                                 const html = template(context);
         
                                 await transporter.sendMail({
-                                    from: "SAPMA <sapmadet@sercoing.cl>",
+                                    from: "SAPMA <sapmadand@sercoing.cl>",
                                     to: arremailp,
                                     cc: Email,
                                     bcc: correo,
@@ -2390,7 +2390,7 @@ router.post('/rechazosa', isLoggedIn, authRole(['Cli_A']), async (req, res)=>{
                         const html = template(context);
 
                         await transporter.sendMail({
-                            from: "SAPMA <sapmadet@sercoing.cl>",
+                            from: "SAPMA <sapmadand@sercoing.cl>",
                             to: arremailp,
                             cc: Email,
                             bcc: correo,
@@ -2467,7 +2467,7 @@ router.post('/rechazosa', isLoggedIn, authRole(['Cli_A']), async (req, res)=>{
                                 const html = template(context);
         
                                 await transporter.sendMail({
-                                    from: "SAPMA <sapmadet@sercoing.cl>",
+                                    from: "SAPMA <sapmadand@sercoing.cl>",
                                     to: arremailp,
                                     cc: Email,
                                     bcc: correo,
@@ -2546,7 +2546,7 @@ router.post('/rechazosd', isLoggedIn, authRole(['Cli_D']), async (req, res)=>{
                         const html = template(context);
 
                         await transporter.sendMail({
-                            from: "SAPMA <sapmadet@sercoing.cl>",
+                            from: "SAPMA <sapmadand@sercoing.cl>",
                             to: arremailp,
                             cc: Email,
                             bcc: correo,
@@ -2623,7 +2623,7 @@ router.post('/rechazosd', isLoggedIn, authRole(['Cli_D']), async (req, res)=>{
                                 const html = template(context);
         
                                 await transporter.sendMail({
-                                    from: "SAPMA <sapmadet@sercoing.cl>",
+                                    from: "SAPMA <sapmadand@sercoing.cl>",
                                     to: arremailp,
                                     cc: Email,
                                     bcc: correo,
@@ -2702,7 +2702,7 @@ router.post('/rechazose', isLoggedIn, authRole(['Cli_E']), async (req, res)=>{
                         const html = template(context);
 
                         await transporter.sendMail({
-                            from: "SAPMA <sapmadet@sercoing.cl>",
+                            from: "SAPMA <sapmadand@sercoing.cl>",
                             to: arremailp,
                             cc: Email,
                             bcc: correo,
@@ -2779,7 +2779,7 @@ router.post('/rechazose', isLoggedIn, authRole(['Cli_E']), async (req, res)=>{
                                 const html = template(context);
         
                                 await transporter.sendMail({
-                                    from: "SAPMA <sapmadet@sercoing.cl>",
+                                    from: "SAPMA <sapmadand@sercoing.cl>",
                                     to: arremailp,
                                     cc: Email,
                                     bcc: correo,
@@ -2869,7 +2869,7 @@ router.post('/mensajerech', isLoggedIn, async (req, res)=>{
                     const html = template(context);
 
                     await transporter.sendMail({
-                        from: "SAPMA <sapmadet@sercoing.cl>",
+                        from: "SAPMA <sapmadand@sercoing.cl>",
                         to: arreEmail,
                         cc: arremailp,
                         bcc: correo,
@@ -2946,7 +2946,7 @@ router.post('/mensajerech', isLoggedIn, async (req, res)=>{
                     const html = template(context);
 
                     await transporter.sendMail({
-                        from: "SAPMA <sapmadet@sercoing.cl>",
+                        from: "SAPMA <sapmadand@sercoing.cl>",
                         to: arreEmail,
                         cc: arremailp,
                         subject: "SAPMA - Notificación de Comentarios en Tareas Rechazadas",

@@ -9,8 +9,8 @@ const fs = require("fs");
 const path = require("path"); 
 const ExcelJS = require('exceljs');
 
-const correo = "sapmadet@sercoing.cl";
-const pass = "2m[FDus[Tym4@ew6";
+const correo = "sapmadand@sercoing.cl";
+const pass = "FL918,VoHvwE=za.";
 
 const transporter = nodemailer.createTransport({
                         host: "mail.sercoing.cl",
@@ -123,7 +123,7 @@ router.post('/aprobadas', isLoggedIn, authRole(['Cli_C']), async (req, res)=>{
         "        FROM\n" +
         "        	VIEW_DetalleEquiposDET VD\n" +
         "        	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-        "        	INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = VD.TAREA\n" +
+        "        	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
         "        	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
         "           INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
         "        WHERE\n" +
@@ -182,7 +182,7 @@ router.post('/aprobadas', isLoggedIn, authRole(['Cli_C']), async (req, res)=>{
             "FROM\n" +
             "	VIEW_DetalleEquiposDET VD\n" +
             "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-            "	INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = VD.TAREA\n" +
+            "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
             "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
             "   INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
             "WHERE\n" +
@@ -251,7 +251,7 @@ router.post('/aprobadasp', isLoggedIn, async (req, res)=>{
         "        FROM\n" +
         "        	VIEW_DetalleEquiposDET VD\n" +
         "        	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-        "        	INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = VD.TAREA\n" +
+        "        	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
         "        	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
         "           INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
         "        WHERE\n" +
@@ -310,7 +310,7 @@ router.post('/aprobadasp', isLoggedIn, async (req, res)=>{
             "FROM\n" +
             "	VIEW_DetalleEquiposDET VD\n" +
             "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-            "	INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = VD.TAREA\n" +
+            "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
             "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
             "   INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
             "WHERE\n" +
@@ -379,7 +379,7 @@ router.post('/aprobadasb', isLoggedIn, authRole(['Cli_B', 'GerVer']), async (req
         "        FROM\n" +
         "        	VIEW_DetalleEquiposDET VD\n" +
         "        	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-        "        	INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = VD.TAREA\n" +
+        "        	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
         "        	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
         "           INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
         "        WHERE\n" +
@@ -438,7 +438,7 @@ router.post('/aprobadasb', isLoggedIn, authRole(['Cli_B', 'GerVer']), async (req
             "FROM\n" +
             "	VIEW_DetalleEquiposDET VD\n" +
             "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-            "	INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = VD.TAREA\n" +
+            "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
             "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
             "   INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
             "WHERE\n" +
@@ -507,7 +507,7 @@ router.post('/aprobadasa', isLoggedIn, authRole(['Cli_A']), async (req, res)=>{
         "        FROM\n" +
         "        	VIEW_DetalleEquiposDET VD\n" +
         "        	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-        "        	INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = VD.TAREA\n" +
+        "        	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
         "        	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
         "           INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
         "        WHERE\n" +
@@ -566,7 +566,7 @@ router.post('/aprobadasa', isLoggedIn, authRole(['Cli_A']), async (req, res)=>{
             "FROM\n" +
             "	VIEW_DetalleEquiposDET VD\n" +
             "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-            "	INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = VD.TAREA\n" +
+            "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
             "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
             "   INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
             "WHERE\n" +
@@ -635,7 +635,7 @@ router.post('/aprobadasd', isLoggedIn, authRole(['Cli_D']), async (req, res)=>{
         "        FROM\n" +
         "        	VIEW_DetalleEquiposDET VD\n" +
         "        	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-        "        	INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = VD.TAREA\n" +
+        "        	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
         "        	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
         "           INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
         "        WHERE\n" +
@@ -694,7 +694,7 @@ router.post('/aprobadasd', isLoggedIn, authRole(['Cli_D']), async (req, res)=>{
             "FROM\n" +
             "	VIEW_DetalleEquiposDET VD\n" +
             "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-            "	INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = VD.TAREA\n" +
+            "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
             "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
             "   INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
             "WHERE\n" +
@@ -763,7 +763,7 @@ router.post('/aprobadase', isLoggedIn, authRole(['Cli_E']), async (req, res)=>{
         "        FROM\n" +
         "        	VIEW_DetalleEquiposDET VD\n" +
         "        	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-        "        	INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = VD.TAREA\n" +
+        "        	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
         "        	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
         "           INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
         "        WHERE\n" +
@@ -822,7 +822,7 @@ router.post('/aprobadase', isLoggedIn, authRole(['Cli_E']), async (req, res)=>{
             "FROM\n" +
             "	VIEW_DetalleEquiposDET VD\n" +
             "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-            "	INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = VD.TAREA\n" +
+            "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
             "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
             "   INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
             "WHERE\n" +
@@ -883,7 +883,15 @@ router.get('/aprobaciones', isLoggedIn, authRole(['Cli_C']), async (req, res)=>{
     "						'Sist. fuera de serv.',\n" +
     "					IF\n" +
     "					( VD.ESTADO_EQUIPO = 'SNO', 'Sist. no operativo', VD.ESTADO_EQUIPO )))))) AS 'ESTADO_EQUIPO',\n" +
-    "IF (VD.OBS_ESTADO_EQUIPO = 'SC', '', CONVERT(CAST(CONVERT(CONCAT(UPPER(LEFT(VD.OBS_ESTADO_EQUIPO,1)), SUBSTRING(VD.OBS_ESTADO_EQUIPO FROM 2))USING latin1) AS BINARY) USING UTF8))	AS OBS_EQUIPO,\n" +
+    "IF\n" +
+    "	(\n" +
+    "		VD.OBS_ESTADO_EQUIPO = 'SC',\n" +
+    "		'',\n" +
+    "		CONVERT (\n" +
+    "			CAST(\n" +
+    "				CONVERT ( CONCAT( UPPER( LEFT ( VD.OBS_ESTADO_EQUIPO, 1 )), SUBSTRING( VD.OBS_ESTADO_EQUIPO FROM 2 )) USING latin1 ) AS BINARY \n" +
+    "			) USING UTF8 \n" +
+    "		)) AS OBS_EQUIPO,\n" +
     "	VD.REPUESTOS AS REPUESTOS,\n" +
     "	VD.TAREA_ANTERIOR AS TAREA_ANTERIOR,\n" +
     "	date_format( VD.FECHA_TAREA_ANTERIOR, '%d-%m-%Y' ) AS FECHA_ANTERIOR,\n" +
@@ -912,12 +920,12 @@ router.get('/aprobaciones', isLoggedIn, authRole(['Cli_C']), async (req, res)=>{
     "FROM\n" +
     "	VIEW_DetalleEquiposDET VD\n" +
     "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-    "	INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = VD.TAREA\n" +
+    "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
     "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA\n" +
     "	INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
     "WHERE\n" +
     "	T.Id_Estado = 5 \n" +
-    "	AND TV.Tv_Estado_val = 1 \n" +
+    "	AND TV.te_Estado_val = 1 \n" +
     "	AND U.Descripcion NOT LIKE '%test' \n" +
     "	AND VT.Val_rechazo = 0 \n" +
     "ORDER BY\n" +
@@ -937,77 +945,85 @@ router.get('/aprobacionesplan', isLoggedIn, async (req, res)=>{
     const {Id_Cliente} = req.user;
 
     await pool.query("SELECT\n" +
-            "	VD.TAREA AS TAREA,\n" +
-            "	date_format( VD.FECHA, '%d-%m-%Y' ) AS FECHA,\n" +
-            "	VD.ESTADO_TAREA AS ESTADO_TAREA,\n" +
-            "	VD.SERVICIO AS SERVICIO,\n" +
-            "	VD.CODIGO AS CODIGO,\n" +
-            "	VD.GERENCIA AS GERENCIA,\n" +
-            "	VD.AREA AS AREA,\n" +
-            "	VD.SECTOR AS SECTOR,\n" +
-            "	VD.DETALLE_UBICACION AS DETALLE,\n" +
-            "	VD.UBICACION_TECNICA AS TECNICA,\n" +
-            "IF\n" +
-            "	(\n" +
-            "		VD.ESTADO_EQUIPO = 'SC',\n" +
-            "		'No aplica',\n" +
-            "	IF\n" +
-            "		(\n" +
-            "			VD.ESTADO_EQUIPO = 'SSR',\n" +
-            "			'Sistema sin revisar.',\n" +
-            "		IF\n" +
-            "			(\n" +
-            "				VD.ESTADO_EQUIPO = 'SOP',\n" +
-            "				'Sistema operativo',\n" +
-            "			IF\n" +
-            "				(\n" +
-            "					VD.ESTADO_EQUIPO = 'SOCO',\n" +
-            "					'Sist. operativo con obs.',\n" +
-            "				IF\n" +
-            "					(\n" +
-            "						VD.ESTADO_EQUIPO = 'SFS',\n" +
-            "						'Sist. fuera de serv.',\n" +
-            "					IF\n" +
-            "					( VD.ESTADO_EQUIPO = 'SNO', 'Sist. no operativo', VD.ESTADO_EQUIPO )))))) AS 'ESTADO_EQUIPO',\n" +
-            "IF (VD.OBS_ESTADO_EQUIPO = 'SC', '', CONVERT(CAST(CONVERT(CONCAT(UPPER(LEFT(VD.OBS_ESTADO_EQUIPO,1)), SUBSTRING(VD.OBS_ESTADO_EQUIPO FROM 2))USING latin1) AS BINARY) USING UTF8))	AS OBS_EQUIPO,\n" +
-            "	VD.REPUESTOS AS REPUESTOS,\n" +
-            "	VD.TAREA_ANTERIOR AS TAREA_ANTERIOR,\n" +
-            "	date_format( VD.FECHA_TAREA_ANTERIOR, '%d-%m-%Y' ) AS FECHA_ANTERIOR,\n" +
-            "IF\n" +
-            "	(\n" +
-            "		VD.EST_EQUIPO_TAREA_ANTERIOR = 'SC',\n" +
-            "		'No aplica',\n" +
-            "	IF\n" +
-            "		(\n" +
-            "			VD.EST_EQUIPO_TAREA_ANTERIOR = 'SSR',\n" +
-            "			'Sistema sin revisar.',\n" +
-            "		IF\n" +
-            "			(\n" +
-            "				VD.EST_EQUIPO_TAREA_ANTERIOR = 'SOP',\n" +
-            "				'Sistema operativo',\n" +
-            "			IF\n" +
-            "				(\n" +
-            "					VD.EST_EQUIPO_TAREA_ANTERIOR = 'SOCO',\n" +
-            "					'Sist. operativo con obs.',\n" +
-            "				IF\n" +
-            "					(\n" +
-            "						VD.EST_EQUIPO_TAREA_ANTERIOR = 'SFS',\n" +
-            "						'Sist. fuera de serv.',\n" +
-            "					IF\n" +
-            "					( VD.EST_EQUIPO_TAREA_ANTERIOR = 'SNO', 'Sist. no operativo', VD.EST_EQUIPO_TAREA_ANTERIOR )))))) AS 'ESTADO_EQUIPO_ANTERIOR' \n" +
-            "FROM\n" +
-            "	VIEW_DetalleEquiposDET VD\n" +
-            "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-            "	INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = VD.TAREA\n" +
-            "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA\n" +
-            "	INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
-            "WHERE\n" +
-            "	T.Id_Estado = 5 \n" +
-            "	AND TV.Tv_Estado_val = 1 \n" +
-            "	AND U.Descripcion NOT LIKE '%test' \n" +
-            "	AND VT.Val_rechazo = 0 \n" +
-            "ORDER BY\n" +
-            "	TAREA DESC;", 
+        "	VD.TAREA AS TAREA,\n" +
+        "	date_format( VD.FECHA, '%d-%m-%Y' ) AS FECHA,\n" +
+        "	VD.ESTADO_TAREA AS ESTADO_TAREA,\n" +
+        "	VD.SERVICIO AS SERVICIO,\n" +
+        "	VD.CODIGO AS CODIGO,\n" +
+        "	VD.GERENCIA AS GERENCIA,\n" +
+        "	VD.AREA AS AREA,\n" +
+        "	VD.SECTOR AS SECTOR,\n" +
+        "	VD.DETALLE_UBICACION AS DETALLE,\n" +
+        "	VD.UBICACION_TECNICA AS TECNICA,\n" +
+        "IF\n" +
+        "	(\n" +
+        "		VD.ESTADO_EQUIPO = 'SC',\n" +
+        "		'No aplica',\n" +
+        "	IF\n" +
+        "		(\n" +
+        "			VD.ESTADO_EQUIPO = 'SSR',\n" +
+        "			'Sistema sin revisar.',\n" +
+        "		IF\n" +
+        "			(\n" +
+        "				VD.ESTADO_EQUIPO = 'SOP',\n" +
+        "				'Sistema operativo',\n" +
+        "			IF\n" +
+        "				(\n" +
+        "					VD.ESTADO_EQUIPO = 'SOCO',\n" +
+        "					'Sist. operativo con obs.',\n" +
+        "				IF\n" +
+        "					(\n" +
+        "						VD.ESTADO_EQUIPO = 'SFS',\n" +
+        "						'Sist. fuera de serv.',\n" +
+        "					IF\n" +
+        "					( VD.ESTADO_EQUIPO = 'SNO', 'Sist. no operativo', VD.ESTADO_EQUIPO )))))) AS 'ESTADO_EQUIPO',\n" +
+        "IF\n" +
+        "	(\n" +
+        "		VD.OBS_ESTADO_EQUIPO = 'SC',\n" +
+        "		'',\n" +
+        "		CONVERT (\n" +
+        "			CAST(\n" +
+        "				CONVERT ( CONCAT( UPPER( LEFT ( VD.OBS_ESTADO_EQUIPO, 1 )), SUBSTRING( VD.OBS_ESTADO_EQUIPO FROM 2 )) USING latin1 ) AS BINARY \n" +
+        "			) USING UTF8 \n" +
+        "		)) AS OBS_EQUIPO,\n" +
+        "	VD.REPUESTOS AS REPUESTOS,\n" +
+        "	VD.TAREA_ANTERIOR AS TAREA_ANTERIOR,\n" +
+        "	date_format( VD.FECHA_TAREA_ANTERIOR, '%d-%m-%Y' ) AS FECHA_ANTERIOR,\n" +
+        "IF\n" +
+        "	(\n" +
+        "		VD.EST_EQUIPO_TAREA_ANTERIOR = 'SC',\n" +
+        "		'No aplica',\n" +
+        "	IF\n" +
+        "		(\n" +
+        "			VD.EST_EQUIPO_TAREA_ANTERIOR = 'SSR',\n" +
+        "			'Sistema sin revisar.',\n" +
+        "		IF\n" +
+        "			(\n" +
+        "				VD.EST_EQUIPO_TAREA_ANTERIOR = 'SOP',\n" +
+        "				'Sistema operativo',\n" +
+        "			IF\n" +
+        "				(\n" +
+        "					VD.EST_EQUIPO_TAREA_ANTERIOR = 'SOCO',\n" +
+        "					'Sist. operativo con obs.',\n" +
+        "				IF\n" +
+        "					(\n" +
+        "						VD.EST_EQUIPO_TAREA_ANTERIOR = 'SFS',\n" +
+        "						'Sist. fuera de serv.',\n" +
+        "					IF\n" +
+        "					( VD.EST_EQUIPO_TAREA_ANTERIOR = 'SNO', 'Sist. no operativo', VD.EST_EQUIPO_TAREA_ANTERIOR )))))) AS 'ESTADO_EQUIPO_ANTERIOR' \n" +
+        "FROM\n" +
+        "	VIEW_DetalleEquiposDET VD\n" +
+        "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
+        "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
+        "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA\n" +
+        "	INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
+        "WHERE\n" +
+        "	T.Id_Estado = 5 \n" +
+        "	AND TV.te_Estado_val = 1 \n" +
+        "	AND U.Descripcion NOT LIKE '%test' \n" +
+        "	AND VT.Val_rechazo = 0 \n" +
+        "ORDER BY\n" +
+        "	TAREA DESC;", 
         (err, result) => { 
         if(err){
             console.log(err);
@@ -1087,12 +1103,12 @@ router.get('/aprobacionesb', isLoggedIn, authRole(['Cli_B', 'GerVer']), async (r
             "	userger US,\n" +
             "	VIEW_DetalleEquiposDET VD\n" +
             "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-            "	INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = VD.TAREA\n" +
+            "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
             "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA\n" +
             "	INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
             "WHERE\n" +
             "	T.Id_Estado = 5 \n" +
-            "	AND TV.Tv_Estado_val = 1 \n" +
+            "	AND TV.te_Estado_val = 1 \n" +
             "	AND U.Descripcion NOT LIKE '%test' \n" +
             "	AND VT.Val_rechazo = 0 \n" +
             "   AND VD.GERENCIA_ID = US.id_ger \n" +
@@ -1178,12 +1194,12 @@ router.get('/aprobacionesa', isLoggedIn, authRole(['Cli_A']), async (req, res)=>
             "	userarea US,\n" +
             "	VIEW_DetalleEquiposDET VD\n" +
             "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-            "	INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = VD.TAREA\n" +
+            "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
             "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA\n" +
             "	INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
             "WHERE\n" +
             "	T.Id_Estado = 5 \n" +
-            "	AND TV.Tv_Estado_val = 1 \n" +
+            "	AND TV.te_Estado_val = 1 \n" +
             "	AND U.Descripcion NOT LIKE '%test' \n" +
             "	AND VT.Val_rechazo = 0 \n" +
             "	AND VD.AREA_ID = US.id_area\n" +
@@ -1267,12 +1283,12 @@ router.get('/aprobacionesd', isLoggedIn, authRole(['Cli_D']), async (req, res)=>
         "   usersector US,\n" +
         "	VIEW_DetalleEquiposDET VD\n" +
         "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-        "	INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = VD.TAREA\n" +
+        "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
         "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA\n" +
         "	INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
         "WHERE\n" +
         "	T.Id_Estado = 5 \n" +
-        "	AND TV.Tv_Estado_val = 1 \n" +
+        "	AND TV.te_Estado_val = 1 \n" +
         "	AND U.Descripcion NOT LIKE '%test' \n" +
         "	AND VT.Val_rechazo = 0 \n" +
         "	AND VD.SECTOR_ID = US.id_sector\n" +
@@ -1356,12 +1372,12 @@ router.get('/aprobacionese', isLoggedIn, authRole(['Cli_E']), async (req, res)=>
         "   userequipo US,\n" +
         "	VIEW_DetalleEquiposDET VD\n" +
         "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-        "	INNER JOIN Tareas_Validacion TV ON TV.Tv_Id_Tarea = VD.TAREA\n" +
+        "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
         "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA\n" +
         "	INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
         "WHERE\n" +
         "	T.Id_Estado = 5 \n" +
-        "	AND TV.Tv_Estado_val = 1 \n" +
+        "	AND TV.te_Estado_val = 1 \n" +
         "	AND U.Descripcion NOT LIKE '%test' \n" +
         "	AND VT.Val_rechazo = 0 \n" +
         "	AND VD.EQUIPO_ID = US.id_equipo\n" +
@@ -1590,7 +1606,7 @@ router.post('/aprobaciones', isLoggedIn, async (req, res)=>{
                               const html = template(context);
                     
                               await transporter.sendMail({
-                                from: "SAPMA <sapmadet@sercoing.cl>",
+                                from: "SAPMA <sapmadand@sercoing.cl>",
                                 // to: "marancibia@sercoing.cl",
                                 to: arremailp,
                                 cc: [arremail, arremailgen],
@@ -1830,7 +1846,7 @@ router.post('/aprobacionesb', isLoggedIn, authRole(['Cli_B', 'GerVer']), async (
                               const html = template(context);
                     
                               await transporter.sendMail({
-                                from: "SAPMA <sapmadet@sercoing.cl>",
+                                from: "SAPMA <sapmadand@sercoing.cl>",
                                 // to: "marancibia@sercoing.cl",
                                 to: arremailp,
                                 cc: [arremail, arremailgen],
@@ -2072,7 +2088,7 @@ router.post('/aprobacionesa', isLoggedIn, authRole(['Cli_A']), async (req, res)=
                               const html = template(context);
                     
                               await transporter.sendMail({
-                                from: "SAPMA <sapmadet@sercoing.cl>",
+                                from: "SAPMA <sapmadand@sercoing.cl>",
                                 // to: "marancibia@sercoing.cl",
                                 to: arremailp,
                                 cc: [arremail, arremailgen],
@@ -2314,7 +2330,7 @@ router.post('/aprobacionesd', isLoggedIn, authRole(['Cli_D']), async (req, res)=
                               const html = template(context);
                     
                               await transporter.sendMail({
-                                from: "SAPMA <sapmadet@sercoing.cl>",
+                                from: "SAPMA <sapmadand@sercoing.cl>",
                                 // to: "marancibia@sercoing.cl",
                                 to: arremailp,
                                 cc: [arremail, arremailgen],
@@ -2556,7 +2572,7 @@ router.post('/aprobacionese', isLoggedIn, authRole(['Cli_E']), async (req, res)=
                               const html = template(context);
                     
                               await transporter.sendMail({
-                                from: "SAPMA <sapmadet@sercoing.cl>",
+                                from: "SAPMA <sapmadand@sercoing.cl>",
                                 // to: "marancibia@sercoing.cl",
                                 to: arremailp,
                                 cc: [arremail, arremailgen],
