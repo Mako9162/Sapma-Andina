@@ -118,6 +118,7 @@
 								<th>Tarea</th>
 								<th>Fecha</th>
 								<th>Tag</th>
+								<th>Técnico planificado</th>
 								<th>Gerencia</th>
 								<th>Area</th>
 								<th>Sector</th>
@@ -135,6 +136,7 @@
 								<td>{{IDT}}</td>
 								<td>{{FECHA}}</td>
 								<td>{{CODIGO}}</td>
+								<td>{{TECNICO}}</td>
 								<td>{{GERENCIA}}</td>
 								<td>{{AREA}}</td>
 								<td>{{SECTOR}}</td>
@@ -239,11 +241,11 @@
 						{
 							"extend": 'excelHtml5',
 							"text": '<i class="fa fa-file-excel-o"></i>',
-							"title": 'Anulaciones',
+							"title": 'Tareas',
 							"titleAttr": 'Exportar a Excel',
 							"className": 'btn btn-rounded btn-success',
 							"exportOptions": {
-							"columns": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+							"columns": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 							},
 							customize: function(xlsx) {
 							const sheet = xlsx.xl.worksheets['sheet1.xml'];

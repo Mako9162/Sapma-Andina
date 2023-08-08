@@ -106,6 +106,7 @@
 									<option value="Psi">Psi</option>
 									<option value="L">L</option>
 									<option value="ml">ml</option>
+									<option value="Lbs">Lbs</option>
 								</select>
 							</fieldset>
 						</div>
@@ -119,6 +120,22 @@
                                             <option value= "{{Id}}">{{Descripcion}}</option>
                                         {{/each}}
                                 </select>
+							</fieldset>
+						</div>
+						<div class="col-md-2 col-sm-6">
+							<fieldset class="form-group">
+								<label class="form-label float-left required" for="dinamico">Dinámico:</label>
+								<select name="dinamico"  id="dinamico" class="select2" >
+									<option value=""></option>
+									<option value="1">Si</option>
+									<option value="0">No</option>
+                                </select>
+							</fieldset>
+						</div>
+						<div class="col-md-1 col-sm-6">
+							<fieldset class="form-group">
+								<label class="form-label" for="ph">PH:</label>
+								<input type="text" class="form-control" id="ph" placeholder="" oninput="this.value = this.value.trim()">
 							</fieldset>
 						</div>
 						<div class="col-md-3 col-sm-6">
@@ -148,6 +165,13 @@
 								</select>
 							</fieldset>
 						</div>
+						<div class="col-md-3 col-sm-6">
+							<fieldset class="form-group">
+								<label class="form-label" for="sup">Superintendencia:</label>
+								<input type="text" class="form-control" id="sup" placeholder="" onblur="formatInput(this)" list="super">
+								<datalist id="super"></datalist>
+							</fieldset>
+						</div>
 						<div class="col-md-6 col-sm-6">
 							<fieldset class="form-group">
 								<label class="form-label required" for="du">Detalle de ubicación:</label>
@@ -164,16 +188,15 @@
 						</div>
 						<div class="col-md-3 col-sm-6">
 							<fieldset class="form-group">
-								<label class="form-label" for="sup">Superintendencia:</label>
-								<input type="text" class="form-control" id="sup" placeholder="" onblur="formatInput(this)" list="super">
-								<datalist id="super"></datalist>
-							</fieldset>
-						</div>
-						<div class="col-md-3 col-sm-6">
-							<fieldset class="form-group">
 								<label class="form-label" for="ut">Ubicación técnica:</label>
 								<input type="text" class="form-control" id="ut" placeholder="" onblur="formatInput(this)" list="utec">
 								<datalist id="utec"></datalist>
+							</fieldset>
+						</div>						
+						<div class="col-md-12 col-sm-6">
+							<fieldset class="form-group">
+								<label class="form-label" for="obs_dand">Observaciones:</label>
+								<input type="text" class="form-control" id="obs_dand" placeholder="">
 							</fieldset>
 						</div>
 						<div id="results-container"></div>
@@ -938,6 +961,9 @@
 				var cer = $('#cer').val();
 				var agente = $('#agente option:selected').text();
 				var peso = $('#peso').val();
+				var dinamico = $('#dinamico').val();
+				var ph = $('#ph').val();
+				var obs_dand = $('#obs_dand').val();
 				var medida = $('#medida').val();
 				var pesoConMedida = peso + ' ' + medida;
 				var unidad = $('#unidad').val();
@@ -971,6 +997,9 @@
 					serie: serie,
 					cer: cer,
 					agente: agente, 
+					dinamico: dinamico,
+					ph: ph,
+					obs_dand: obs_dand,
 					pesoConMedida: pesoConMedida,
 					unidad: unidad,
 					mm: mm,
@@ -986,9 +1015,17 @@
 					protocoloIds: protocoloIds
 				};
 
-				if (tag === '' || tipoe === '' || critico === '' || gerencia === '' || area === '' || sector === '' || du === '' || tipoProtocoloIds.length < 1 || protocoloIds.length < 1) {
-					swal("¡SAPMA!", "Inserte información en los campos obligatorios. Debe asignar al menos un protocolo (I),(M) o (P)", "error");
+				if (tag === '' || tipoe === '' || critico === '' || gerencia === '' || area === '' || sector === '' || dinamico === '' || du === '' || tipoProtocoloIds.length < 1 || protocoloIds.length < 1) {
+					swal("¡SAPMA!", "Inserte información en los campos obligatorios. Debe asignar al menos un protocolo (I),(M) o (P).", "error");
 				} else {
+
+					if (dinamico == 1) {
+						if (serie == '' & cer == '') {
+							swal("¡SAPMA!", "Si el equipo es dinamico, debe agregar una serie o una certificación.", "error");
+							return;
+						}
+					}
+
 					swal({
 						title: "¡SAPMA!",
 						text: "¿Desea agregar este equipo?",
@@ -1022,7 +1059,7 @@
 									allowOutsideClick: false
 								});	
 								setTimeout(function () {
-									location.reload();
+									window.location.href = '/editequi/'+data.newId+'';
 								}, 1000);	
 							})
 						}

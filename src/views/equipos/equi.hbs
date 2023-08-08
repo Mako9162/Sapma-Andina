@@ -80,6 +80,7 @@
 								<th>Id</th>
 								<th>Tag</th>
 								<th>Critico</th>
+								<th>Dinámico</th>
 								<th>Gerencia</th>
 								<th>Area</th>
 								<th hidden="true">Id_Sector</th>
@@ -92,6 +93,7 @@
 								<th>Modelo</th>
 								<th>Agente</th>
 								<th>Peso</th>
+								<th>PH</th>
 								<th>Superintendencia</th>
 								<th>Ubicación técnica</th>
 								<th>Unidad</th>
@@ -102,7 +104,8 @@
 							<tr>
 								<td>{{ID}}</td>
 								<td>{{TAG}}</td>
-								<td>{{CRITICO}}</td>								
+								<td>{{CRITICO}}</td>	
+								<td>{{DINAMICO}}</td>							
 								<td>{{GERENCIA}}</td>
 								<td>{{AREA}}</td>
 								<td hidden="true">{{ID_SECTOR}}</td>
@@ -115,6 +118,7 @@
 								<td>{{MODELO}}</td>
 								<td>{{AGENTE}}</td>
 								<td>{{PESO}}</td>
+								<td>{{PH}}</td>
 								<td>{{SUPERINTENDENCIA}}</td>
 								<td>{{UTECNICA}}</td>
 								<td>{{UNIDAD}}</td>
@@ -481,10 +485,10 @@
 				datos.push({
 				id: value[0],
 				tag: value[1],
-				ger: value[3],
-				area: value[4],
-				idsec: value[5],
-				sec: value[6]
+				ger: value[4],
+				area: value[5],
+				idsec: value[6],
+				sec: value[7]
 				});
 			});
 			$("#my-dialog").show();

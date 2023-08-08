@@ -623,7 +623,19 @@ router.post('/eliminar-agente', isLoggedIn, authRole(['Plan', 'Admincli']), (req
 
 router.post('/check-serie', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
     const {serie} = req.body;
-    await pool.query("SELECT ef_serie FROM Equipos_full WHERE ef_serie = ?", [serie], async (err, result) => {
+    await pool.query("SELECT eg_serie FROM Equipos_General WHERE eg_serie = ?", [serie], async (err, result) => {
+        if (err) throw err;
+        if (result.length > 0) {
+          res.send({ exists: true });
+        } else {
+          res.send({ exists: false });
+        }
+    });
+});
+
+router.post('/check-serie-din', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
+    const {serie} = req.body;
+    await pool.query("SELECT ed_serie FROM Equipos_Dinamicos WHERE ed_serie = ?", [serie], async (err, result) => {
         if (err) throw err;
         if (result.length > 0) {
           res.send({ exists: true });
@@ -635,7 +647,19 @@ router.post('/check-serie', isLoggedIn, authRole(['Plan', 'Admincli']), async (r
 
 router.post('/check-cer', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
     const {cer} = req.body;
-    await pool.query("SELECT ef_certificacion FROM Equipos_full WHERE ef_certificacion = ?", [cer], async (err, result) => {
+    await pool.query("SELECT eg_certificacion FROM Equipos_General WHERE eg_certificacion = ?", [cer], async (err, result) => {
+        if (err) throw err;
+        if (result.length > 0) {
+          res.send({ exists: true });
+        } else {
+          res.send({ exists: false });
+        }
+    });
+});
+
+router.post('/check-cer-din', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
+    const {cer} = req.body;
+    await pool.query("SELECT ed_certificacion FROM Equipos_Dinamicos WHERE ed_certificacion = ?", [cer], async (err, result) => {
         if (err) throw err;
         if (result.length > 0) {
           res.send({ exists: true });
@@ -647,20 +671,20 @@ router.post('/check-cer', isLoggedIn, authRole(['Plan', 'Admincli']), async (req
 
 router.get('/autocomplete_unidad', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
     const userInput = req.query.input;
-    const results = await pool.query('SELECT ef_unidad FROM Equipos_full WHERE ef_unidad LIKE ? AND ef_unidad <> ""', ['%'+ userInput + '%']);
+    const results = await pool.query('SELECT eg_unidad FROM Equipos_General WHERE eg_unidad LIKE ? AND eg_unidad <> ""', ['%'+ userInput + '%']);
     res.json(results);
 });
 
 router.get('/autocomplete_superintendencia', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
     const userInput = req.query.input;
-    const results = await pool.query('SELECT ef_superintendencia AS SUPER FROM Equipos_full WHERE ef_superintendencia LIKE ? AND ef_superintendencia <> "" GROUP BY ef_superintendencia', ['%'+ userInput + '%']);
+    const results = await pool.query('SELECT eg_superintendencia AS SUPER FROM Equipos_General WHERE eg_superintendencia LIKE ? AND eg_superintendencia <> "" GROUP BY eg_superintendencia', ['%'+ userInput + '%']);
     res.json(results);
     console.log(results)
 });
 
 router.get('/autocomplete_utec', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
     const userInput = req.query.input;
-    const results = await pool.query('SELECT ef_ubicacion_tecnica AS UTEC FROM Equipos_full WHERE ef_ubicacion_tecnica LIKE ? AND ef_ubicacion_tecnica <> "" GROUP BY ef_ubicacion_tecnica', ['%'+ userInput + '%']);
+    const results = await pool.query('SELECT eg_ubicacion_tecnica AS UTEC FROM Equipos_General WHERE eg_ubicacion_tecnica LIKE ? AND eg_ubicacion_tecnica <> "" GROUP BY eg_ubicacion_tecnica', ['%'+ userInput + '%']);
     res.json(results);
     console.log(results)
 });

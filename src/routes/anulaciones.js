@@ -93,6 +93,7 @@ router.post("/tgenerales", isLoggedIn, authRole(['Plan', 'Admincli']), async (re
     "			VE.vcgas_areaN AS AREA,\n" +
     "			VE.vcgas_sectorN AS SECTOR,\n" +
     "			TP.Descripcion AS SERVICIO,\n" +
+    "			U.Descripcion AS TECNICO,\n" +
     "			E.Descripcion AS ESTADO,\n" +
     "			COUNT(*) OVER ( PARTITION BY VE.vce_codigo ) AS CuentaCodigo \n" +
     "		FROM\n" +
@@ -127,6 +128,7 @@ router.post("/tgenerales", isLoggedIn, authRole(['Plan', 'Admincli']), async (re
     "			VE.vcgas_areaN AS AREA,\n" +
     "			VE.vcgas_sectorN AS SECTOR,\n" +
     "			TP.Descripcion AS SERVICIO,\n" +
+    "			U.Descripcion AS TECNICO,\n" +
     "			E.Descripcion AS ESTADO,\n" +
     "			'CuentaCodigo' \n" +
     "		FROM\n" +
@@ -213,6 +215,7 @@ router.post("/tgenerales", isLoggedIn, authRole(['Plan', 'Admincli']), async (re
           "			VE.vcgas_areaN AS AREA,\n" +
           "			VE.vcgas_sectorN AS SECTOR,\n" +
           "			TP.Descripcion AS SERVICIO,\n" +
+          "			U.Descripcion AS TECNICO,\n" +
           "			E.Descripcion AS ESTADO,\n" +
           "			COUNT(*) OVER ( PARTITION BY VE.vce_codigo ) AS CuentaCodigo \n" +
           "		FROM\n" +
@@ -247,6 +250,7 @@ router.post("/tgenerales", isLoggedIn, authRole(['Plan', 'Admincli']), async (re
           "			VE.vcgas_areaN AS AREA,\n" +
           "			VE.vcgas_sectorN AS SECTOR,\n" +
           "			TP.Descripcion AS SERVICIO,\n" +
+          "			U.Descripcion AS TECNICO,\n" +
           "			E.Descripcion AS ESTADO,\n" +
           "			'CuentaCodigo' \n" +
           "		FROM\n" +

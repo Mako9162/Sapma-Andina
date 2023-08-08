@@ -8,7 +8,7 @@ passport.use('local.signin', new LocalStrategy({
     passwordField: 'Clave',
     passReqToCallback: true
 }, async (req, Login, Clave, done) => {    
-    const rows = await pool.query('SELECT * FROM Usuarios WHERE Login = ?', [Login]);
+    const rows = await pool.query('SELECT * FROM Usuarios WHERE Login = ? AND Activo = 1', [Login]);
     if (rows.length > 0) {
         const user = rows[0];
         const validPassword = await helpers.matchClave(Clave, user.Clave);
