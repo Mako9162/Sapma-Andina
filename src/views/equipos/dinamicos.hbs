@@ -106,7 +106,75 @@
 		var table;
 		$(document).ready(function () {
 			
-			table = $('#tabla_prot').DataTable();
+				table = $('#tabla_prot').DataTable({
+				'columnDefs': [
+					{
+						'targets': 0,
+						'checkboxes': {
+							'selectRow': true
+						}
+					}
+				],
+				'select': {
+					'style': 'multi'
+				},
+				'order': [[0, 'asc']],
+				"dom": 'Bfrtip',
+				"searching": true,
+				"lengthChange": false,
+				"colReorder": true,
+				"buttons": [
+				{
+					"extend": 'excelHtml5',
+					"text": '<i class="fa fa-file-excel-o"></i>',
+					"title": 'Dinámicos',
+					"titleAttr": 'Exportar a Excel',
+					"className": 'btn btn-rounded btn-success',
+					"exportOptions": {
+					"columns": [0, 1, 2, 3, 4, 6, 7, 8]
+					},
+					customize: function(xlsx) {
+					const sheet = xlsx.xl.worksheets['sheet1.xml'];
+						$('row:first c', sheet).attr('s', '47');
+            		}
+				}],
+				"bDestroy": true, 	
+				"scrollX": true,
+				"bInfo": true,
+				"iDisplayLength": 20,
+				"autoWidth": false,
+				"language": {
+					"sProcessing": "Procesando...",
+					"sLengthMenu": "Mostrar _MENU_ registros",
+					"sZeroRecords": "No se encontraron resultados",
+					"sEmptyTable": "Ningún dato disponible en esta tabla",
+					"sInfo": "Mostrando un total de _TOTAL_ registros",
+					"sInfoEmpty": "Mostrando un total de 0 registros",
+					"sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+					"sInfoPostFix": "",
+					"sSearch": "Buscar:",
+					"sUrl": "",
+					"sInfoThousands": ".",
+					"sLoadingRecords": "Cargando...",
+					"oPaginate": {
+						"sFirst": "Primero",
+						"sLast": "Último",
+						"sNext": "Siguiente",
+						"sPrevious": "Anterior"
+					},
+					"oAria": {
+						"sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+						"sSortDescending": ": Activar para ordenar la columna de manera descendente"
+					},
+					"select" : {
+						"rows" : {
+							"_" : "Has seleccionado %d filas",
+							"0" : "Click en una fila para seleccionar",
+							"1" : "Has seleccionado 1 fila"
+						}
+					}
+				},
+			}).columns.adjust();
 				
 		});
 	</script>
