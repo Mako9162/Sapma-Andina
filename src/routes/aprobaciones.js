@@ -924,7 +924,7 @@ router.get('/aprobaciones', isLoggedIn, authRole(['Cli_C']), async (req, res)=>{
     "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA\n" +
     "	INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
     "WHERE\n" +
-    "	T.Id_Estado = 5 \n" +
+    "	T.Id_Estado IN (5, 6) \n" +
     "	AND TV.te_Estado_val = 1 \n" +
     "	AND U.Descripcion NOT LIKE '%test' \n" +
     "	AND VT.Val_rechazo = 0 \n" +
@@ -1018,7 +1018,7 @@ router.get('/aprobacionesplan', isLoggedIn, async (req, res)=>{
         "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA\n" +
         "	INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
         "WHERE\n" +
-        "	T.Id_Estado = 5 \n" +
+        "	T.Id_Estado IN (5, 6) \n" +
         "	AND TV.te_Estado_val = 1 \n" +
         "	AND U.Descripcion NOT LIKE '%test' \n" +
         "	AND VT.Val_rechazo = 0 \n" +
@@ -1107,7 +1107,7 @@ router.get('/aprobacionesb', isLoggedIn, authRole(['Cli_B', 'GerVer']), async (r
             "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA\n" +
             "	INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
             "WHERE\n" +
-            "	T.Id_Estado = 5 \n" +
+            "	T.Id_Estado IN (5, 6) \n" +
             "	AND TV.te_Estado_val = 1 \n" +
             "	AND U.Descripcion NOT LIKE '%test' \n" +
             "	AND VT.Val_rechazo = 0 \n" +
@@ -1198,7 +1198,7 @@ router.get('/aprobacionesa', isLoggedIn, authRole(['Cli_A']), async (req, res)=>
             "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA\n" +
             "	INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
             "WHERE\n" +
-            "	T.Id_Estado = 5 \n" +
+            "	T.Id_Estado IN (5, 6) \n" +
             "	AND TV.te_Estado_val = 1 \n" +
             "	AND U.Descripcion NOT LIKE '%test' \n" +
             "	AND VT.Val_rechazo = 0 \n" +
@@ -1287,7 +1287,7 @@ router.get('/aprobacionesd', isLoggedIn, authRole(['Cli_D']), async (req, res)=>
         "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA\n" +
         "	INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
         "WHERE\n" +
-        "	T.Id_Estado = 5 \n" +
+        "	T.Id_Estado IN (5, 6) \n" +
         "	AND TV.te_Estado_val = 1 \n" +
         "	AND U.Descripcion NOT LIKE '%test' \n" +
         "	AND VT.Val_rechazo = 0 \n" +
@@ -1376,7 +1376,7 @@ router.get('/aprobacionese', isLoggedIn, authRole(['Cli_E']), async (req, res)=>
         "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA\n" +
         "	INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
         "WHERE\n" +
-        "	T.Id_Estado = 5 \n" +
+        "	T.Id_Estado IN (5, 6) \n" +
         "	AND TV.te_Estado_val = 1 \n" +
         "	AND U.Descripcion NOT LIKE '%test' \n" +
         "	AND VT.Val_rechazo = 0 \n" +

@@ -76,8 +76,8 @@ router.post("/protocoloss", isLoggedIn,  async (req, res) => {
       "WHERE\n" +
       "	V.vtc_idCliente = "+Id_Cliente+"\n" +
       "	AND V.vtc_tareaId = "+tarea+"\n" +
-      "	AND T.Id_Estado = 5 \n" +
-      "	AND TE.te_Id_aux_estado = 5 \n" +
+      "	AND T.Id_Estado IN (5, 6) \n" +
+      "	AND TE.te_Id_aux_estado IN (5, 6) \n" +
       "	AND TE.te_Estado_val = 0 \n" +
       " GROUP BY T.Id;",
         (err, result) => {
@@ -116,8 +116,8 @@ router.post("/protocoloss", isLoggedIn,  async (req, res) => {
         "    INNER JOIN Tareas_Estado TE ON TE.te_Id_Tarea = T.Id \n" +
         "WHERE\n" +
         "    V.vtc_idCliente = "+Id_Cliente+"\n" +
-        "    AND T.Id_Estado = 5 \n" +
-        "    AND TE.te_Id_aux_estado = 5 \n" +
+        "    AND T.Id_Estado IN (5, 6) \n" +
+        "    AND TE.te_Id_aux_estado IN (5, 6) \n" +
         "    AND TE.te_Estado_val = 0 \n" +
         "	   AND T.Fecha BETWEEN \""+date1+"\" AND \""+date2+"\"\n" +
         "GROUP BY\n" +

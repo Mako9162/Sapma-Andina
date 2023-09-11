@@ -670,7 +670,25 @@
 				}
 			}).columns.adjust();
 
+			var pro = table.column(3).data();
 
+			pro.each(function(value, index) {
+				if (value === "No Realizada") {
+					var row = table.row(index).node();
+					$(row).find("td:eq(17) a").remove();
+				}
+			});
+
+			var rowsSelectable = false;
+
+			table.on('select', function(e, dt, type, indexes) {
+				if (type === 'row' && !rowsSelectable) {
+					var data = table.rows(indexes).data().toArray();
+					if (data[0][3] === 'No Realizada') {
+						table.rows(indexes).deselect();
+					}
+				}
+			});
 
 			var parentValues = table.column(6).data().unique();
 			parentValues.sort();

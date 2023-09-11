@@ -637,15 +637,12 @@
 				if (count === 1) {
 					$("#pdfs1").prop("hidden", false);
 					$("#pdfs").prop("hidden", true);
-					console.log("hay uno")
 				} else if (count > 1) {
 					$("#pdfs").prop("hidden", false);
 					$("#pdfs1").prop("hidden", true);
-					console.log("hay mas de uno")
 				} else {
 					$("#pdfs").prop("hidden", true);
 					$("#pdfs1").prop("hidden", true);
-					console.log("no hay nada")
 				}
 			}).columns.adjust();
 
