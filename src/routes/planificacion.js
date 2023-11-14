@@ -5,7 +5,51 @@ const { isLoggedIn } = require('../lib/auth');
 const { authRole} = require('../lib/rol');
 
 router.get('/ciclos', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) =>{
-    res.render('planificacion/ciclos');
+
+    try {
+        // const ciclo_table= await pool.query("SELECT Id, Nombre, Ciclo, Rep FROM Ciclos");
+        const tareas = await pool.query("Select Id, Descripcion, Abreviacion FROM TipoProtocolo;");
+
+        res.render('planificacion/ciclos', {
+            // ciclo_table:ciclo_table,
+            tareas:tareas
+        });
+    } catch (err) {
+        console.log(err);
+    }
+
+});
+
+router.post('/crear', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
+    console.log(req.body);
+    const {nombre, ttarea, periodo, perdia, persemana, permes, perano, mantencion} = req.body;
+    const ttareaConcatenada = ttarea.join('-');
+    const perdiaConcatenada = perdia ? `${perdia.cicloDiario}-${perdia.nDias}` : null;
+    const periodoValue = periodo[0]; // Extraer el valor de periodo del array
+    
+    const arr1 = [nombre, ttareaConcatenada, periodoValue, perdiaConcatenada];
+    console.log(arr1);
+    
+    // if(perdia){
+    //     try {
+    //          await pool.query("INSERT INTO Ciclos (ciclo_nombre, ciclo_tipotarea, ciclo_tipoperiodo) VALUES (?)", [arr1], (err, result)=>{
+    //             if(err){
+    //                 console.log(err);
+    //             }else{
+    //                 console.log('ok');
+    //             }
+    //          });
+
+    //     } catch (err) {
+            
+    //     }
+    // }else if(persemana){
+    //     console.log('persemana');
+    // }else if(permes){
+    //     console.log('permes');
+    // }else if(perano){
+    //     console.log('perano');
+    // }
 });
 
 router.get('/plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) =>{
@@ -13,6 +57,7 @@ router.get('/plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res)
     const gerencias= await pool.query('SELECT vcgas_idGerencia, vcgas_gerenciaN FROM VIEW_ClienteGerAreSec WHERE vcgas_idCliente = '+Id_Cliente+' GROUP BY vcgas_idGerencia ');
     
     res.render('planificacion/planificar', 
+
         {
             gerencias: gerencias
         }
@@ -26,24 +71,27 @@ router.get('/get_datapla', function(request, response, next){
     const search_query = request.query.parent_value;
 
     if(type == 'load_areass')
+
     {
         var query = `
-        SELECT DISTINCT vcgas_idArea AS Id, vcgas_areaN AS Data FROM VIEW_ClienteGerAreSec 
-        WHERE vcgas_idGerencia = '${search_query}' 
+        SELECT DISTINCT vcgas_idArea AS Id, vcgas_areaN AS Data FROM VIEW_equiposCteGerAreSec
+        WHERE vcgas_idGerencia = '${search_query}'
         ORDER BY vcgas_areaN ASC
         `;
     }
 
     if(type == 'load_sectoress')
+
     {
         var query = `
-        SELECT DISTINCT vcgas_idSector AS Id, vcgas_sectorN AS Data FROM VIEW_ClienteGerAreSec 
+        SELECT DISTINCT vcgas_idSector AS Id, vcgas_sectorN AS Data FROM VIEW_equiposCteGerAreSec
         WHERE vcgas_idArea = '${search_query}' 
         ORDER BY vcgas_sectorN ASC
         `;
     }
 
     if(type == 'load_equiposs')
+
     {
         var query = `
         SELECT DISTINCT vce_idEquipo AS Id, vce_codigo AS Data FROM VIEW_equiposCteGerAreSec 
@@ -72,6 +120,7 @@ router.post('/buscar_plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (r
     const {gerencia, area, sector, equipo} = req.body;
 
     try {
+
         if(gerencia>0 && !area && !sector && !equipo){
 
             const ger_equi = await pool.query("SELECT\n" +
@@ -168,11 +217,13 @@ router.post('/buscar_plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (r
                 res.json(equi_equi);
             }
         } 
+
     } catch (err) {
+
         console.log(err);
+
     }
 });
-
 
 module.exports = router;
 
