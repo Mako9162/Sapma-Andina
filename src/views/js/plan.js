@@ -127,6 +127,29 @@ $(document).ready(function() {
 
     initDataTable(); // Inicializar DataTables al principio
 
+    $('#asignar_ciclo').on('click', function() {
+        var ciclo = $('#cicloa').val();
+        var filasSeleccionadas = table.rows({ selected: true }).data();
+        var datosFilas = filasSeleccionadas.toArray();
+        
+        var idsSeleccionados = datosFilas.map(function (fila) {
+            return fila[0]; // Ajusta según la posición real del ID en tus datos
+        });
+
+        var data = {
+            ciclo: ciclo,
+            idsSeleccionados: idsSeleccionados
+        }
+
+        $.ajax({
+            url: '/asigna_ciclo',
+            type: 'POST',
+            data: data
+        })
+
+
+    });
+
     $('#buscar').click(function() {
         var gerencia = $('#gerencia').val();
         var area = 	$('#area').val();
@@ -173,6 +196,7 @@ $(document).ready(function() {
                             <td>${item.GER}</td>
                             <td>${item.AREA}</td>
                             <td>${item.SECTOR}</td>
+                            <td>${item.CICLO}</td>
                         </tr>
                     `);
                 });
@@ -182,5 +206,6 @@ $(document).ready(function() {
             }
         });
     });
+
 
 });

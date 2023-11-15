@@ -7,11 +7,11 @@ const { authRole} = require('../lib/rol');
 router.get('/ciclos', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) =>{
 
     try {
-        // const ciclo_table= await pool.query("SELECT Id, Nombre, Ciclo, Rep FROM Ciclos");
+        const ciclo_table= await pool.query("SELECT ciclo_id AS ID, ciclo_nombre AS NOMBRE, ciclo_tipotarea AS TTAREA, ciclo_tipoperiodo AS TPERIODO, ciclo_periodo AS PERIODO, ciclo_mantencion AS MANTENCION FROM Ciclos");
         const tareas = await pool.query("Select Id, Descripcion, Abreviacion FROM TipoProtocolo;");
 
         res.render('planificacion/ciclos', {
-            // ciclo_table:ciclo_table,
+            ciclo_table:ciclo_table,
             tareas:tareas
         });
     } catch (err) {
@@ -21,45 +21,85 @@ router.get('/ciclos', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, re
 });
 
 router.post('/crear', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
-    console.log(req.body);
+
     const {nombre, ttarea, periodo, perdia, persemana, permes, perano, mantencion} = req.body;
     const ttareaConcatenada = ttarea.join('-');
     const perdiaConcatenada = perdia ? `${perdia.cicloDiario}-${perdia.nDias}` : null;
-    const periodoValue = periodo[0]; // Extraer el valor de periodo del array
-    
-    const arr1 = [nombre, ttareaConcatenada, periodoValue, perdiaConcatenada];
-    console.log(arr1);
-    
-    // if(perdia){
-    //     try {
-    //          await pool.query("INSERT INTO Ciclos (ciclo_nombre, ciclo_tipotarea, ciclo_tipoperiodo) VALUES (?)", [arr1], (err, result)=>{
-    //             if(err){
-    //                 console.log(err);
-    //             }else{
-    //                 console.log('ok');
-    //             }
-    //          });
+    const persemanaConcatenada = persemana ? `${persemana.cicloSemana}-${persemana.nSemana}` : null;
+    const permesConcatenada = permes ? `${permes.cicloMes}-${permes.nMes}` : null;
+    const periodoValue = periodo[0];
+    const periodoMantencion = mantencion[0];
 
-    //     } catch (err) {
-            
-    //     }
-    // }else if(persemana){
-    //     console.log('persemana');
-    // }else if(permes){
-    //     console.log('permes');
-    // }else if(perano){
-    //     console.log('perano');
-    // }
+    const arr1 = [nombre, ttareaConcatenada, periodoValue, perdiaConcatenada, periodoMantencion];
+    const arr2 = [nombre, ttareaConcatenada, periodoValue, persemanaConcatenada, periodoMantencion];
+    const arr3 = [nombre, ttareaConcatenada, periodoValue, permesConcatenada, periodoMantencion];
+    const arr4 = [nombre, ttareaConcatenada, periodoValue, "TA", periodoMantencion];
+
+
+    if(perdia){
+         try {
+              await pool.query("INSERT INTO Ciclos (ciclo_nombre, ciclo_tipotarea, ciclo_tipoperiodo, ciclo_periodo, ciclo_mantencion) VALUES (?)", [arr1], (err, result)=>{
+                 if(err){
+                     console.log(err);
+                 }else{
+                     console.log('ok');
+                 }
+              });
+
+         } catch (err) {
+            console.log(err);
+         }
+     }else if(persemana){
+        try {
+            await pool.query("INSERT INTO Ciclos (ciclo_nombre, ciclo_tipotarea, ciclo_tipoperiodo, ciclo_periodo, ciclo_mantencion) VALUES (?)", [arr2], (err, result)=>{
+               if(err){
+                   console.log(err);
+               }else{
+                   console.log('ok');
+               }
+            });
+
+       } catch (err) {
+          console.log(err);
+       }
+     }else if(permes){
+        try {
+            await pool.query("INSERT INTO Ciclos (ciclo_nombre, ciclo_tipotarea, ciclo_tipoperiodo, ciclo_periodo, ciclo_mantencion) VALUES (?)", [arr3], (err, result)=>{
+               if(err){
+                   console.log(err);
+               }else{
+                   console.log('ok');
+               }
+            });
+
+       } catch (err) {
+          console.log(err);
+       }
+     }else if(perano){
+        try {
+            await pool.query("INSERT INTO Ciclos (ciclo_nombre, ciclo_tipotarea, ciclo_tipoperiodo, ciclo_periodo, ciclo_mantencion) VALUES (?)", [arr4], (err, result)=>{
+               if(err){
+                   console.log(err);
+               }else{
+                   console.log('ok');
+               }
+            });
+
+       } catch (err) {
+          console.log(err);
+       }
+     }
 });
 
 router.get('/plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) =>{
     const {Id_Cliente} = req.user;
     const gerencias= await pool.query('SELECT vcgas_idGerencia, vcgas_gerenciaN FROM VIEW_ClienteGerAreSec WHERE vcgas_idCliente = '+Id_Cliente+' GROUP BY vcgas_idGerencia ');
-    
+    const ciclo= await pool.query("SELECT ciclo_id AS ID, ciclo_nombre AS NOMBRE, ciclo_tipotarea AS TTAREA, ciclo_tipoperiodo AS TPERIODO, ciclo_periodo AS PERIODO, ciclo_mantencion AS MANTENCION FROM Ciclos");
     res.render('planificacion/planificar', 
 
         {
-            gerencias: gerencias
+            gerencias: gerencias,
+            ciclo: ciclo
         }
     );
 });
@@ -129,13 +169,15 @@ router.post('/buscar_plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (r
             "	TP.Descripcion AS TIPO,\n" +
             "	G.Descripcion AS GER,\n" +
             "	A.Descripcion AS AREA,\n" +
-            "	S.Descripcion AS SECTOR\n" +
+            "	S.Descripcion AS SECTOR,\n" +
+            "   CE.equipo_ciclo AS CICLO\n" +
             "FROM\n" +
             "	Equipos E\n" +
             "	INNER JOIN Sectores S ON S.Id = E.Id_Sector\n" +
             "	INNER JOIN Areas A ON A.Id = S.Id_Area\n" +
             "	INNER JOIN Gerencias G ON G.Id = A.Id_Gerencia\n" +
             "	INNER JOIN TipoEquipo TP ON TP.Id = E.Id_Tipo \n" +
+            "   INNER JOIN Ciclo_equipos CE ON CE.equipo_id = E.Id\n" +
             "WHERE\n" +
             "	G.Id = ?", [gerencia]);
 
@@ -153,13 +195,15 @@ router.post('/buscar_plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (r
             "	TP.Descripcion AS TIPO,\n" +
             "	G.Descripcion AS GER,\n" +
             "	A.Descripcion AS AREA,\n" +
-            "	S.Descripcion AS SECTOR\n" +
+            "	S.Descripcion AS SECTOR,\n" +
+            "   CE.equipo_ciclo AS CICLO\n" +
             "FROM\n" +
             "	Equipos E\n" +
             "	INNER JOIN Sectores S ON S.Id = E.Id_Sector\n" +
             "	INNER JOIN Areas A ON A.Id = S.Id_Area\n" +
             "	INNER JOIN Gerencias G ON G.Id = A.Id_Gerencia\n" +
             "	INNER JOIN TipoEquipo TP ON TP.Id = E.Id_Tipo \n" +
+            "   INNER JOIN Ciclo_equipos CE ON CE.equipo_id = E.Id\n" +
             "WHERE\n" +
             "	A.Id = ?", [area]);
  
@@ -177,13 +221,15 @@ router.post('/buscar_plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (r
             "	TP.Descripcion AS TIPO,\n" +
             "	G.Descripcion AS GER,\n" +
             "	A.Descripcion AS AREA,\n" +
-            "	S.Descripcion AS SECTOR\n" +
+            "	S.Descripcion AS SECTOR,\n" +
+            "   CE.equipo_ciclo AS CICLO\n" +
             "FROM\n" +
             "	Equipos E\n" +
             "	INNER JOIN Sectores S ON S.Id = E.Id_Sector\n" +
             "	INNER JOIN Areas A ON A.Id = S.Id_Area\n" +
             "	INNER JOIN Gerencias G ON G.Id = A.Id_Gerencia\n" +
             "	INNER JOIN TipoEquipo TP ON TP.Id = E.Id_Tipo \n" +
+            "   INNER JOIN Ciclo_equipos CE ON CE.equipo_id = E.Id\n" +
             "WHERE\n" +
             "	E.Id_Sector = ?", [sector]);
             
@@ -201,13 +247,15 @@ router.post('/buscar_plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (r
             "	TP.Descripcion AS TIPO,\n" +
             "	G.Descripcion AS GER,\n" +
             "	A.Descripcion AS AREA,\n" +
-            "	S.Descripcion AS SECTOR\n" +
+            "	S.Descripcion AS SECTOR,\n" +
+            "   CE.equipo_ciclo AS CICLO\n" +
             "FROM\n" +
             "	Equipos E\n" +
             "	INNER JOIN Sectores S ON S.Id = E.Id_Sector\n" +
             "	INNER JOIN Areas A ON A.Id = S.Id_Area\n" +
             "	INNER JOIN Gerencias G ON G.Id = A.Id_Gerencia\n" +
             "	INNER JOIN TipoEquipo TP ON TP.Id = E.Id_Tipo \n" +
+            "   INNER JOIN Ciclo_equipos CE ON CE.equipo_id = E.Id\n" +
             "WHERE\n" +
             "	E.Id = ?", [equipo]);
             
@@ -223,6 +271,19 @@ router.post('/buscar_plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (r
         console.log(err);
 
     }
+});
+
+router.post('/asigna_ciclo', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
+    const {ciclo, idsSeleccionados } = req.body;
+
+    await pool.query("UPDATE Ciclo_equipos SET equipo_ciclo = ? WHERE equipo_id IN (?);", [ciclo, idsSeleccionados], (err, result) => {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log('ok');
+        }
+    });
+    
 });
 
 module.exports = router;

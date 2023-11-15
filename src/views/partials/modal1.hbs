@@ -14,11 +14,17 @@
                             <div class="row">
                                 <cdiv class="form-group">
                                     <label for="atp">Descripción</label>
-									<input type="text" class="form-control" id="aagente" name="aagente" onblur="formatInput(this)"> 
+									<select class="select2" name="cicloa" id="cicloa">
+                                        <option value="">Seleccione un ciclo</option>
+                                        {{#each ciclo}}
+                                        <option value="{{NOMBRE}}">{{NOMBRE}}</option>
+                                        {{/each}}
+                                    </select>
                                 </cdiv>
 								<br>
+                                <br>
                                 <div>
-                                    <button type="button"  name="action" id="guardar_ciclo" class="btn btn-rounded btn-primary float-right">Guardar</button>
+                                    <button type="button"  name="action" id="asignar_ciclo" class="btn btn-rounded btn-primary float-right">Asignar</button>
                                 </div>
                             </div>
                         </div>

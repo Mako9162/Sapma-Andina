@@ -27,7 +27,7 @@
 				</style>
 			</header>
 			<div class="box-typical box-typical-padding">
-				<button class="btn btn-success float-right" id="crear" disabled="true">Crear</button>
+				<button class="btn btn-success float-right" id="crear">Crear</button>
 				<button class="btn btn-danger float-right add-margin" id="borrar">Borrar</button>
 				<h5 class="m-t-lg with-border">Nuevo ciclo</h5>
 				<div class="row">
@@ -41,28 +41,31 @@
 						<br>
 						{{#each tareas}}
 						<div class="checkbox-bird green ttarea-checkbox">
-							<input type="checkbox" id="radio-{{Id}}" value="{{Id}}" class="ttarea-checkbox">
+							<input type="checkbox" id="radio-{{Id}}" value="{{Abreviacion}}" class="ttarea-checkbox">
 							<label for="radio-{{Id}}">{{Descripcion}} - {{Abreviacion}}</label>
 						</div>
 						{{/each}}
 					</div>
-					<div class="form-group col-md-2 col-sm-6" id="periodo">
+					<!-- Aquí es donde se mostrarán las opciones adicionales -->
+					<div class="form-group col-md-3 col-sm-6" id="opciones-adicionales"></div>
+					<div class="form-group col-md-3 col-sm-6" id="otras-opciones-adicionales"></div>
+					{{!-- <div class="form-group col-md-2 col-sm-6" id="periodo">
 						<label class="form-label">Seleccione periodicidad:</label>
 						<br>
 						<div class="checkbox-bird orange">
-							<input type="checkbox" class="periodicidad-checkbox" id="diario" value="1" disabled="true">
+							<input type="checkbox" class="periodicidad-checkbox" id="diario" value="diario" disabled="true">
 							<label for="diario">Diario</label>
 						</div>
 						<div class="checkbox-bird orange">
-							<input type="checkbox" class="periodicidad-checkbox" id="semanal" value="2" disabled="true">
+							<input type="checkbox" class="periodicidad-checkbox" id="semanal" value="semanal" disabled="true">
 							<label for="semanal">Semanal</label>
 						</div>
 						<div class="checkbox-bird orange">
-							<input type="checkbox" class="periodicidad-checkbox" id="mensual" value="3" disabled="true">
+							<input type="checkbox" class="periodicidad-checkbox" id="mensual" value="mensual" disabled="true">
 							<label for="mensual">Mensual</label>
 						</div>
 						<div class="checkbox-bird orange">
-							<input type="checkbox" class="periodicidad-checkbox" id="anual" value="4" disabled="true">
+							<input type="checkbox" class="periodicidad-checkbox" id="anual" value="anual" disabled="true">
 							<label for="anual">Anual</label>
 						</div>
 					</div>
@@ -169,8 +172,34 @@
 							</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 							años
 						</div>
-					</div>
+					</div> --}}
 				</div>	
+			</div>
+			<div class="box-typical box-typical-padding">
+				<table id="tabla_prot" class="table table-bordered table-striped table-vcenter js-dataTable-full">
+					<thead>
+						<tr>
+							<th>Id</th>
+							<th>Nombre</th>
+							<th>Tipo de Tarea</th>
+							<th>Tipo de Periodo</th>
+							<th>Periodo</th>
+							<th>Mantención</th>
+						</tr>
+					</thead>
+					<tbody>
+						{{#each ciclo_table}}
+						<tr>
+							<td>{{ID}}</td>
+							<td>{{NOMBRE}}</td>
+							<td>{{TTAREA}}</td>
+							<td>{{TPERIODO}}</td>
+							<td>{{PERIODO}}</td>
+							<td>{{MANTENCION}}</td>
+						</tr>	
+						{{/each}}
+					</tbody>
+				</table>
 			</div>
 		</div>	
 	</div>
