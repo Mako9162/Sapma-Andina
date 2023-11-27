@@ -9,10 +9,11 @@ router.get('/ciclos', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, re
     try {
         const ciclo_table= await pool.query("SELECT ciclo_id AS ID, ciclo_nombre AS NOMBRE, ciclo_tipotarea AS TTAREA, ciclo_tipoperiodo AS TPERIODO, ciclo_periodo AS PERIODO, ciclo_mantencion AS MANTENCION FROM Ciclos");
         const tareas = await pool.query("Select Id, Descripcion, Abreviacion FROM TipoProtocolo;");
-
+        const tequipo = await pool.query("Select Id, Descripcion FROM TipoEquipo;");
         res.render('planificacion/ciclos', {
             ciclo_table:ciclo_table,
-            tareas:tareas
+            tareas:tareas,
+            tequipo: tequipo
         });
     } catch (err) {
         console.log(err);
@@ -20,75 +21,19 @@ router.get('/ciclos', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, re
 
 });
 
+router.get('/ttareas', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
+    try {
+        const ttareas = await pool.query("Select Id, Descripcion, Abreviacion FROM TipoProtocolo;");
+        res.json(ttareas);  // Envía directamente el array sin anidarlo en un objeto
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: 'Error al obtener los datos.' });
+    }
+});
+
 router.post('/crear', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
-
-    const {nombre, ttarea, periodo, perdia, persemana, permes, perano, mantencion} = req.body;
-    const ttareaConcatenada = ttarea.join('-');
-    const perdiaConcatenada = perdia ? `${perdia.cicloDiario}-${perdia.nDias}` : null;
-    const persemanaConcatenada = persemana ? `${persemana.cicloSemana}-${persemana.nSemana}` : null;
-    const permesConcatenada = permes ? `${permes.cicloMes}-${permes.nMes}` : null;
-    const periodoValue = periodo[0];
-    const periodoMantencion = mantencion[0];
-
-    const arr1 = [nombre, ttareaConcatenada, periodoValue, perdiaConcatenada, periodoMantencion];
-    const arr2 = [nombre, ttareaConcatenada, periodoValue, persemanaConcatenada, periodoMantencion];
-    const arr3 = [nombre, ttareaConcatenada, periodoValue, permesConcatenada, periodoMantencion];
-    const arr4 = [nombre, ttareaConcatenada, periodoValue, "TA", periodoMantencion];
-
-
-    if(perdia){
-         try {
-              await pool.query("INSERT INTO Ciclos (ciclo_nombre, ciclo_tipotarea, ciclo_tipoperiodo, ciclo_periodo, ciclo_mantencion) VALUES (?)", [arr1], (err, result)=>{
-                 if(err){
-                     console.log(err);
-                 }else{
-                     console.log('ok');
-                 }
-              });
-
-         } catch (err) {
-            console.log(err);
-         }
-     }else if(persemana){
-        try {
-            await pool.query("INSERT INTO Ciclos (ciclo_nombre, ciclo_tipotarea, ciclo_tipoperiodo, ciclo_periodo, ciclo_mantencion) VALUES (?)", [arr2], (err, result)=>{
-               if(err){
-                   console.log(err);
-               }else{
-                   console.log('ok');
-               }
-            });
-
-       } catch (err) {
-          console.log(err);
-       }
-     }else if(permes){
-        try {
-            await pool.query("INSERT INTO Ciclos (ciclo_nombre, ciclo_tipotarea, ciclo_tipoperiodo, ciclo_periodo, ciclo_mantencion) VALUES (?)", [arr3], (err, result)=>{
-               if(err){
-                   console.log(err);
-               }else{
-                   console.log('ok');
-               }
-            });
-
-       } catch (err) {
-          console.log(err);
-       }
-     }else if(perano){
-        try {
-            await pool.query("INSERT INTO Ciclos (ciclo_nombre, ciclo_tipotarea, ciclo_tipoperiodo, ciclo_periodo, ciclo_mantencion) VALUES (?)", [arr4], (err, result)=>{
-               if(err){
-                   console.log(err);
-               }else{
-                   console.log('ok');
-               }
-            });
-
-       } catch (err) {
-          console.log(err);
-       }
-     }
+    console.log(req.body);
+        
 });
 
 router.get('/plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) =>{

@@ -8,174 +8,130 @@
 				<div class="tbl">
 					<div class="tbl-row">
 						<div class="tbl-cell">
-							<h3>Ciclos</h3>
+							<h3>Ciclos de planificación</h3>
 							<ol class="breadcrumb breadcrumb-simple">
 								<li><a href="/home">Inicio</a></li>
-								<li class="active">Nuevo</li>
+								<li class="active">Nuevo ciclo</li>
 							</ol>
 						</div>
                     </div>    
 				</div>
 				<style>
-					.ver {
-						visibility: visible !important;
-						opacity: 1 !important;
-					}
 					.add-margin {
 						margin-right: 10px; /* Ajusta el valor según el espacio que desees entre los botones */
+					}
+					input[type="number"] {
+						width: 50px; /* Ajusta el ancho según tus necesidades */
+						height: 20px; /* Ajusta la altura según tus necesidades */
+						visibility: visible !important; /* Fuerza la visibilidad del elemento */
+					}
+					.icon-primary {
+						color: #00bfffbc;
 					}
 				</style>
 			</header>
 			<div class="box-typical box-typical-padding">
-				<button class="btn btn-success float-right" id="crear">Crear</button>
+				<button class="btn btn-success float-right" id="crear" disabled>Crear</button>
 				<button class="btn btn-danger float-right add-margin" id="borrar">Borrar</button>
 				<h5 class="m-t-lg with-border">Nuevo ciclo</h5>
+				<br>
 				<div class="row">
-					<div class="form-group col-md-3 col-sm-6" id="nomciclo">
+					<div class="form-group col-md-6 col-sm-6" id="nomciclo">
 						<label class="form-label" for="nombre">Nombre de ciclo:</label>
 						<br>
 						<input type="text" class="form-control" id="nombre" placeholder="Asigne un nombre al ciclo">
 					</div>
-					<div class="form-group col-md-3 col-sm-6" style="display: flex; flex-direction: column;" id="ttarea">
-						<label class="form-label">Seleccione el o los tipos de tarea:</label>
+					<div class="form-group col-md-6 col-sm-6" id="tequipo">
+						<label class="form-label" for="tipo_equipo">Seleccione el tipo de equipo:</label>
 						<br>
-						{{#each tareas}}
-						<div class="checkbox-bird green ttarea-checkbox">
-							<input type="checkbox" id="radio-{{Id}}" value="{{Abreviacion}}" class="ttarea-checkbox">
-							<label for="radio-{{Id}}">{{Descripcion}} - {{Abreviacion}}</label>
-						</div>
-						{{/each}}
+						<select name="tipo_equipo"  id="tipo_equipo" class="select2">
+							<option value="">Seleccione una opción</option>
+                            {{#each tequipo }}
+                                <option value= "{{Id}}">{{Descripcion}}</option>
+                            {{/each}}
+                        </select>
 					</div>
-					<!-- Aquí es donde se mostrarán las opciones adicionales -->
-					<div class="form-group col-md-3 col-sm-6" id="opciones-adicionales"></div>
-					<div class="form-group col-md-3 col-sm-6" id="otras-opciones-adicionales"></div>
-					{{!-- <div class="form-group col-md-2 col-sm-6" id="periodo">
-						<label class="form-label">Seleccione periodicidad:</label>
-						<br>
-						<div class="checkbox-bird orange">
-							<input type="checkbox" class="periodicidad-checkbox" id="diario" value="diario" disabled="true">
-							<label for="diario">Diario</label>
-						</div>
-						<div class="checkbox-bird orange">
-							<input type="checkbox" class="periodicidad-checkbox" id="semanal" value="semanal" disabled="true">
-							<label for="semanal">Semanal</label>
-						</div>
-						<div class="checkbox-bird orange">
-							<input type="checkbox" class="periodicidad-checkbox" id="mensual" value="mensual" disabled="true">
-							<label for="mensual">Mensual</label>
-						</div>
-						<div class="checkbox-bird orange">
-							<input type="checkbox" class="periodicidad-checkbox" id="anual" value="anual" disabled="true">
-							<label for="anual">Anual</label>
-						</div>
-					</div>
-					<div class="form-group col-md-2 col-sm-6" id="perdia" style="display: none;">
-						<label class="form-label">Seleccione ciclo:</label>
-						<br>
-						<div class="checkbox-bird">
-							<input type="checkbox" id="cdiario" value="1">
-							<label for="cdiario">Todos los días</label>
-						</div>
-						<div class="checkbox-bird" style="display: inline-block;">
-							<input type="checkbox" id="cdiarion" value="2" style="display: inline-block; z-index: 1;">
-							<label for="cdiarion" style="display: inline-block;">
-								Cada &nbsp;
-								<input class="form-control form-control-sm ml-2 ver" id="ndia" type="number" min="1" max="365" style="width: 60px; display: inline-block; z-index: 1;"> 
-							</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-							días
-						</div>
-					</div>
-					<div class="form-group col-md-2 col-sm-6" id="persemana" style="display: none;">
-						<label class="form-label">Seleccione ciclo:</label>
-						<br>
-						<div class="checkbox-bird">
-							<input type="checkbox" id="csemana" value="3">
-							<label for="csemana">Todos las semanas</label>
-						</div>
-						<div class="checkbox-bird" style="display: inline-block;">
-							<input type="checkbox" id="csemanan" value="4" style="display: inline-block; z-index: 1;">
-							<label for="csemanan" style="display: inline-block;">
-								Cada &nbsp;
-								<input class="form-control form-control-sm ml-2 ver" id="nsem" type="number" min="1" max="365" style="width: 60px; display: inline-block; z-index: 1;"> 
-							</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-							semanas
-						</div>
-					</div>
-					<div class="form-group col-md-2 col-sm-6" id="permes" style="display: none;">
-						<label class="form-label">Seleccione ciclo:</label>
-						<br>
-						<div class="checkbox-bird">
-							<input type="checkbox" id="cmes" value="5">
-							<label for="cmes">Todos los meses</label>
-						</div>
-						<div class="checkbox-bird" style="display: inline-block;">
-							<input type="checkbox" id="cmesn" value="6" style="display: inline-block; z-index: 1;">
-							<label for="cmesn" style="display: inline-block;">
-								Cada &nbsp;
-								<input class="form-control form-control-sm ml-2 ver" id="nmes" type="number" min="1" max="365" style="width: 60px; display: inline-block; z-index: 1;"> 
-							</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-							meses
-						</div>
-					</div>
-					<div class="form-group col-md-2 col-sm-6" id="perano" style="display: none;">
-						<label class="form-label">Seleccione ciclo:</label>
-						<br>
-						<div class="checkbox-bird">
-							<input type="checkbox" id="cano" value="7">
-							<label for="cano">Todos los años</label>
-						</div>
-					</div>
-					<div class="form-group col-md-2 col-sm-6" id="mantenciondia" style="display: none;">
-						<label class="form-label">Mantención:</label>
-						<br>
-						<div class="checkbox-bird" style="display: inline-block;">
-							<input type="checkbox" id="mandia" value="6" style="display: inline-block; z-index: 1;">
-							<label for="mandia" style="display: inline-block;">
-								Cada &nbsp;
-								<input class="form-control form-control-sm ml-2 ver" id="mdia" type="number" min="1" max="365" style="width: 60px; display: inline-block; z-index: 1;"> 
-							</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-							días
-						</div>
-					</div>
-					<div class="form-group col-md-2 col-sm-6" id="mantencionsemana" style="display: none;">
-						<label class="form-label">Mantención:</label>
-						<br>
-						<div class="checkbox-bird" style="display: inline-block;">
-							<input type="checkbox" id="mansemana" value="6" style="display: inline-block; z-index: 1;">
-							<label for="mansemana" style="display: inline-block;">
-								Cada &nbsp;
-								<input class="form-control form-control-sm ml-2 ver" id="msemana" type="number" min="1" max="365" style="width: 60px; display: inline-block; z-index: 1;"> 
-							</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-							semanas
-						</div>
-					</div>
-					<div class="form-group col-md-2 col-sm-6" id="mantencionmes" style="display: none;">
-						<label class="form-label">Mantención:</label>
-						<br>
-						<div class="checkbox-bird" style="display: inline-block;">
-							<input type="checkbox" id="manmes" value="6" style="display: inline-block; z-index: 1;">
-							<label for="manmes" style="display: inline-block;">
-								Cada &nbsp;
-								<input class="form-control form-control-sm ml-2 ver" id="mmes" type="number" min="1" max="365" style="width: 60px; display: inline-block; z-index: 1;"> 
-							</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-							meses
-						</div>
-					</div>
-					<div class="form-group col-md-2 col-sm-6" id="mantencionano" style="display: none;">
-						<label class="form-label">Mantención:</label>
-						<br>
-						<div class="checkbox-bird" style="display: inline-block;">
-							<input type="checkbox" id="manano" value="6" style="display: inline-block; z-index: 1;">
-							<label for="manano" style="display: inline-block;">
-								Cada &nbsp;
-								<input class="form-control form-control-sm ml-2 ver" id="mano" type="number" min="1" max="365" style="width: 60px; display: inline-block; z-index: 1;"> 
-							</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-							años
-						</div>
-					</div> --}}
 				</div>	
+				<h5 class="m-t-lg with-border">Ciclo de panificación</h5>
+				<br>
+				<div class="row">	
+					<div class="form-group col-md-4 col-sm-6" id="ttarea">
+						<label class="form-label" for="tipo_tarea">Seleccione el tipo de protocolo:</label>
+						<select name="tipo_tarea"  id="tipo_tarea" class="select2" disabled>
+							<option value="">Seleccione una opción</option>
+                            {{#each tareas }}
+                                <option value= "{{Id}}">{{Descripcion}} - {{Abreviacion}}</option>
+                            {{/each}}
+                        </select>
+					</div>
+					<div class="form-group col-md-4 col-sm-6" id="periodicidad">
+						<label class="form-label" for="periodo">Seleccione perdiodicidad:</label>
+						<select name="periodo"  id="periodo" class="select2" disabled>
+							<option value="">Seleccione una opción</option>
+							<option value="Diario">Diario</option>
+							<option value="Semanal">Semanal</option>
+							<option value="Mensual">Mensual</option>
+							<option value="Anual">Anual</option>                                   
+                        </select>
+					</div>
+					<div class="form-group col-md-4 col-sm-6" id="tipo_periodo_d" style="display: none;">
+						<label class="form-label">Seleccione un ciclo:</label>
+						<div class="radio">
+							<input type="radio" name="optionsRadios" id="todos_los_dias" value="Todos los días">
+							<label for="todos_los_dias">Todos los días</label>
+						</div>
+						<div class="radio">
+							<input type="radio" name="optionsRadios" id="cdn" value="CND">
+							<label for="cdn">Cada&nbsp;
+							<input class="form-control" min="1" style="width: 60px; display: inline-block; z-index: 1;" type="number" name="d" id="d">
+							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;días</label>
+						</div>
+					</div>
+					<div class="form-group col-md-4 col-sm-6" id="tipo_periodo_s" style="display: none;">
+						<label class="form-label">Seleccione un ciclo:</label>
+						<div class="radio">
+							<input type="radio" name="optionsRadios" id="todas_las_semanas" value="Todas las semanas">
+							<label for="todas_las_semanas">Todas las semanas</label>
+						</div>
+						<div class="radio">
+							<input type="radio" name="optionsRadios" id="cns" value="CNS">
+							<label for="cns">Cada&nbsp;
+							<input class="form-control" min="1" style="width: 60px; display: inline-block; z-index: 1;" type="number" name="s" id="s">
+							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;semanas</label>
+						</div>
+					</div>
+					<div class="form-group col-md-4 col-sm-6" id="tipo_periodo_m" style="display: none;">
+						<label class="form-label">Seleccione un ciclo:</label>
+						<div class="radio">
+							<input type="radio" name="optionsRadios" id="todos_los_meses" value="Todos los meses">
+							<label for="todos_los_meses">Todos los meses</label>
+						</div>
+						<div class="radio">
+							<input type="radio" name="optionsRadios" id="cnm" value="CNM">
+							<label for="cnm">Cada&nbsp;
+							<input class="form-control" min="1" style="width: 60px; display: inline-block; z-index: 1;" type="number" name="m" id="m">
+							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;meses</label>
+						</div>
+					</div>
+					<div class="form-group col-md-4 col-sm-6" id="tipo_periodo_a" style="display: none;">
+						<label class="form-label">Seleccione un ciclo:</label>
+						<div class="radio">
+							<input type="radio" name="optionsRadios" id="todos_los_anos" value="Todos los años">
+							<label for="todos_los_anos">Todos los años</label>
+						</div>
+						<div class="radio">
+							<input type="radio" name="optionsRadios" id="cna" value="CNA">
+							<label for="cna">Cada&nbsp;
+							<input class="form-control" min="1" style="width: 60px; display: inline-block; z-index: 1;" type="number" name="a" id="a">
+							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;años</label>
+						</div>
+					</div>
+				</div>
+				<br>
+				<div id="contenedor-ciclos"></div>
+				<button class="btn btn-primary" id="a_ciclo" >Agregar Ciclo</button>
 			</div>
-			<div class="box-typical box-typical-padding">
+			<div class="box-typical box-typical-padding" style="display: none;">
 				<table id="tabla_prot" class="table table-bordered table-striped table-vcenter js-dataTable-full">
 					<thead>
 						<tr>
