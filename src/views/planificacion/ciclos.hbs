@@ -8,7 +8,7 @@
 				<div class="tbl">
 					<div class="tbl-row">
 						<div class="tbl-cell">
-							<h3>Ciclos de planificación</h3>
+							<h3>Nuevo ciclo</h3>
 							<ol class="breadcrumb breadcrumb-simple">
 								<li><a href="/home">Inicio</a></li>
 								<li class="active">Nuevo ciclo</li>
@@ -18,12 +18,12 @@
 				</div>
 				<style>
 					.add-margin {
-						margin-right: 10px; /* Ajusta el valor según el espacio que desees entre los botones */
+						margin-right: 10px; 
 					}
 					input[type="number"] {
-						width: 50px; /* Ajusta el ancho según tus necesidades */
-						height: 20px; /* Ajusta la altura según tus necesidades */
-						visibility: visible !important; /* Fuerza la visibilidad del elemento */
+						width: 50px; 
+						height: 20px; 
+						visibility: visible !important; 
 					}
 					.icon-primary {
 						color: #00bfffbc;
@@ -32,7 +32,7 @@
 			</header>
 			<div class="box-typical box-typical-padding">
 				<button class="btn btn-success float-right" id="crear" disabled>Crear</button>
-				<button class="btn btn-danger float-right add-margin" id="borrar">Borrar</button>
+				<button class="btn btn-danger float-right add-margin" id="borrar">Limpiar</button>
 				<h5 class="m-t-lg with-border">Nuevo ciclo</h5>
 				<br>
 				<div class="row">
@@ -77,7 +77,7 @@
 					<div class="form-group col-md-4 col-sm-6" id="tipo_periodo_d" style="display: none;">
 						<label class="form-label">Seleccione un ciclo:</label>
 						<div class="radio">
-							<input type="radio" name="optionsRadios" id="todos_los_dias" value="Todos los días">
+							<input type="radio" name="optionsRadios" id="todos_los_dias" value="TLD">
 							<label for="todos_los_dias">Todos los días</label>
 						</div>
 						<div class="radio">
@@ -90,7 +90,7 @@
 					<div class="form-group col-md-4 col-sm-6" id="tipo_periodo_s" style="display: none;">
 						<label class="form-label">Seleccione un ciclo:</label>
 						<div class="radio">
-							<input type="radio" name="optionsRadios" id="todas_las_semanas" value="Todas las semanas">
+							<input type="radio" name="optionsRadios" id="todas_las_semanas" value="TLS">
 							<label for="todas_las_semanas">Todas las semanas</label>
 						</div>
 						<div class="radio">
@@ -103,7 +103,7 @@
 					<div class="form-group col-md-4 col-sm-6" id="tipo_periodo_m" style="display: none;">
 						<label class="form-label">Seleccione un ciclo:</label>
 						<div class="radio">
-							<input type="radio" name="optionsRadios" id="todos_los_meses" value="Todos los meses">
+							<input type="radio" name="optionsRadios" id="todos_los_meses" value="TLM">
 							<label for="todos_los_meses">Todos los meses</label>
 						</div>
 						<div class="radio">
@@ -116,7 +116,7 @@
 					<div class="form-group col-md-4 col-sm-6" id="tipo_periodo_a" style="display: none;">
 						<label class="form-label">Seleccione un ciclo:</label>
 						<div class="radio">
-							<input type="radio" name="optionsRadios" id="todos_los_anos" value="Todos los años">
+							<input type="radio" name="optionsRadios" id="todos_los_anos" value="TLA">
 							<label for="todos_los_anos">Todos los años</label>
 						</div>
 						<div class="radio">
@@ -129,7 +129,7 @@
 				</div>
 				<br>
 				<div id="contenedor-ciclos"></div>
-				<button class="btn btn-primary" id="a_ciclo" >Agregar Ciclo</button>
+				<button class="btn btn-primary" id="a_ciclo" disabled>Agregar Ciclo</button>
 			</div>
 			<div class="box-typical box-typical-padding" style="display: none;">
 				<table id="tabla_prot" class="table table-bordered table-striped table-vcenter js-dataTable-full">

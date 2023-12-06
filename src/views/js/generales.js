@@ -509,6 +509,7 @@ for (let year = endYear; year >= startYear; year--) {
         button.addEventListener('click', () => {
         window.location.href = '/download';
     });
+    
     $("#pdfs").on("click", function () {
         var rows_selected = table.rows({selected: true}).data();
         var idpdf = [];
