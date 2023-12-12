@@ -65,9 +65,10 @@
 								<tr>
 									<th hidden="true">Id</th>
 									<th>Nombre</th>
-									<th>Tipo de tarea</th>
+									<th>Tipo de protocolo</th>
 									<th>Periodicidad</th>
                                     <th>Periodo</th>
+									<th>Acciones</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -76,7 +77,10 @@
 					</div>
 				</div>
             </div>
-            {{> edit_ciclo}}        
+            {{> edit_ciclo}}   
+			{{> edit_fila}}   
+			{{> new_fila}}  
+			{{> duplicar_ciclo}}   
 		</div>	
 	</div>
 	<script src="/js/lib/jquery/jquery.min.js"></script>

@@ -11,10 +11,20 @@ router.get('/ciclos', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, re
         const tareas = await pool.query("Select Id, Descripcion, Abreviacion FROM TipoProtocolo;");
         const tequipo = await pool.query("Select Id, Descripcion FROM TipoEquipo;");
         res.render('planificacion/ciclos', {
-            // ciclo_table:ciclo_table,
             tareas:tareas,
             tequipo: tequipo
         });
+    } catch (err) {
+        console.log(err);
+    }
+
+});
+
+router.get('/ciclos_tequipo', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) =>{
+
+    try {
+        const tequipo = await pool.query("Select Id, Descripcion FROM TipoEquipo;");
+        res.json(tequipo);
     } catch (err) {
         console.log(err);
     }
@@ -141,6 +151,7 @@ router.get('/obtenerDetallesCiclo/:Id', isLoggedIn, authRole(['Plan', 'Admincli'
             "SELECT\n" +
             "   C.ciclo_id AS ID,\n" +
             "	C.ciclo_nombre AS NOMBRE,\n" +
+            "   TP.ID AS IDTP,\n" +
             "	CONCAT(TP.Descripcion, ' - ', TP.Abreviacion) AS TIPO_ABREVIADO,\n" +
             "	CD.c_detalle_periodicidad AS PERIODICIDAD,\n" +
             "	CD.c_detalle_periodo AS PERIODO\n" +
@@ -195,25 +206,140 @@ router.get('/edit_ciclo/:Id', isLoggedIn, authRole(['Plan', 'Admincli']), async 
 
 });
 
-router.get('/agregar_fila', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) =>{
-    
+router.post('/eliminar_fila', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) =>{
+
+    const {idDetalle, tareaDetalle, periodicidadDetalle, periodoDetalle} = req.body;
+
     try {
-        
-        const prot = await pool.query("Select Id AS ID, CONCAT(Descripcion,' - ',Abreviacion) AS TIPO_ABREVIACION FROM TipoProtocolo;");
+        const prot = await pool.query(
+            "SELECT Id FROM TipoProtocolo WHERE CONCAT(Descripcion, ' - ', Abreviacion) = ?",
+            [tareaDetalle]
+        );
 
-        res.json({
-            prot
-        });
+        const tarea = prot[0].Id;
+
+        const borrar = await pool.query("DELETE \n" +
+        "FROM\n" +
+        "	Ciclos_detalle \n" +
+        "WHERE\n" +
+        "	c_detalle_id = ? \n" +
+        "	AND c_detalle_ttarea = ?\n" +
+        "	AND c_detalle_periodicidad = ? \n" +
+        "	AND c_detalle_periodo = ?;", [idDetalle, tarea, periodicidadDetalle, periodoDetalle] );
+
+        res.send("ok");
+
     } catch (error) {
-        console.log(error);    
+        console.log(error);
     }
+});
 
+router.post('/editar_fila', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) =>{
+    const {id_fila, tareaDetalle_fila, periodicidadDetalle_fila, periodoDetalle_fila,tipo_protocolo, periodicidad, periodo } = req.body;
+
+    try {
+        const prot = await pool.query(
+            "SELECT Id FROM TipoProtocolo WHERE CONCAT(Descripcion, ' - ', Abreviacion) = ?",
+            [tareaDetalle_fila]
+        );
+
+        const tarea = prot[0].Id;
+
+        const act = await pool.query(
+            "UPDATE Ciclos_detalle SET c_detalle_ttarea = ?, c_detalle_periodicidad = ?, c_detalle_periodo = ? WHERE c_detalle_id = ? AND c_detalle_ttarea = ? AND c_detalle_periodicidad = ? AND c_detalle_periodo = ?",
+            [tipo_protocolo, periodicidad, periodo, id_fila, tarea, periodicidadDetalle_fila, periodoDetalle_fila]
+          );
+          
+        res.send("ok");
+    } catch (error) {
+       console.log(error); 
+    }
+  
+});
+
+router.post('/actualizar', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
+    const {id, nombre, tipo_equipo} = req.body;
+
+    try {
+        const act = await pool.query("UPDATE Ciclos SET ciclo_nombre = ?, ciclo_tipo_equipo = ?   WHERE ciclo_id = ?;", [nombre, tipo_equipo, id]);
+        res.send("ok");
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+router.post('/insert_fila', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
+    const { id, tipo_protocolo, periodicidad, periodo } = req.body;
+
+    try {
+
+        const totalIdsOtraTabla = await pool.query('SELECT COUNT(DISTINCT Id) AS count FROM TipoProtocolo;');
+        const totalIdsIngresados = await pool.query('SELECT COUNT(DISTINCT c_detalle_ttarea) AS count FROM Ciclos_detalle WHERE c_detalle_id = ?;', [id]);
+
+        if (totalIdsIngresados[0].count >= totalIdsOtraTabla[0].count) {
+            return res.status(400).json({ error: 'Se han ingresado todos los items permitidos para este ciclo.' });
+        }
+
+        const existeId = await pool.query('SELECT COUNT(*) AS count FROM Ciclos_detalle WHERE c_detalle_id = ? AND c_detalle_ttarea = ?', [id, tipo_protocolo]);
+
+        if (existeId[0].count > 0) {
+            return res.status(400).json({ error: 'Este item ya existe en el ciclo' });
+        }
+
+        await pool.query('INSERT INTO Ciclos_detalle (c_detalle_id, c_detalle_ttarea, c_detalle_periodicidad, c_detalle_periodo) VALUES (?, ?, ?, ?)', 
+        [id, tipo_protocolo, periodicidad, periodo]);
+
+        res.status(200).json({ success: true });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Error en el servidor.' });
+    }
+});
+
+router.post('/duplicar', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
+    const { id_duplicar, nombre, tipo_equipo } = req.body;
+
+    try {
+        const antiguo = await pool.query("SELECT\n" +
+            "c_detalle_ttarea AS IDTP,\n" +
+            "c_detalle_periodicidad AS PERIODICIDAD,\n" +
+            "c_detalle_periodo AS PERIODO\n" +
+            "FROM\n" +
+            "Ciclos_detalle CD\n" +
+            "WHERE\n" +
+            "CD.c_detalle_id = ?;", [id_duplicar]);
+
+        const nuevo = await pool.query("INSERT INTO Ciclos (ciclo_nombre, ciclo_tipo_equipo) VALUES (?,?);", [nombre, tipo_equipo]);
+
+        const new_id = nuevo.insertId;
+
+        const nuevoArray = antiguo.map(fila => [new_id, fila.IDTP, fila.PERIODICIDAD, fila.PERIODO]);
+
+        const nuevo_antiguo = await pool.query(
+            "INSERT INTO Ciclos_detalle (c_detalle_id, c_detalle_ttarea, c_detalle_periodicidad, c_detalle_periodo) VALUES ?",
+            [nuevoArray]
+        );
+
+        res.send("ok");
+
+    } catch (error) {
+        console.log(error);
+    }
 });
 
 router.get('/plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) =>{
+    
     const {Id_Cliente} = req.user;
+    
     const gerencias= await pool.query('SELECT vcgas_idGerencia, vcgas_gerenciaN FROM VIEW_ClienteGerAreSec WHERE vcgas_idCliente = '+Id_Cliente+' GROUP BY vcgas_idGerencia ');
-    const ciclo= await pool.query("SELECT ciclo_id AS ID, ciclo_nombre AS NOMBRE, ciclo_tipotarea AS TTAREA, ciclo_tipoperiodo AS TPERIODO, ciclo_periodo AS PERIODO, ciclo_mantencion AS MANTENCION FROM Ciclos");
+    
+    const ciclo= await pool.query("SELECT\n" +
+    "ciclo_id AS ID,\n" +
+    "ciclo_nombre AS NOMBRE,\n" +
+    "ciclo_tipo_equipo AS TTEQUIPO\n" +
+    "FROM\n" +
+    "Ciclos;");
     res.render('planificacion/planificar', 
 
         {
@@ -221,6 +347,7 @@ router.get('/plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res)
             ciclo: ciclo
         }
     );
+    
 });
 
 router.get('/get_datapla', function(request, response, next){

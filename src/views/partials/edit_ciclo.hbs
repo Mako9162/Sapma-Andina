@@ -1,6 +1,6 @@
 
 <div class="modal fade bd-example-modal-lg" id="edit_ciclo" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="modal-close" data-dismiss="modal" aria-label="Close">
@@ -15,18 +15,20 @@
                             <div class="row">
                                 <div class="form-group col-md-6 col-sm-6">
                                     <label class="form-label" for="act_nombre">Nombre</label>
+                                    <input type="text" id="id_ciclo" name="id_ciclo" hidden="true">  
                                     <input class="form-control" type="text" id="act_nombre" name="act_nombre">  
                                 </div>
                                 <div class="form-group col-md-6 col-sm-6">
                                     <label class="form-label" for="act_tipo_equipo">Tipo de Equipo</label>
                                     <select class="form-control" id="act_tipo_equipo" name="act_tipo_equipo"></select>
                                 </div>
-                                 <h5 class="m-t-lg with-border" style="color: aliceblue;">.</h5>
-                                <div class="form-group col-md-12 col-sm-6">
+                                 {{!-- <h5 class="m-t-lg with-border" style="color: aliceblue;">.</h5> --}}
+                                {{!-- <div class="form-group col-md-12 col-sm-6">
                                     <button id="agrega_fila" class="btn btn-inline btn-primary btn-sm ladda-button float-right"><i class="fa fa-plus"></i></button>
-                                </div>
+                                </div> --}}
+                                {{!-- <br>
+                                <div id="informacion"></div> --}}
                                 <br>
-                                <div id="informacion"></div>
                                 <br>
                                 <button type="button"  name="actualizar" id="actualizar" class="btn btn-rounded btn-success float-right">Actualizar</button>
                             </div>
