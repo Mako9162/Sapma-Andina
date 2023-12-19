@@ -9,6 +9,9 @@ const MySQLStore = require('express-mysql-session');
 const passport = require('passport');
 const {database} = require('./keys.js');
 const cors = require('cors');
+const fs = require('fs');
+
+const max = path.resolve(__dirname, "./maximo.txt")
 
 require('./routes/cronJobs');
 require('./routes/cronJobs1');
@@ -65,10 +68,11 @@ app.use(passport.session());
 
 //Variables globales
 app.use((req, res, next) => {
-    app.locals.success = req.flash('success');
-    app.locals.message = req.flash('message');
-    app.locals.user = req.user;
-    next();
+  app.locals.success = req.flash('success');
+  app.locals.message = req.flash('message');
+  app.locals.user = req.user;
+  app.locals.maximo = parseInt(fs.readFileSync(max, 'utf8'));; 
+  next();
 });
 
 //Rutas

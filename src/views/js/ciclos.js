@@ -226,6 +226,7 @@ $(document).ready(function () {
     });
     
     $('#crear').on('click', function () {
+        
         var nombre = $('#nombre').val();
         var tipo_equipo = $('#tipo_equipo').val();
         var tipo_tarea = $('#tipo_tarea').val();

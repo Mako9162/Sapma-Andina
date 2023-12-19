@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../database');
+const path = require('path');
+const fs = require('fs');
 const { isLoggedIn } = require('../lib/auth');
 const { authRole} = require('../lib/rol');
 
@@ -149,16 +151,18 @@ router.get('/obtenerDetallesCiclo/:Id', isLoggedIn, authRole(['Plan', 'Admincli'
         const {Id} = req.params
         const detallesCiclo = await pool.query(
             "SELECT\n" +
-            "   C.ciclo_id AS ID,\n" +
+            "	C.ciclo_id AS ID,\n" +
             "	C.ciclo_nombre AS NOMBRE,\n" +
-            "   TP.ID AS IDTP,\n" +
-            "	CONCAT(TP.Descripcion, ' - ', TP.Abreviacion) AS TIPO_ABREVIADO,\n" +
+            "	TE.Descripcion AS TIPO_EQUIPO,\n" +
+            "	TP.ID AS IDTP,\n" +
+            "	CONCAT( TP.Descripcion, ' - ', TP.Abreviacion ) AS TIPO_ABREVIADO,\n" +
             "	CD.c_detalle_periodicidad AS PERIODICIDAD,\n" +
-            "	CD.c_detalle_periodo AS PERIODO\n" +
+            "	CD.c_detalle_periodo AS PERIODO \n" +
             "FROM\n" +
             "	Ciclos_detalle CD\n" +
             "	INNER JOIN Ciclos C ON C.ciclo_id = CD.c_detalle_id\n" +
-            "	INNER JOIN TipoProtocolo TP ON TP.Id = CD.c_detalle_ttarea\n" +
+            "	INNER JOIN TipoProtocolo TP ON TP.Id = CD.c_detalle_ttarea \n" +
+            "	INNER JOIN TipoEquipo TE ON TE.Id =  C.ciclo_tipo_equipo\n" +
             "WHERE\n" +
             "	C.ciclo_id = ?;",[Id]
         );
@@ -328,7 +332,7 @@ router.post('/duplicar', isLoggedIn, authRole(['Plan', 'Admincli']), async (req,
     }
 });
 
-router.get('/plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) =>{
+router.get('/equipos_plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) =>{
     
     const {Id_Cliente} = req.user;
     
@@ -340,7 +344,7 @@ router.get('/plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res)
     "ciclo_tipo_equipo AS TTEQUIPO\n" +
     "FROM\n" +
     "Ciclos;");
-    res.render('planificacion/planificar', 
+    res.render('planificacion/asignacion_equipos', 
 
         {
             gerencias: gerencias,
@@ -412,18 +416,20 @@ router.post('/buscar_plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (r
             const ger_equi = await pool.query("SELECT\n" +
             "	E.Id AS ID,\n" +
             "	E.Codigo AS CODIGO,\n" +
+            "	TP.Id AS IDTP,\n" +
             "	TP.Descripcion AS TIPO,\n" +
             "	G.Descripcion AS GER,\n" +
             "	A.Descripcion AS AREA,\n" +
             "	S.Descripcion AS SECTOR,\n" +
-            "   CE.equipo_ciclo AS CICLO\n" +
+            "	C.ciclo_nombre AS CICLO \n" +
             "FROM\n" +
             "	Equipos E\n" +
             "	INNER JOIN Sectores S ON S.Id = E.Id_Sector\n" +
             "	INNER JOIN Areas A ON A.Id = S.Id_Area\n" +
             "	INNER JOIN Gerencias G ON G.Id = A.Id_Gerencia\n" +
-            "	INNER JOIN TipoEquipo TP ON TP.Id = E.Id_Tipo \n" +
-            "   INNER JOIN Ciclo_equipos CE ON CE.equipo_id = E.Id\n" +
+            "	INNER JOIN TipoEquipo TP ON TP.Id = E.Id_Tipo\n" +
+            "	INNER JOIN Ciclo_equipos CE ON CE.equipo_id = E.Id\n" +
+            "	LEFT JOIN Ciclos C ON C.ciclo_id = CE.equipo_ciclo\n" +
             "WHERE\n" +
             "	G.Id = ?", [gerencia]);
 
@@ -438,18 +444,20 @@ router.post('/buscar_plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (r
             const area_equi = await pool.query("SELECT\n" +
             "	E.Id AS ID,\n" +
             "	E.Codigo AS CODIGO,\n" +
+            "	TP.Id AS IDTP,\n" +
             "	TP.Descripcion AS TIPO,\n" +
             "	G.Descripcion AS GER,\n" +
             "	A.Descripcion AS AREA,\n" +
             "	S.Descripcion AS SECTOR,\n" +
-            "   CE.equipo_ciclo AS CICLO\n" +
+            "	C.ciclo_nombre AS CICLO \n" +
             "FROM\n" +
             "	Equipos E\n" +
             "	INNER JOIN Sectores S ON S.Id = E.Id_Sector\n" +
             "	INNER JOIN Areas A ON A.Id = S.Id_Area\n" +
             "	INNER JOIN Gerencias G ON G.Id = A.Id_Gerencia\n" +
-            "	INNER JOIN TipoEquipo TP ON TP.Id = E.Id_Tipo \n" +
-            "   INNER JOIN Ciclo_equipos CE ON CE.equipo_id = E.Id\n" +
+            "	INNER JOIN TipoEquipo TP ON TP.Id = E.Id_Tipo\n" +
+            "	INNER JOIN Ciclo_equipos CE ON CE.equipo_id = E.Id\n" +
+            "	LEFT JOIN Ciclos C ON C.ciclo_id = CE.equipo_ciclo\n" +
             "WHERE\n" +
             "	A.Id = ?", [area]);
  
@@ -464,18 +472,20 @@ router.post('/buscar_plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (r
             const sec_equi = await pool.query("SELECT\n" +
             "	E.Id AS ID,\n" +
             "	E.Codigo AS CODIGO,\n" +
+            "	TP.Id AS IDTP,\n" +
             "	TP.Descripcion AS TIPO,\n" +
             "	G.Descripcion AS GER,\n" +
             "	A.Descripcion AS AREA,\n" +
             "	S.Descripcion AS SECTOR,\n" +
-            "   CE.equipo_ciclo AS CICLO\n" +
+            "	C.ciclo_nombre AS CICLO \n" +
             "FROM\n" +
             "	Equipos E\n" +
             "	INNER JOIN Sectores S ON S.Id = E.Id_Sector\n" +
             "	INNER JOIN Areas A ON A.Id = S.Id_Area\n" +
             "	INNER JOIN Gerencias G ON G.Id = A.Id_Gerencia\n" +
-            "	INNER JOIN TipoEquipo TP ON TP.Id = E.Id_Tipo \n" +
-            "   INNER JOIN Ciclo_equipos CE ON CE.equipo_id = E.Id\n" +
+            "	INNER JOIN TipoEquipo TP ON TP.Id = E.Id_Tipo\n" +
+            "	INNER JOIN Ciclo_equipos CE ON CE.equipo_id = E.Id\n" +
+            "	LEFT JOIN Ciclos C ON C.ciclo_id = CE.equipo_ciclo\n" +
             "WHERE\n" +
             "	E.Id_Sector = ?", [sector]);
             
@@ -490,18 +500,20 @@ router.post('/buscar_plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (r
             const equi_equi = await pool.query("SELECT\n" +
             "	E.Id AS ID,\n" +
             "	E.Codigo AS CODIGO,\n" +
+            "	TP.Id AS IDTP,\n" +
             "	TP.Descripcion AS TIPO,\n" +
             "	G.Descripcion AS GER,\n" +
             "	A.Descripcion AS AREA,\n" +
             "	S.Descripcion AS SECTOR,\n" +
-            "   CE.equipo_ciclo AS CICLO\n" +
+            "	C.ciclo_nombre AS CICLO \n" +
             "FROM\n" +
             "	Equipos E\n" +
             "	INNER JOIN Sectores S ON S.Id = E.Id_Sector\n" +
             "	INNER JOIN Areas A ON A.Id = S.Id_Area\n" +
             "	INNER JOIN Gerencias G ON G.Id = A.Id_Gerencia\n" +
-            "	INNER JOIN TipoEquipo TP ON TP.Id = E.Id_Tipo \n" +
-            "   INNER JOIN Ciclo_equipos CE ON CE.equipo_id = E.Id\n" +
+            "	INNER JOIN TipoEquipo TP ON TP.Id = E.Id_Tipo\n" +
+            "	INNER JOIN Ciclo_equipos CE ON CE.equipo_id = E.Id\n" +
+            "	LEFT JOIN Ciclos C ON C.ciclo_id = CE.equipo_ciclo\n" +
             "WHERE\n" +
             "	E.Id = ?", [equipo]);
             
@@ -510,7 +522,35 @@ router.post('/buscar_plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (r
             }else{
                 res.json(equi_equi);
             }
+
+        }else if(!gerencia && !area && !sector && !equipo){
+
+            const equi_equi = await pool.query("SELECT\n" +
+            "	E.Id AS ID,\n" +
+            "	E.Codigo AS CODIGO,\n" +
+            "	TP.Id AS IDTP,\n" +
+            "	TP.Descripcion AS TIPO,\n" +
+            "	G.Descripcion AS GER,\n" +
+            "	A.Descripcion AS AREA,\n" +
+            "	S.Descripcion AS SECTOR,\n" +
+            "	C.ciclo_nombre AS CICLO \n" +
+            "FROM\n" +
+            "	Equipos E\n" +
+            "	INNER JOIN Sectores S ON S.Id = E.Id_Sector\n" +
+            "	INNER JOIN Areas A ON A.Id = S.Id_Area\n" +
+            "	INNER JOIN Gerencias G ON G.Id = A.Id_Gerencia\n" +
+            "	INNER JOIN TipoEquipo TP ON TP.Id = E.Id_Tipo\n" +
+            "	INNER JOIN Ciclo_equipos CE ON CE.equipo_id = E.Id\n" +
+            "	LEFT JOIN Ciclos C ON C.ciclo_id = CE.equipo_ciclo;");
+
+            
+            if(!equi_equi){
+                res.json({title: "Sin Información."});
+            }else{
+                res.json(equi_equi);
+            }
         } 
+
 
     } catch (err) {
 
@@ -519,18 +559,119 @@ router.post('/buscar_plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (r
     }
 });
 
-router.post('/asigna_ciclo', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
-    const {ciclo, idsSeleccionados } = req.body;
+router.post('/detalle_ciclo', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
+    try {
+        const detalle = await pool.query("SELECT ciclo_id AS ID, ciclo_nombre AS DETALLE, ciclo_tipo_equipo AS EQUIPO FROM Ciclos;");
 
-    await pool.query("UPDATE Ciclo_equipos SET equipo_ciclo = ? WHERE equipo_id IN (?);", [ciclo, idsSeleccionados], (err, result) => {
-        if (err) {
-            console.log(err);
-        } else {
-            console.log('ok');
+        res.json(detalle);
+        
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+router.post('/asigna_ciclo', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
+    const info = req.body;
+
+    let idsSeleccionados;
+    let idCiclo;
+
+    const transformedInfo = info.map(([idSeleccionado, valorSelect, ciclo]) => ({
+        idsSeleccionados: idSeleccionado,
+        idCiclo: ciclo
+    }));
+
+    try {
+        for (const { idsSeleccionados, idCiclo } of transformedInfo) {
+            await pool.query("UPDATE Ciclo_equipos SET equipo_ciclo = ? WHERE equipo_id = ?;", [idCiclo, idsSeleccionados]);
         }
-    });
+
+        res.send("ok");
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("Error interno del servidor");
+    }
+});
+
+router.get('/planificacion_equipos', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) =>{
+    
+    const {Id_Cliente} = req.user;
+
+    const maximo = req.app.locals.maximo;
+    
+    const gerencias= await pool.query('SELECT vcgas_idGerencia, vcgas_gerenciaN FROM VIEW_ClienteGerAreSec WHERE vcgas_idCliente = '+Id_Cliente+' GROUP BY vcgas_idGerencia ');
+    
+    const ciclo= await pool.query("SELECT\n" +
+    "ciclo_id AS ID,\n" +
+    "ciclo_nombre AS NOMBRE,\n" +
+    "ciclo_tipo_equipo AS TTEQUIPO\n" +
+    "FROM\n" +
+    "Ciclos;");
+    res.render('planificacion/planificacion_equipos', 
+
+        {
+            gerencias: gerencias,
+            ciclo: ciclo,
+            maximo: maximo
+        }
+    );
     
 });
+
+router.post('/verificar', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
+
+    const {fecha_inicial, fecha_final, idsSeleccionados} = req.body;
+
+    try {
+        
+        const verificacion = await pool.query(
+        "SELECT\n" +
+        "	T.Id AS ID,\n" +
+        "	T.Fecha AS FECHA,\n" +
+        "	U.Login AS TECNICO,\n" +
+        "	E.Descripcion AS ESTADO,\n" +
+        "	EQ.Codigo AS EQUIPO,\n" +
+        "	P.Descripcion AS PROTOCOLO\n" +
+        "FROM\n" +
+        "	Tareas T\n" +
+        "	INNER JOIN Usuarios U ON U.Id = T.Id_Tecnico\n" +
+        "	INNER JOIN Estados E ON E.Id = T.Id_Estado\n" +
+        "	INNER JOIN Equipos EQ ON EQ.Id = T.Id_Equipo\n" +
+        "	INNER JOIN Protocolos P ON P.Id = T.Id_Protocolo\n" +
+        "WHERE\n" +
+        "	T.Id_Equipo IN (?)\n" +
+        "   AND T.Id_Estado IN (1,2)\n" +
+        "	AND T.Fecha BETWEEN ? AND ?;", [idsSeleccionados, fecha_inicial, fecha_final]);
+
+        console.log(verificacion);
+
+        res.json(verificacion);
+
+    } catch (error) {
+        console.log(error);
+    }
+
+});
+
+router.post('/actualizamaximo', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
+
+    const nuevoMaximo = req.body.nuevoMaximo;
+
+    try {
+
+        const dir = path.resolve(__dirname, "../maximo.txt")
+        fs.writeFileSync(dir, nuevoMaximo);
+        res.send("ok");
+        
+    } catch (error) {
+        
+        console.log(error);
+        
+    }
+
+
+});
+
 
 module.exports = router;
 
