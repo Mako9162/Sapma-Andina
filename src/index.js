@@ -61,7 +61,7 @@ app.use((req, res, next) => {
 app.use(flash());
 app.use(morgan('dev'));
 // app.use(express.urlencoded({extended: false, parameterLimit: 100000}));
-app.use(express.urlencoded({ extended: true, limit: '50mb', parameterLimit: 1000000 }));
+app.use(express.urlencoded({ extended: true, limit: '500mb', parameterLimit: 2000000 }));
 app.use(express.json());
 app.use(passport.initialize());
 app.use(passport.session());
@@ -93,9 +93,9 @@ app.use(require('./routes/planificacion'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 //Inicio de servidor
-app.listen(app.get('port'), () => {
-    console.log('Servidor en línea. Puerto:', app.get('port'));
+// Inicio de servidor
+var server = app.listen(app.get('port'), () => {
+  console.log('Servidor en línea. Puerto:', app.get('port'));
 });
 
-
-
+server.timeout = 1000000; // Tiempo de espera en milisegundos

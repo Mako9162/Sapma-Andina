@@ -5,6 +5,29 @@ const path = require('path');
 const fs = require('fs');
 const { isLoggedIn } = require('../lib/auth');
 const { authRole} = require('../lib/rol');
+const XLSX = require('xlsx');
+const ExcelJS = require('exceljs');
+const moment = require('moment');
+const multer = require('multer');
+const upload = multer();
+const hbs = require("handlebars");
+const nodemailer = require('nodemailer');
+
+const correo = "sapmadet@sercoing.cl";
+const pass = "2m[FDus[Tym4@ew6";
+
+const transporter = nodemailer.createTransport({
+                        host: "mail.sercoing.cl",
+                        port: 587,
+                        secure: false,
+                        auth: {
+                            user: correo,
+                            pass: pass,
+                        },
+                        tls: {
+                            rejectUnauthorized: false,
+                        },
+                    });
 
 router.get('/ciclos', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) =>{
 
@@ -607,12 +630,31 @@ router.get('/planificacion_equipos', isLoggedIn, authRole(['Plan', 'Admincli']),
     "ciclo_tipo_equipo AS TTEQUIPO\n" +
     "FROM\n" +
     "Ciclos;");
+
+    const tecnicos = await pool.query("SELECT\n" +
+    "	U.Id AS ID,\n" +
+    "	U.Login AS LOGIN \n" +
+    "FROM\n" +
+    "	Usuarios U\n" +
+    "	INNER JOIN Perfiles P ON P.Id = U.Id_Perfil\n" +
+    "WHERE\n" +
+    "	U.Id_Perfil=3 AND U.Id_Cliente = 28;");
+
+    const tipo_tareas = await pool.query("SELECT\n" +
+    "	Descripcion AS DESCRIPCION,\n" +
+    "	Indice AS ORDEN \n" +
+    "FROM\n" +
+    "	TipoProtocolo\n" +
+    "ORDER BY Indice ASC;");
+
     res.render('planificacion/planificacion_equipos', 
 
         {
             gerencias: gerencias,
             ciclo: ciclo,
-            maximo: maximo
+            maximo: maximo,
+            tecnicos: tecnicos,
+            tipo_tareas: tipo_tareas
         }
     );
     
@@ -643,8 +685,6 @@ router.post('/verificar', isLoggedIn, authRole(['Plan', 'Admincli']), async (req
         "   AND T.Id_Estado IN (1,2)\n" +
         "	AND T.Fecha BETWEEN ? AND ?;", [idsSeleccionados, fecha_inicial, fecha_final]);
 
-        console.log(verificacion);
-
         res.json(verificacion);
 
     } catch (error) {
@@ -653,25 +693,670 @@ router.post('/verificar', isLoggedIn, authRole(['Plan', 'Admincli']), async (req
 
 });
 
+router.get('/configuracion_planificacion', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) =>{
+    
+    const maximo = req.app.locals.maximo;
+
+    const tipo_tareas = await pool.query("SELECT\n" +
+    "	Descripcion AS DESCRIPCION,\n" +
+    "	Indice AS ORDEN \n" +
+    "FROM\n" +
+    "	TipoProtocolo\n" +
+    "ORDER BY Indice ASC;");
+
+    res.render('planificacion/configuracion_plan', 
+
+        {
+            maximo: maximo,
+            tipo_tareas: tipo_tareas
+        }
+    );
+    
+});
+
 router.post('/actualizamaximo', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
 
     const nuevoMaximo = req.body.nuevoMaximo;
-
     try {
-
         const dir = path.resolve(__dirname, "../maximo.txt")
         fs.writeFileSync(dir, nuevoMaximo);
-        res.send("ok");
-        
-    } catch (error) {
-        
-        console.log(error);
-        
+        res.send("ok");        
+    } catch (error) {      
+        console.log(error);    
     }
+
+});
+
+router.post('/act_prioridad', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
+    const { nuevoOrdenYDescripcion } = req.body;
+
+    try {
+        for (const item of nuevoOrdenYDescripcion) {
+            const { orden, descripcion } = item;
+            await pool.query(
+                "UPDATE TipoProtocolo SET Indice = ? WHERE Descripcion = ?",
+                [orden, descripcion]
+            );
+        }
+        res.send("ok");
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+router.post('/crear_plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
+    const maximo = req.app.locals.maximo;
+    const {fecha1, fecha2, tecnico, idsSeleccionados} = req.body;
+
+    
 
 
 });
 
+router.get('/planificacion_archivo', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) =>{
+
+    const {Id_Cliente} = req.user;
+    
+    const gerencias= await pool.query('SELECT vcgas_idGerencia, vcgas_gerenciaN FROM VIEW_ClienteGerAreSec WHERE vcgas_idCliente = '+Id_Cliente+' GROUP BY vcgas_idGerencia ');
+    
+    res.render('planificacion/planificacion_archivo', {
+        gerencias: gerencias
+    });
+});
+
+router.post('/genera_plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
+
+    const {gerencia, area, sector, equipo} = req.body;
+    // console.log(req.body);
+    try {
+
+        let equipos= [];
+
+        if(gerencia>0 && !area && !sector && !equipo){
+
+            const consulta = await pool.query("SELECT\n" +
+            "	V.vce_codigo AS TAG,\n" +
+            "	V.vce_idEquipo AS ID,\n" +
+            "	TE.Descripcion AS TIPO,\n" +
+            "	V.vcgas_gerenciaN AS GERENCIA,\n" +
+            "	V.vcgas_areaN AS AREA,\n" +
+            "	V.vcgas_sectorN AS SECTOR \n" +
+            "FROM\n" +
+            "	VIEW_equiposCteGerAreSec V\n" +
+            "	INNER JOIN Equipos E ON E.Id = V.vce_idEquipo \n" +
+            "	INNER JOIN TipoEquipo TE ON TE.Id = E.Id_Tipo\n" +
+            "WHERE\n" +
+            "	V.vcgas_idCliente = 1 \n" +
+            "	AND E.Activo = 1 AND V.vcgas_idGerencia = ?;", [gerencia]);
+
+            if (!consulta) {
+                res.json({ title: "Sin Información." });
+            } else {
+                equipos.push(...consulta)
+            }
+
+        }else if(gerencia>0 && area>0 && !sector && !equipo){
+
+            const consulta = await pool.query("SELECT\n" +
+            "	V.vce_codigo AS TAG,\n" +
+            "	V.vce_idEquipo AS ID,\n" +
+            "	TE.Descripcion AS TIPO,\n" +
+            "	V.vcgas_gerenciaN AS GERENCIA,\n" +
+            "	V.vcgas_areaN AS AREA,\n" +
+            "	V.vcgas_sectorN AS SECTOR \n" +
+            "FROM\n" +
+            "	VIEW_equiposCteGerAreSec V\n" +
+            "	INNER JOIN Equipos E ON E.Id = V.vce_idEquipo \n" +
+            "	INNER JOIN TipoEquipo TE ON TE.Id = E.Id_Tipo\n" +
+            "WHERE\n" +
+            "	V.vcgas_idCliente = 1 \n" +
+            "	AND E.Activo = 1 AND V.vcgas_idArea = ?;", [area]);
+
+            if (!consulta) {
+                res.json({ title: "Sin Información." });
+            } else {
+                equipos.push(...consulta)
+            }
+
+        }else if(gerencia>0 && area >0 && sector>0 && !equipo){
+            
+            const consulta = await pool.query("SELECT\n" +
+            "	V.vce_codigo AS TAG,\n" +
+            "	V.vce_idEquipo AS ID,\n" +
+            "	TE.Descripcion AS TIPO,\n" +
+            "	V.vcgas_gerenciaN AS GERENCIA,\n" +
+            "	V.vcgas_areaN AS AREA,\n" +
+            "	V.vcgas_sectorN AS SECTOR \n" +
+            "FROM\n" +
+            "	VIEW_equiposCteGerAreSec V\n" +
+            "	INNER JOIN Equipos E ON E.Id = V.vce_idEquipo \n" +
+            "	INNER JOIN TipoEquipo TE ON TE.Id = E.Id_Tipo\n" +
+            "WHERE\n" +
+            "	V.vcgas_idCliente = 1 \n" +
+            "	AND E.Activo = 1 AND V.vcgas_idSector = ?;", [sector]);
+
+            if (!consulta) {
+                res.json({ title: "Sin Información." });
+            } else {
+                equipos.push(...consulta)
+            }
+
+        }else if(equipo>0 && area >0 && sector>0 && equipo>0){
+
+            const consulta = await pool.query("SELECT\n" +
+            "	V.vce_codigo AS TAG,\n" +
+            "	V.vce_idEquipo AS ID,\n" +
+            "	TE.Descripcion AS TIPO,\n" +
+            "	V.vcgas_gerenciaN AS GERENCIA,\n" +
+            "	V.vcgas_areaN AS AREA,\n" +
+            "	V.vcgas_sectorN AS SECTOR \n" +
+            "FROM\n" +
+            "	VIEW_equiposCteGerAreSec V\n" +
+            "	INNER JOIN Equipos E ON E.Id = V.vce_idEquipo \n" +
+            "	INNER JOIN TipoEquipo TE ON TE.Id = E.Id_Tipo\n" +
+            "WHERE\n" +
+            "	V.vcgas_idCliente = 1 \n" +
+            "	AND E.Activo = 1 AND V.vce_idEquipo = ?;", [equipo]);
+
+            if (!consulta) {
+                res.json({ title: "Sin Información." });
+            } else {
+                equipos.push(...consulta)
+            }
+
+        }else if(!gerencia && !area && !sector && !equipo){
+
+            const consulta = await pool.query("SELECT\n" +
+            "	V.vce_codigo AS TAG,\n" +
+            "	V.vce_idEquipo AS ID,\n" +
+            "	TE.Descripcion AS TIPO,\n" +
+            "	V.vcgas_gerenciaN AS GERENCIA,\n" +
+            "	V.vcgas_areaN AS AREA,\n" +
+            "	V.vcgas_sectorN AS SECTOR \n" +
+            "FROM\n" +
+            "	VIEW_equiposCteGerAreSec V\n" +
+            "	INNER JOIN Equipos E ON E.Id = V.vce_idEquipo \n" +
+            "	INNER JOIN TipoEquipo TE ON TE.Id = E.Id_Tipo\n" +
+            "WHERE\n" +
+            "	V.vcgas_idCliente = 1 \n" +
+            "	AND E.Activo = 1");
+
+            if (!consulta) {
+                res.json({ title: "Sin Información." });
+            } else {
+                equipos.push(...consulta)
+            }
+        } 
+
+        const usuarios = await pool.query("SELECT Id AS ID, Login AS USUARIO FROM Usuarios WHERE Id_Cliente = 1 AND Id_Perfil = 3 AND NOT Login LIKE '%test%';");
+        
+        const tipo_protocolo = await pool.query("SELECT Id AS ID, Descripcion AS DESCRIPCION FROM TipoProtocolo;");
+        
+        const protocolo = await pool.query("SELECT\n" +
+        "	EP.ep_id_equipo,\n" +
+        "	EP.ep_id_tipo_protocolo,\n" +
+        "	CONCAT(EP.ep_id_equipo,T.Descripcion),\n" +
+        "	EP.ep_id_protocolo\n" +
+        "FROM\n" +
+        "	EquipoProtocolo  EP\n" +
+        "	INNER JOIN TipoProtocolo T ON T.Id = EP.ep_id_tipo_protocolo\n" +
+        "ORDER BY\n" +
+        "	EP.ep_id_equipo;");
+
+        const workbook = new ExcelJS.Workbook();
+
+        await workbook.xlsx.readFile(path.resolve(__dirname, "../plantillas/planificación.xlsx"));
+        const worksheetEquipos = workbook.getWorksheet('EQUIPOS');
+        const worksheetUsuarios = workbook.getWorksheet('USUARIOS');
+        const worksheetTProtocolos = workbook.getWorksheet('TIPO_PROTOCOLO');
+        const worksheetProtocolos = workbook.getWorksheet('PROTOCOLOS');
+        const planSheet = workbook.getWorksheet('EQUIPOS');
+
+        equipos.forEach((equipo, index) => {   
+            const fila = Object.values(equipo);
+            worksheetEquipos.addRow(fila, index + 2); 
+        });
+
+        usuarios.forEach((usuario, index) => {
+            const fila = Object.values(usuario);
+            worksheetUsuarios.addRow(fila, index + 2);
+        });
+
+        tipo_protocolo.forEach((tipo_protocolo, index) => {
+            const fila = Object.values(tipo_protocolo);
+            worksheetTProtocolos.addRow(fila, index + 2);
+        });
+
+        protocolo.forEach((protocolo, index) => {
+            const fila = Object.values(protocolo);
+            worksheetProtocolos.addRow(fila, index + 2);
+        });
+
+        planSheet.dataValidations.add('I2:I22001', {
+            type: 'list',
+            allowBlank: true,
+            formulae: ['=TIPO_PROTOCOLO!$B$2:$B$201'], 
+            showErrorMessage: true,
+            errorStyle: 'error',
+            error: 'Elija o escriba un valor de la lista',
+        });
+
+        planSheet.dataValidations.add('H2:H22001', {
+            type: 'list',
+            allowBlank: true,
+            formulae: ['=USUARIOS!$B$2:$B$201'], 
+            showErrorMessage: true,
+            errorStyle: 'error',
+            error: 'Elija o escriba un valor de la lista',
+        });
+
+        planSheet.dataValidations.add('G2:G12001', {
+            type: 'whole',
+            operator: 'between',
+            formula1: 1,
+            formula2: 28, 
+            showErrorMessage: true,
+            errorTitle: 'Entrada inválida',
+            error: 'Debes ingresar un número entero.',
+        });
+
+        await workbook.xlsx.writeFile('planificación.xlsx');
+
+        const workbookReloaded = new ExcelJS.Workbook();
+
+        await workbookReloaded.xlsx.readFile('planificación.xlsx');
+
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', 'attachment; filename=planificación.xlsx');
+        res.status(200).send("ok");
+
+    } catch (error) {
+
+        res.status(500).json({ error: "No se pudo generar la plantilla" });
+
+    }
+});
+
+router.get('/excel_download', isLoggedIn, async (req, res) => {
+    res.download('planificación.xlsx', (err) => {
+        if (err) {
+            console.error("Error al descargar el archivo:", err);
+            res.status(500).json({ error: "Error al descargar el archivo." });
+        } else {
+            console.log("Archivo descargado con éxito.");
+        }
+    });
+})
+
+router.post('/verificacion_tareas', isLoggedIn, upload.single('file'), authRole(['Plan', 'Admincli']), async (req, res) =>{
+    const { date1, ano1, date2, ano2 } = req.body;
+
+    try {
+        const fechaInicial = moment(`${ano1}-${date1}`, 'YYYY-MMM').startOf('month').format('YYYY-MM-DD');
+        const fechaFinal = moment(`${ano2}-${date2}`, 'YYYY-MMM').endOf('month').format('YYYY-MM-DD');  
+        
+        const workbook = XLSX.read(req.file.buffer);
+        const cargaSheet = workbook.Sheets['CARGA'];
+
+        if (!cargaSheet) {
+            throw new Error('La hoja "CARGA" no está presente en el archivo.');
+        }
+
+        const columnsToExtract = [0,2,4];
+
+        const data = [];
+
+        let rowIndex = 2;
+        while (cargaSheet[XLSX.utils.encode_cell({ r: rowIndex, c: 0 })]) {
+            const rowData = {};
+            
+            const rowHasData = columnsToExtract.every((colIndex) => {
+                const cell = cargaSheet[XLSX.utils.encode_cell({ r: rowIndex, c: colIndex })];
+                rowData[`columna${colIndex}`] = cell ? cell.v : null;
+                return cell !== undefined && cell.v !== undefined && cell.v !== null && cell.v !== '';
+            });
+
+            if (rowHasData) {
+                data.push(rowData);
+            }
+
+            rowIndex++;
+        }
+
+        const resultadosCiclo = [];
+
+        const diasEnRango = moment(fechaFinal).diff(fechaInicial, 'days') + 1;
+
+        for (let i = 0; i < diasEnRango; i++) {
+
+            const fechaActual = moment(fechaInicial).add(i, 'days').format('YYYY-MM-DD');
+
+            for (const fila of data) {
+
+                const { columna0, columna2, columna4 } = fila;
+
+                if (moment(fechaActual).date() === columna0) {
+
+                    const resultado = {
+                        FECHA: fechaActual,
+                        ID: columna2,
+                        PROTOCOLO: columna4,
+                    };
+
+                    resultadosCiclo.push(resultado);
+                }
+            }
+        }
+
+        const valoresColumna2 = data.map((fila) => Object.values(fila)[1]);
+
+        const verificacion = await pool.query("SELECT\n" +
+        "	date_format( T.Fecha, '%Y-%m-%d' ) AS FECHA,\n" +
+        "	T.Id_Equipo AS ID,\n" +
+        "	P.Id AS PROTOCOLO\n" +
+        "FROM\n" +
+        "	Tareas T\n" +
+        "	INNER JOIN Protocolos P ON P.Id = T.Id_Protocolo\n" +
+        "WHERE\n" +
+        "	T.Id_Equipo IN (?)\n" +
+        "   AND T.Id_Estado IN (1,2)\n" +
+        "	AND T.Fecha BETWEEN ? AND ?;", [valoresColumna2, fechaInicial, fechaFinal]);
+
+        const verificacionLimpiada = verificacion.map(row => ({ ...row }));
+
+        let coincidenciasEncontradas = 0;
+
+        for (const resultadoCiclo of resultadosCiclo) {
+            let existeCoincidencia = false;
+
+            for (const filaVerificacion of verificacionLimpiada) {
+                if (
+                    resultadoCiclo.FECHA === filaVerificacion.FECHA &&
+                    resultadoCiclo.ID === filaVerificacion.ID &&
+                    resultadoCiclo.PROTOCOLO === filaVerificacion.PROTOCOLO
+                ) {
+                    existeCoincidencia = true;
+                    break; 
+                }
+            }
+
+            if (existeCoincidencia) {
+                coincidenciasEncontradas++;
+            }
+        }
+
+        if (coincidenciasEncontradas > 0) {
+            res.send("repetidos");
+        } else {
+            res.send("ok");
+        }
+
+    } catch (error) {
+        console.error(error);
+    }
+});
+
+router.post('/verificacion_tareas1', isLoggedIn, upload.single('file'), authRole(['Plan', 'Admincli']), async (req, res) =>{
+    const { date1, ano1, date2, ano2 } = req.body;
+
+    try {
+        const fechaInicial = moment(`${ano1}-${date1}`, 'YYYY-MMM').startOf('month').format('YYYY-MM-DD');
+        const fechaFinal = moment(`${ano2}-${date2}`, 'YYYY-MMM').endOf('month').format('YYYY-MM-DD');  
+        
+        const workbook = XLSX.read(req.file.buffer);
+        const cargaSheet = workbook.Sheets['CARGA'];
+
+        if (!cargaSheet) {
+            throw new Error('La hoja "CARGA" no está presente en el archivo.');
+        }
+
+        const columnsToExtract = [2];
+
+        const data = [];
+
+        let rowIndex = 2;
+        while (cargaSheet[XLSX.utils.encode_cell({ r: rowIndex, c: 0 })]) {
+            const rowData = {};
+            
+            const rowHasData = columnsToExtract.every((colIndex) => {
+                const cell = cargaSheet[XLSX.utils.encode_cell({ r: rowIndex, c: colIndex })];
+                rowData[`columna${colIndex}`] = cell ? cell.v : null;
+                return cell !== undefined && cell.v !== undefined && cell.v !== null && cell.v !== '';
+            });
+
+            if (rowHasData) {
+                data.push(rowData);
+            }
+
+            rowIndex++;
+        }
+
+        const valoresColumna2 = data.map((fila) => Object.values(fila)[0]);
+
+        const verificacion = await pool.query("SELECT\n" +
+        "	T.Id_Equipo AS ID\n" +
+        "FROM\n" +
+        "	Tareas T\n" +
+        "	INNER JOIN Protocolos P ON P.Id = T.Id_Protocolo\n" +
+        "WHERE\n" +
+        "	T.Id_Equipo IN (?)\n" +
+        "   AND T.Id_Estado IN (1,2)\n" +
+        "	AND T.Fecha BETWEEN ? AND ?;", [valoresColumna2, fechaInicial, fechaFinal]);
+
+        if (verificacion.length > 0) {
+            res.send('tareas');
+        }else{
+            res.send('notareas');
+        }
+
+    } catch (error) {
+        console.error(error);
+    }
+});
+
+router.post('/planificacion_archivo', isLoggedIn, upload.single('file'), authRole(['Plan', 'Admincli']), async (req, res) => {
+    
+    const { date1, ano1, date2, ano2 } = req.body;
+
+    try {
+
+        const fechaInicial = moment(`${ano1}-${date1}`, 'YYYY-MMM').startOf('month').format('YYYY-MM-DD');
+        const fechaFinal = moment(`${ano2}-${date2}`, 'YYYY-MMM').endOf('month').format('YYYY-MM-DD');          
+    
+        const workbook = XLSX.read(req.file.buffer);
+
+        const cargaSheet = workbook.Sheets['CARGA'];
+
+        if (!cargaSheet) {
+            throw new Error('La hoja "CARGA" no está presente en el archivo.');
+        }
+
+        const columnsToExtract = [0, 1, 2, 4];
+
+        const data = [];
+
+        let rowIndex = 1;
+        while (cargaSheet[XLSX.utils.encode_cell({ r: rowIndex, c: 0 })]) {
+            const rowData = {};
+            
+            const rowHasData = columnsToExtract.every((colIndex) => {
+                const cell = cargaSheet[XLSX.utils.encode_cell({ r: rowIndex, c: colIndex })];
+                rowData[`columna${colIndex}`] = cell ? cell.v : null;
+                return cell !== undefined && cell.v !== undefined && cell.v !== null && cell.v !== '';
+            });
+
+            if (rowHasData) {
+                data.push(rowData);
+            }
+
+            rowIndex++;
+        }
+
+        const resultadosCiclo = [];
+
+        const diasEnRango = moment(fechaFinal).diff(fechaInicial, 'days') + 1;
+
+        for (let i = 0; i < diasEnRango; i++) {
+
+            const fechaActual = moment(fechaInicial).add(i, 'days').format('YYYY-MM-DD');
+
+            for (const fila of data) {
+
+                const { columna0, columna1, columna2, columna4 } = fila;
+
+                if (moment(fechaActual).date() === columna0) {
+
+                    const resultado = {
+                        Fecha: fechaActual,
+                        Id_Tecnico: columna1,
+                        Id_Equipo: columna2,
+                        Id_Protocolo: columna4,
+                        Contingente: 0,
+                        Prueba: 0
+                    };
+
+                    resultadosCiclo.push(resultado);
+                }
+            }
+        }
+
+        const insertIds = await Promise.all(resultadosCiclo.map(insertTarea));
+
+        const tareas = await pool.query(
+            "SELECT\n" +
+            "	T.Id AS ID,\n" +
+            "	DATE_FORMAT(T.Fecha, '%Y-%m-%d') AS FECHA,\n" +
+            "	U.Descripcion AS TECNICO,\n" +
+            "	E.Descripcion AS ESTADO,\n" +
+            "	EQ.Codigo AS EQUIPO,\n" +
+            "	TP.Descripcion AS TIPO,\n" +
+            "	P.Descripcion AS PROTOCOLO \n" +
+            "FROM\n" +
+            "	Tareas T\n" +
+            "	INNER JOIN Usuarios U ON U.Id = T.Id_Tecnico\n" +
+            "	INNER JOIN Estados E ON E.Id = T.Id_Estado\n" +
+            "	INNER JOIN Equipos EQ ON EQ.Id = T.Id_Equipo\n" +
+            "	INNER JOIN Protocolos P ON P.Id = T.Id_Protocolo \n" +
+            "	INNER JOIN TipoProtocolo TP ON TP.Id = P.Id_TipoProtocolo\n" +
+            "WHERE\n" +
+            "	T.Id IN (?)\n" +
+            "ORDER BY T.Fecha ASC;", [insertIds]);
+
+        const {usuario} = req.user;
+        const {Id_Cliente} = req.user;
+
+        var info = [];
+
+        for (var i = 0; i < tareas.length; i++) {
+            info.push({
+                Tarea: tareas[i].ID,
+                Fecha: tareas[i].FECHA,
+                Técnico: tareas[i].TECNICO,
+                Estado: tareas[i].ESTADO,
+                TAG: tareas[i].EQUIPO,
+                Tipo_de_Protocolo: tareas[i].TIPO,
+                Protocolo: tareas[i].PROTOCOLO,
+                Creado_por: usuario
+            });
+        } 
+
+        var wb = XLSX.utils.book_new();
+        var ws = XLSX.utils.json_to_sheet(info);
+
+        var range = XLSX.utils.decode_range(ws['!ref']);
+        var colWidths = [];
+        for (var col = range.s.c; col <= range.e.c; col++) {
+            var maxWidth = 0;
+            for (var row = range.s.r; row <= range.e.r; row++) {
+                var cell_address = {c:col, r:row};
+                var cell_ref = XLSX.utils.encode_cell(cell_address);
+                var cell = ws[cell_ref];
+                if (cell) {
+                    var cellValue = cell.v.toString();
+                    if (cellValue.length > maxWidth) {
+                        maxWidth = cellValue.length;
+                    }
+                }
+            }
+            colWidths.push({wch:maxWidth});
+        }
+
+        ws['!cols'] = colWidths;
+
+        XLSX.utils.book_append_sheet(wb, ws);
+
+        var buffer = XLSX.write(wb, {type:'buffer', bookType:'xlsx'});    
+        const datemail = new Date().toLocaleDateString('en-GB');
+        const filePathName1 = path.resolve(__dirname, "../views/email/tareas.hbs"); 
+        const mensaje = fs.readFileSync(filePathName1, "utf8");
+        const template = hbs.compile(mensaje);
+        const context = {
+                datemail, 
+            };
+        const html = template(context); 
+        const email_plan = await pool.query(
+        "SELECT\n" +
+            "	U.Id,\n" +
+            "	U.Email \n" +
+            "FROM\n" +
+            "	Usuarios U \n" +
+            "WHERE\n" +
+            "	U.Id_Perfil = 2 \n" +
+            "	AND U.Id_Cliente = " +
+            Id_Cliente +
+            " \n" +
+            "	AND U.Activo = 1;"
+        );     
+        const {Email} = req.user;  
+        await transporter.sendMail({
+        from: "SAPMA <sapmadet@sercoing.cl>",
+        to: "marancibia@sercoing.cl",
+        // to: [email_plan, Email],
+        // bcc: "sapmadet@sercoing.cl",
+        subject: "SAPMA - Tareas Creadas",
+        html,
+        attachments: [
+            {
+            filename: "imagen1.png",
+            path: "./src/public/img/imagen1.png",
+            cid: "imagen1",
+
+            },
+            {
+            filename: 'tareas_'+datemail+'.xlsx',
+            content: buffer
+            }
+        ],
+        });
+
+        res.send("ok");
+
+    } catch (error) {
+        console.error('Error al procesar el archivo Excel', error);
+        res.status(500).send("Error al procesar el archivo Excel");
+    }
+    
+});
+
+function insertTarea(resultado) {
+    return new Promise((resolve, reject) => {
+        const query = `INSERT INTO Tareas (Fecha, Id_Tecnico, Id_Equipo, Id_Protocolo, Contingente, Prueba) VALUES (?, ?, ?, ?, 0, 0)`;
+        
+        pool.query(query, [
+            resultado.Fecha,
+            resultado.Id_Tecnico,
+            resultado.Id_Equipo,
+            resultado.Id_Protocolo
+        ], (error, results, fields) => {
+            if (error) {
+                console.error('Error al ejecutar la consulta de inserción', error);
+                reject(error);
+            } else {
+                resolve(results.insertId);
+            }
+        });
+    });
+}
 
 module.exports = router;
 

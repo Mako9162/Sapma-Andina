@@ -2,7 +2,7 @@
 let select = document.getElementById('date3');
 let currentYear = new Date().getFullYear();
 let startYear = currentYear - 2;
-let endYear = currentYear;
+let endYear = currentYear + 1;
 let option = document.createElement('option');
 option.value = '';
 option.text = '--Seleccione un año--';

@@ -1,18 +1,22 @@
 var table;
 var table1;
 
+
 $(document).ready(function() {
 
     var date1 = document.querySelector('#inicial_plan');
     var date2 = document.querySelector('#final_plan');
 
     table1 = $('#tabla_verificar').DataTable({
-        "dom": 'rtp',
-        'select': {
-            'style': 'single'
-        },
+        "searching": true,
+        "lengthChange": false,
+        "colReorder": true,
+        "dom": 'frtip',
+        "bDestroy": true, 	
         "bInfo": true,
-        "iDisplayLength": 8,
+        "iDisplayLength": 10,
+        "autoWidth": true,
+        "scrollY": true, 
         "language": {
             "sProcessing": "Procesando...",
             "sLengthMenu": "Mostrar _MENU_ registros",
@@ -166,7 +170,7 @@ $(document).ready(function() {
     
     }
 
-    initDataTable();
+    initDataTable();  
 
     $('#filtrar').click(function () {
         var gerencia = $('#gerencia').val();
@@ -214,6 +218,7 @@ $(document).ready(function() {
                         <td>${item.AREA}</td>
                         <td>${item.SECTOR}</td>
                         <td>${ciclo}</td>
+                        <td><a>Ver tareas</a></td>
                     </tr>
                 `);
             });
@@ -233,9 +238,13 @@ $(document).ready(function() {
         }
     });
 
-    $('#planificaion').on('hidden.bs.modal', function (e) {
-
-    });
+    $('#planificacion').on('hidden.bs.modal', function (e) {
+        $('#inicial_plan').val('');
+        $('#final_plan').val('');
+        $('#tecnico').val('').trigger('change');
+        $('#div_tecnico').hide();
+        $('#crear_plan').prop('disabled', true);
+    });    
 
     $('#verificar').on('click', function () {
         var fecha1 = $('#inicial_plan').val();
@@ -245,7 +254,7 @@ $(document).ready(function() {
             swal("Error", "Ingrese ambas fechas.", "error");
             return;
         }
-        
+
         var filasSeleccionadas = table.rows({ selected: true }).data();
         var idsSeleccionados = filasSeleccionadas.toArray().map(function(row) {
             return row[0]; 
@@ -294,59 +303,51 @@ $(document).ready(function() {
         });
     });
 
-    $('#verificar_tareas').on('hidden.bs.modal', function () {
-        $('#tabla_verificar tbody').empty();
-    });
-
     $('#cancelar_ver').on('click', function () {
         $('#verificar_tareas').modal('hide');
     });
 
-    $('#configuracion').on('click', function () {
-        $('#configurar').modal('show');
-    });
-
-    $('#actvariable').on('click', function () {
-        var nuevoMaximo = $('#maximo').val();
-        
-        var data = {nuevoMaximo}
-
-        swal({
-            title: "¡SAPMA!",
-            text: "¿Desea actualizar el máximo de tareas por día?",
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonClass: "btn-primary",
-            confirmButtonText: "Si",
-            cancelButtonText: "No",
-            closeOnConfirm: false      
-            },function(isConfirm) {
-                if(isConfirm){
-                    $.ajax({
-                        url: '/actualizamaximo',
-                        type: 'POST',
-                        data: data
-                    }).done(function(data){
-                        swal({
-                            title: "¡SAPMA!",
-                            text: "Máximo actualizado correctamente",
-                            type: "success",
-                            confirmButtonText: "Aceptar",
-                            allowOutsideClick: false
-                        });	
-                        $('#maximo').val('');
-                        $('#configurar').modal('hide');
-                        setTimeout(function () {
-                            location.reload();
-                        }, 1000);	
-                    })
-                }
-            });	
-    });
-    
     $('#ir').on('click', function () {
         $('#crear_plan').prop('disabled', false);
+        $('#div_tecnico').show();
         $('#verificar_tareas').modal('hide');
+    });
+
+    $('#crear_plan').on('click', function () {
+        var fecha1 = $('#inicial_plan').val();
+        var fecha2 = $('#final_plan').val();
+    
+        if (!fecha1 || !fecha2) {
+            swal("Error", "Ingrese ambas fechas.", "error");
+            return;
+        }
+
+        var tecnico = $('#tecnico').val();
+
+        if(!tecnico){
+            swal("Error", "Debe seleccionar un técnico para planificar.", "error");
+            return;
+        }
+
+        var filasSeleccionadas = table.rows({ selected: true }).data();
+        var idsSeleccionados = filasSeleccionadas.toArray().map(function(row) {
+            return row[0]; 
+        });
+
+        var data = {
+            fecha1,
+            fecha2,
+            tecnico,
+            idsSeleccionados
+        }
+
+        $.ajax({
+            url: '/crear_plan',
+            type: 'POST',
+            data:data
+        })
+
+        
     });
 
 });

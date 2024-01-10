@@ -16,9 +16,6 @@
 						</div>
 						<div class="form-group float-right">
                             <button type="button" class="btn btn-inline btn-success-outline" id="planificar" name="planificar">Planificar</button>
-                             <button type="button" class="btn btn-inline btn-secondary" id="configuracion">
-                                <i class="fa fa-cog"></i>
-                            </button>
 						</div>
                     </div>    
 				</div>
@@ -69,6 +66,7 @@
 							<th>Area</th>
 							<th>Sector</th>
 							<th>Ciclo</th>
+							<th>Acción</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -77,7 +75,6 @@
             </div>
             {{> planificacion}}
             {{> verificar_tareas}}
-            {{> configurar}}
 		</div>	
 	</div>
 	<script src="/js/lib/jquery/jquery.min.js"></script>
@@ -93,5 +90,5 @@
 	<script src="/js/lib/select2/select2.full.min.js"></script>
 	<script src="/plan.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 </body>	
