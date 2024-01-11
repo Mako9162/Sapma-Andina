@@ -4,55 +4,62 @@ var table1;
 
 $(document).ready(function() {
 
-    var date1 = document.querySelector('#inicial_plan');
-    var date2 = document.querySelector('#final_plan');
+    var year = new Date().getFullYear();
 
-    table1 = $('#tabla_verificar').DataTable({
-        "searching": true,
-        "lengthChange": false,
-        "colReorder": true,
-        "dom": 'frtip',
-        "bDestroy": true, 	
-        "bInfo": true,
-        "iDisplayLength": 10,
-        "autoWidth": true,
-        "scrollY": true, 
-        "language": {
-            "sProcessing": "Procesando...",
-            "sLengthMenu": "Mostrar _MENU_ registros",
-            "sZeroRecords": "No se encontraron resultados",
-            "sEmptyTable": "Ningún dato disponible en esta tabla",
-            "sInfo": "Mostrando un total de _TOTAL_ registros",
-            "sInfoEmpty": "Mostrando un total de 0 registros",
-            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
-            "sInfoPostFix": "",
-            "sSearch": "Buscar:",
-            "sUrl": "",
-            "sInfoThousands": ".",
-            "sLoadingRecords": "Cargando...",
-            "oPaginate": {
-                "sFirst": "Primero",
-                "sLast": "Último",
-                "sNext": "Siguiente",
-                "sPrevious": "Anterior"
-            },
-            "oAria": {
-                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
-                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
-            },
-            "select" : {
-                "rows" : {
-                    "_" : "Has seleccionado %d filas",
-                    "0" : "Click en una fila para seleccionar",
-                    "1" : "Has seleccionado 1 fila"
-                }
-            }
-        }
-    });
+    for (var i = 0; i < 2; i++) {
+        $('#ano1').append('<option value="' + (year + i) + '">' + (year + i) + '</option>');
+        $('#ano2').append('<option value="' + (year + i) + '">' + (year + i) + '</option>');
+    }
 
-    date1.addEventListener('change', function() {
-        date2.min = this.value;
-    });	
+    // var date1 = document.querySelector('#inicial_plan');
+    // var date2 = document.querySelector('#final_plan');
+
+    // table1 = $('#tabla_verificar').DataTable({
+    //     "searching": true,
+    //     "lengthChange": false,
+    //     "colReorder": true,
+    //     "dom": 'frtip',
+    //     "bDestroy": true, 	
+    //     "bInfo": true,
+    //     "iDisplayLength": 10,
+    //     "autoWidth": true,
+    //     "scrollY": true, 
+    //     "language": {
+    //         "sProcessing": "Procesando...",
+    //         "sLengthMenu": "Mostrar _MENU_ registros",
+    //         "sZeroRecords": "No se encontraron resultados",
+    //         "sEmptyTable": "Ningún dato disponible en esta tabla",
+    //         "sInfo": "Mostrando un total de _TOTAL_ registros",
+    //         "sInfoEmpty": "Mostrando un total de 0 registros",
+    //         "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+    //         "sInfoPostFix": "",
+    //         "sSearch": "Buscar:",
+    //         "sUrl": "",
+    //         "sInfoThousands": ".",
+    //         "sLoadingRecords": "Cargando...",
+    //         "oPaginate": {
+    //             "sFirst": "Primero",
+    //             "sLast": "Último",
+    //             "sNext": "Siguiente",
+    //             "sPrevious": "Anterior"
+    //         },
+    //         "oAria": {
+    //             "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+    //             "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+    //         },
+    //         "select" : {
+    //             "rows" : {
+    //                 "_" : "Has seleccionado %d filas",
+    //                 "0" : "Click en una fila para seleccionar",
+    //                 "1" : "Has seleccionado 1 fila"
+    //             }
+    //         }
+    //     }
+    // });
+
+    // date1.addEventListener('change', function() {
+    //     date2.min = this.value;
+    // });	
 
     function _(element)
     {
@@ -217,6 +224,7 @@ $(document).ready(function() {
                         <td>${item.GER}</td>
                         <td>${item.AREA}</td>
                         <td>${item.SECTOR}</td>
+                        <td hidden="true">${item.IDCICLO}</td>
                         <td>${ciclo}</td>
                         <td><a>Ver tareas</a></td>
                     </tr>
@@ -238,115 +246,138 @@ $(document).ready(function() {
         }
     });
 
-    $('#planificacion').on('hidden.bs.modal', function (e) {
-        $('#inicial_plan').val('');
-        $('#final_plan').val('');
-        $('#tecnico').val('').trigger('change');
-        $('#div_tecnico').hide();
-        $('#crear_plan').prop('disabled', true);
-    });    
+    // $('#planificacion').on('hidden.bs.modal', function (e) {
+    //     $('#inicial_plan').val('');
+    //     $('#final_plan').val('');
+    //     $('#tecnico').val('').trigger('change');
+    //     $('#div_tecnico').hide();
+    //     $('#crear_plan').prop('disabled', true);
+    // });    
 
-    $('#verificar').on('click', function () {
-        var fecha1 = $('#inicial_plan').val();
-        var fecha2 = $('#final_plan').val();
+    // $('#verificar').on('click', function () {
+    //     var fecha1 = $('#inicial_plan').val();
+    //     var fecha2 = $('#final_plan').val();
     
-        if (!fecha1 || !fecha2) {
-            swal("Error", "Ingrese ambas fechas.", "error");
-            return;
-        }
+    //     if (!fecha1 || !fecha2) {
+    //         swal("Error", "Ingrese ambas fechas.", "error");
+    //         return;
+    //     }
 
-        var filasSeleccionadas = table.rows({ selected: true }).data();
-        var idsSeleccionados = filasSeleccionadas.toArray().map(function(row) {
-            return row[0]; 
-        });
-        var fecha_inicial = $('#inicial_plan').val();
-        var fecha_final = $('#final_plan').val();
+    //     var filasSeleccionadas = table.rows({ selected: true }).data();
+    //     var idsSeleccionados = filasSeleccionadas.toArray().map(function(row) {
+    //         return row[0]; 
+    //     });
+    //     var fecha_inicial = $('#inicial_plan').val();
+    //     var fecha_final = $('#final_plan').val();
         
-        var data = {
-            idsSeleccionados,
-            fecha_inicial,
-            fecha_final
-        }
+    //     var data = {
+    //         idsSeleccionados,
+    //         fecha_inicial,
+    //         fecha_final
+    //     }
     
-        $.ajax({
-            url: '/verificar',
-            type: 'POST',
-            data: data,
-            success: function(response) {
-                if (response && response.length > 0) {
-                    $('#tabla_verificar tbody').empty();
+    //     $.ajax({
+    //         url: '/verificar',
+    //         type: 'POST',
+    //         data: data,
+    //         success: function(response) {
+    //             if (response && response.length > 0) {
+    //                 $('#tabla_verificar tbody').empty();
     
-                    response.forEach(function(tarea) {
+    //                 response.forEach(function(tarea) {
 
-                        var fechaFormateada = new Date(tarea.FECHA).toLocaleDateString('es-ES', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric'
-                        });
+    //                     var fechaFormateada = new Date(tarea.FECHA).toLocaleDateString('es-ES', {
+    //                         day: '2-digit',
+    //                         month: '2-digit',
+    //                         year: 'numeric'
+    //                     });
 
-                        var row = '<tr>' +
-                            '<td>' + tarea.ID + '</td>' +
-                            '<td>' + tarea.EQUIPO + '</td>' +
-                            '<td>' + fechaFormateada + '</td>' +
-                            '<td>' + tarea.ESTADO + '</td>' +
-                            '<td>' + tarea.TECNICO + '</td>' +
-                            '</tr>';
-                        $('#tabla_verificar tbody').append(row);
-                    });
-                } 
+    //                     var row = '<tr>' +
+    //                         '<td>' + tarea.ID + '</td>' +
+    //                         '<td>' + tarea.EQUIPO + '</td>' +
+    //                         '<td>' + fechaFormateada + '</td>' +
+    //                         '<td>' + tarea.ESTADO + '</td>' +
+    //                         '<td>' + tarea.TECNICO + '</td>' +
+    //                         '</tr>';
+    //                     $('#tabla_verificar tbody').append(row);
+    //                 });
+    //             } 
 
-                $('#verificar_tareas').modal('show');
-            },
-            error: function(error) {
-                console.log('Error en la solicitud AJAX:', error);
-            }
-        });
-    });
+    //             $('#verificar_tareas').modal('show');
+    //         },
+    //         error: function(error) {
+    //             console.log('Error en la solicitud AJAX:', error);
+    //         }
+    //     });
+    // });
 
-    $('#cancelar_ver').on('click', function () {
-        $('#verificar_tareas').modal('hide');
-    });
+    // $('#cancelar_ver').on('click', function () {
+    //     $('#verificar_tareas').modal('hide');
+    // });
 
-    $('#ir').on('click', function () {
-        $('#crear_plan').prop('disabled', false);
-        $('#div_tecnico').show();
-        $('#verificar_tareas').modal('hide');
-    });
+    // $('#ir').on('click', function () {
+    //     $('#crear_plan').prop('disabled', false);
+    //     $('#div_tecnico').show();
+    //     $('#verificar_tareas').modal('hide');
+    // });
 
     $('#crear_plan').on('click', function () {
-        var fecha1 = $('#inicial_plan').val();
-        var fecha2 = $('#final_plan').val();
+
+        const date1 = $('#date1').val();
+        const ano1 = $('#ano1').val();
+        const date2 = $('#date2').val();
+        const ano2 = $('#ano2').val();
+        const tecnico = $('#tecnico').val();
     
-        if (!fecha1 || !fecha2) {
-            swal("Error", "Ingrese ambas fechas.", "error");
+        if (!date1 || !ano1 || !date2 || !ano2) {
+            swal("Error", "Ingrese ambas fechas y años.", "error");
             return;
         }
 
-        var tecnico = $('#tecnico').val();
+        const fecha1 = new Date(`${ano1}-${date1}`);
+        const fecha2 = new Date(`${ano2}-${date2}`);
+
+        if (fecha2 < fecha1) {
+            swal("Error", "La primera fecha no puede ser mayor que la segunda.", "error");
+            return;
+        }
 
         if(!tecnico){
             swal("Error", "Debe seleccionar un técnico para planificar.", "error");
             return;
         }
 
-        var filasSeleccionadas = table.rows({ selected: true }).data();
-        var idsSeleccionados = filasSeleccionadas.toArray().map(function(row) {
-            return row[0]; 
+        const filasSeleccionadas = table.rows({ selected: true }).data();
+        const valoresColumnas = filasSeleccionadas.toArray().map(function(row) {
+            return {
+                ID:row[0],
+                CICLO:row[7]
+            }; 
         });
-
-        var data = {
-            fecha1,
-            fecha2,
+        
+        const data = {
+            date1,
+            ano1,
+            date2,
+            ano2,
             tecnico,
-            idsSeleccionados
+            valoresColumnas
         }
 
         $.ajax({
-            url: '/crear_plan',
+            url: '/verificar_tareas',
             type: 'POST',
-            data:data
+            data:data,
+            beforeSend: function() {
+                swal({
+                    title: "Verificando",
+                    text: "Espere un momento por favor...",
+                    imageUrl: "/img/Spinner-1s-200px2.gif",
+                    showConfirmButton: false,
+                    allowOutsideClick: false
+                });
+            }
         })
-
         
     });
 

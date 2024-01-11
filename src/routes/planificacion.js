@@ -13,21 +13,21 @@ const upload = multer();
 const hbs = require("handlebars");
 const nodemailer = require('nodemailer');
 
-const correo = "sapmadet@sercoing.cl";
-const pass = "2m[FDus[Tym4@ew6";
+const correo = "sapmadand@sercoing.cl";
+const pass = "FL918,VoHvwE=za.";
 
 const transporter = nodemailer.createTransport({
-                        host: "mail.sercoing.cl",
-                        port: 587,
-                        secure: false,
-                        auth: {
-                            user: correo,
-                            pass: pass,
-                        },
-                        tls: {
-                            rejectUnauthorized: false,
-                        },
-                    });
+  host: "mail.sercoing.cl",
+  port: 587,
+  secure: false,
+  auth: {
+    user: correo,
+    pass: pass,
+  },
+  tls: {
+    rejectUnauthorized: false,
+  },
+});
 
 router.get('/ciclos', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) =>{
 
@@ -444,6 +444,7 @@ router.post('/buscar_plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (r
             "	G.Descripcion AS GER,\n" +
             "	A.Descripcion AS AREA,\n" +
             "	S.Descripcion AS SECTOR,\n" +
+            "   C.ciclo_id AS IDCICLO,\n" +
             "	C.ciclo_nombre AS CICLO \n" +
             "FROM\n" +
             "	Equipos E\n" +
@@ -472,6 +473,7 @@ router.post('/buscar_plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (r
             "	G.Descripcion AS GER,\n" +
             "	A.Descripcion AS AREA,\n" +
             "	S.Descripcion AS SECTOR,\n" +
+            "   C.ciclo_id AS IDCICLO,\n" +
             "	C.ciclo_nombre AS CICLO \n" +
             "FROM\n" +
             "	Equipos E\n" +
@@ -500,6 +502,7 @@ router.post('/buscar_plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (r
             "	G.Descripcion AS GER,\n" +
             "	A.Descripcion AS AREA,\n" +
             "	S.Descripcion AS SECTOR,\n" +
+            "   C.ciclo_id AS IDCICLO,\n" +
             "	C.ciclo_nombre AS CICLO \n" +
             "FROM\n" +
             "	Equipos E\n" +
@@ -528,6 +531,7 @@ router.post('/buscar_plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (r
             "	G.Descripcion AS GER,\n" +
             "	A.Descripcion AS AREA,\n" +
             "	S.Descripcion AS SECTOR,\n" +
+            "   C.ciclo_id AS IDCICLO,\n" +
             "	C.ciclo_nombre AS CICLO \n" +
             "FROM\n" +
             "	Equipos E\n" +
@@ -556,6 +560,7 @@ router.post('/buscar_plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (r
             "	G.Descripcion AS GER,\n" +
             "	A.Descripcion AS AREA,\n" +
             "	S.Descripcion AS SECTOR,\n" +
+            "   C.ciclo_id AS IDCICLO,\n" +
             "	C.ciclo_nombre AS CICLO \n" +
             "FROM\n" +
             "	Equipos E\n" +
@@ -638,7 +643,7 @@ router.get('/planificacion_equipos', isLoggedIn, authRole(['Plan', 'Admincli']),
     "	Usuarios U\n" +
     "	INNER JOIN Perfiles P ON P.Id = U.Id_Perfil\n" +
     "WHERE\n" +
-    "	U.Id_Perfil=3 AND U.Id_Cliente = 28;");
+    "	U.Id_Perfil=3 AND U.Id_Cliente = 1 AND NOT Login LIKE '%test%';");
 
     const tipo_tareas = await pool.query("SELECT\n" +
     "	Descripcion AS DESCRIPCION,\n" +
@@ -744,12 +749,62 @@ router.post('/act_prioridad', isLoggedIn, authRole(['Plan', 'Admincli']), async 
     }
 });
 
+router.post('/verificar_tareas', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
+
+    try {
+        const {date1, ano1, date2, ano2, tecnico, valoresColumnas} = req.body;
+        const fechaInicial = moment(`${ano1}-${date1}`, 'YYYY-MMM').startOf('month').format('YYYY-MM-DD');
+        const fechaFinal = moment(`${ano2}-${date2}`, 'YYYY-MMM').endOf('month').format('YYYY-MM-DD'); 
+        
+        const cuenta = await pool.query("SELECT COUNT(*) as total FROM Tareas WHERE Fecha BETWEEN ? AND ?;",
+        [fechaInicial, fechaFinal]);
+        const total = cuenta[0].total;
+
+        if (total === 0){
+            const valoresColumnasConTecnico = valoresColumnas.map(function(row) {
+                return {
+                    ID: row.ID,
+                    CICLO: row.CICLO,
+                    tecnico: tecnico
+                }; 
+            });
+
+            console.log(valoresColumnasConTecnico);
+        }else{
+            console.log("cuenta");
+            //res.send("cuenta_positiva");
+        }
+
+    } catch (error) {
+        console.log(error);    
+    }
+
+});
+
 router.post('/crear_plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
-    const maximo = req.app.locals.maximo;
-    const {fecha1, fecha2, tecnico, idsSeleccionados} = req.body;
-
     
+    try {
 
+        const maximo = req.app.locals.maximo;
+        const {date1, ano1, date2, ano2, tecnico, valoresColumnas} = req.body;
+        const fechaInicial = moment(`${ano1}-${date1}`, 'YYYY-MMM').startOf('month').format('YYYY-MM-DD');
+        const fechaFinal = moment(`${ano2}-${date2}`, 'YYYY-MMM').endOf('month').format('YYYY-MM-DD'); 
+
+        const valoresColumnasConTecnico = valoresColumnas.map(function(row) {
+            return {
+                ID: row.ID,
+                CICLO: row.CICLO,
+                tecnico: tecnico
+            }; 
+        });
+        
+        console.log(valoresColumnasConTecnico);
+
+    } catch (error) {
+
+       console.log(error); 
+
+    }
 
 });
 
@@ -977,7 +1032,7 @@ router.post('/genera_plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (r
     }
 });
 
-router.get('/excel_download', isLoggedIn, async (req, res) => {
+router.get('/excel_download', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
     res.download('planificación.xlsx', (err) => {
         if (err) {
             console.error("Error al descargar el archivo:", err);
@@ -1243,7 +1298,6 @@ router.post('/planificacion_archivo', isLoggedIn, upload.single('file'), authRol
             "ORDER BY T.Fecha ASC;", [insertIds]);
 
         const {usuario} = req.user;
-        const {Id_Cliente} = req.user;
 
         var info = [];
 
@@ -1302,14 +1356,12 @@ router.post('/planificacion_archivo', isLoggedIn, upload.single('file'), authRol
             "	Usuarios U \n" +
             "WHERE\n" +
             "	U.Id_Perfil = 2 \n" +
-            "	AND U.Id_Cliente = " +
-            Id_Cliente +
-            " \n" +
+            "	AND U.Id_Cliente = 1 \n" +
             "	AND U.Activo = 1;"
         );     
         const {Email} = req.user;  
         await transporter.sendMail({
-        from: "SAPMA <sapmadet@sercoing.cl>",
+        from: "SAPMA <sapmadand@sercoing.cl>",
         to: "marancibia@sercoing.cl",
         // to: [email_plan, Email],
         // bcc: "sapmadet@sercoing.cl",
@@ -1328,6 +1380,23 @@ router.post('/planificacion_archivo', isLoggedIn, upload.single('file'), authRol
             }
         ],
         });
+
+        const updatePromises = insertIds.map((taskId) => {
+            return new Promise((resolve, reject) => {
+                const updateQuery = 'UPDATE Tareas_Estado SET te_usuario = ?, te_metodo = ? WHERE te_id_tarea = ?';
+        
+                pool.query(updateQuery, [usuario, 'M', taskId], (updateError, updateResults, updateFields) => {
+                    if (updateError) {
+                        console.error('Error al ejecutar la consulta de actualización en Tareas_Estado', updateError);
+                        reject(updateError);
+                    } else {
+                        resolve();
+                    }
+                });
+            });
+        });
+        
+        await Promise.all(updatePromises);
 
         res.send("ok");
 

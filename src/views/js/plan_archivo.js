@@ -60,12 +60,6 @@ $(document).ready(function() {
         fetch_data(_('sector'), _('equipo'), 'load_equiposs');
     };
 
-    var date1 = document.querySelector('#date1');
-    var date2 = document.querySelector('#date2');
-
-    date1.addEventListener('change', function() {
-        date2.min = this.value;
-    });	
 
     $('#plan_archivo').on('click', function () {
         var date1 = $('#date1').val();

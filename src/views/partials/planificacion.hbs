@@ -12,15 +12,69 @@
                     <div class="form-group">
                         <div class="card-block">
                             <div class="row">
-                                <div class="form-group col-md-12 col-sm-6">
-                                    <label class="form-label" for="inicial_plan">Fecha inicial</label>
-                                    <input class="form-control" type="date" id="inicial_plan" name="inicial_plan">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="date1">Desde:</label>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <select class="select2" id="date1">
+                                                    <option value="" selected disabled>Seleccione un mes</option>
+                                                    <option value="jan">Enero</option>
+                                                    <option value="feb">Febrero</option>
+                                                    <option value="mar">Marzo</option>
+                                                    <option value="apr">Abril</option>
+                                                    <option value="may">Mayo</option>
+                                                    <option value="jun">Junio</option>
+                                                    <option value="jul">Julio</option>
+                                                    <option value="aug">Agosto</option>
+                                                    <option value="sep">Septiembre</option>
+                                                    <option value="oct">Octubre</option>
+                                                    <option value="nov">Noviembre</option>
+                                                    <option value="dec">Diciembre</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <select class="select2" id="ano1">
+                                                    <option value="" selected disabled>Seleccione un año</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="form-group col-md-12 col-sm-6">
-                                    <label class="form-label" for="final_plan">Fecha final</label>
-                                    <input class="form-control" type="date" id="final_plan" name="final_plan">   
+                                <div class="col-md-4">
                                 </div>
-                                <div class="form-group col-md-12 col-sm-6" style="display: none;" id="div_tecnico">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="date2">Hasta:</label>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <select class="select2" id="date2">
+                                                    <option value="" selected disabled>Seleccione un mes</option>
+                                                    <option value="jan">Enero</option>
+                                                    <option value="feb">Febrero</option>
+                                                    <option value="mar">Marzo</option>
+                                                    <option value="apr">Abril</option>
+                                                    <option value="may">Mayo</option>
+                                                    <option value="jun">Junio</option>
+                                                    <option value="jul">Julio</option>
+                                                    <option value="aug">Agosto</option>
+                                                    <option value="sep">Septiembre</option>
+                                                    <option value="oct">Octubre</option>
+                                                    <option value="nov">Noviembre</option>
+                                                    <option value="dec">Diciembre</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <select class="select2" id="ano2">
+                                                    <option value="" selected disabled>Seleccione un año</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                </div>
+                                <div class="form-group col-md-12 col-sm-6" id="div_tecnico">
                                     <label class="form-label" for="tecnico">Asigne un técnico</label>
                                     <select class="select2" name="tecnico" id="tecnico">
                                         <option value="" selected disabled>Seleccione una opción</option>
@@ -31,8 +85,8 @@
                                 </div>
                                 <div class="col-md-12 col-sm-6">
                                     <br>
-                                    <button type="button"  name="crear_plan" id="crear_plan" class="btn btn-success btn-sm float-right" disabled>Planificar</button>
-                                    <button type="button" name="verificar" id="verificar" class="btn btn-warning btn-sm float-right" style="margin-right: 10px;">Verificar</button>
+                                    <button type="button"  name="crear_plan" id="crear_plan" class="btn btn-success btn-sm float-right">Planificar</button>
+                                    {{!-- <button type="button" name="verificar" id="verificar" class="btn btn-warning btn-sm float-right" style="margin-right: 10px;">Verificar</button> --}}
                                 </div>
                             </div>
                         </div>
