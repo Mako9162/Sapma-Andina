@@ -377,6 +377,37 @@ $(document).ready(function() {
                     allowOutsideClick: false
                 });
             }
+        }).done(function(response){
+            if (response === "cuenta_positiva"){
+                swal({
+                    title: "Existen tareas en el periodo seleccionado",
+                    text: "¿Desea continuar con la planificación?",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonClass: "btn-primary",
+                    confirmButtonText: "Si",
+                    cancelButtonText: "No",
+                    closeOnConfirm: false 
+                }, function (ifConfirm){
+                    $.ajax({
+                        url: '/verificar_tareas1',
+                        type: 'POST',
+                        data:data,
+                        beforeSend: function() {
+                            swal({
+                                title: "Verificando",
+                                text: "Espere un momento por favor...",
+                                imageUrl: "/img/Spinner-1s-200px2.gif",
+                                showConfirmButton: false,
+                                allowOutsideClick: false
+                            });
+                        }
+                    })
+                }
+                )
+            }else if(response === "cuenta_negativa"){
+                
+            }
         })
         
     });

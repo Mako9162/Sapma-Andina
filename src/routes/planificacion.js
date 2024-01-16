@@ -761,24 +761,36 @@ router.post('/verificar_tareas', isLoggedIn, authRole(['Plan', 'Admincli']), asy
         const total = cuenta[0].total;
 
         if (total === 0){
-            const valoresColumnasConTecnico = valoresColumnas.map(function(row) {
-                return {
-                    ID: row.ID,
-                    CICLO: row.CICLO,
-                    tecnico: tecnico
-                }; 
-            });
-
-            console.log(valoresColumnasConTecnico);
+            res.send("cuenta_negativa")
         }else{
-            console.log("cuenta");
-            //res.send("cuenta_positiva");
+            res.send("cuenta_positiva");
         }
 
     } catch (error) {
         console.log(error);    
     }
 
+});
+
+router.post('/verificar_tareas1', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) =>{
+    
+    try {
+        
+        const {date1, ano1, date2, ano2, tecnico, valoresColumnas} = req.body;
+        const fechaInicial = moment(`${ano1}-${date1}`, 'YYYY-MMM').startOf('month').format('YYYY-MM-DD');
+        const fechaFinal = moment(`${ano2}-${date2}`, 'YYYY-MMM').endOf('month').format('YYYY-MM-DD'); 
+        const valores = valoresColumnas.map(function(row) {
+            return {
+                ID: row.ID,
+                CICLO: row.CICLO
+            }; 
+        });
+        
+        console.log(valores);
+    } catch (error) {
+        console.log(error);
+    }
+    console.log("Segunda verificación");
 });
 
 router.post('/crear_plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
