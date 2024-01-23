@@ -226,7 +226,7 @@ $(document).ready(function() {
                         <td>${item.SECTOR}</td>
                         <td hidden="true">${item.IDCICLO}</td>
                         <td>${ciclo}</td>
-                        <td><a>Ver tareas</a></td>
+                        <td hidden="true"><a>Ver tareas</a></td>
                     </tr>
                 `);
             });
@@ -388,8 +388,9 @@ $(document).ready(function() {
                     confirmButtonText: "Si",
                     cancelButtonText: "No",
                     closeOnConfirm: false 
-                }, function (ifConfirm){
-                    $.ajax({
+                }, function (isConfirm){
+                    if(isConfirm){
+                        $.ajax({
                         url: '/verificar_tareas1',
                         type: 'POST',
                         data:data,
@@ -402,11 +403,361 @@ $(document).ready(function() {
                                 allowOutsideClick: false
                             });
                         }
-                    })
+                        }).done(function(response){
+                            if(response === "positiva"){
+                                swal({
+                                    title: "Ya existen tareas para algunos equipos seleccionados en las fechas a planificar",
+                                    text: "¿Desea continuar con la planificación?",
+                                    type: "warning",
+                                    showCancelButton: true,
+                                    confirmButtonClass: "btn-primary",
+                                    confirmButtonText: "Si",
+                                    cancelButtonText: "No",
+                                    closeOnConfirm: false 
+                                }, function (isConfirm){
+                                    if(isConfirm){
+                                        $.ajax({
+                                            url: '/verificar_tareas2',
+                                            type: 'POST',
+                                            data:data,
+                                            beforeSend: function() {
+                                                swal({
+                                                    title: "Verificando",
+                                                    text: "Espere un momento por favor...",
+                                                    imageUrl: "/img/Spinner-1s-200px2.gif",
+                                                    showConfirmButton: false,
+                                                    allowOutsideClick: false
+                                                });
+                                            }
+                                        }).done(function(response){
+                                            if(response ==="pasado"){
+                                                swal({
+                                                    title: "Ya existen las tareas maximas diarias para algunas fechas a planificar",
+                                                    text: "¿Desea continuar con la planificación?",
+                                                    type: "warning",
+                                                    showCancelButton: true,
+                                                    confirmButtonClass: "btn-primary",
+                                                    confirmButtonText: "Si",
+                                                    cancelButtonText: "No",
+                                                    closeOnConfirm: false 
+                                                }, function(isConfirm){
+                                                    if(isConfirm){
+                                                        $.ajax({
+                                                            url: '/crear_plan',
+                                                            type: 'POST',
+                                                            data:data,
+                                                            beforeSend: function() {
+                                                                swal({
+                                                                    title: "Planificando",
+                                                                    text: "Espere un momento por favor...",
+                                                                    imageUrl: "/img/Spinner-1s-200px2.gif",
+                                                                    showConfirmButton: false,
+                                                                    allowOutsideClick: false
+                                                                });
+                                                            }
+                                                        }).done(function (response) {
+                                                            if (response === "ok") {
+                                                                swal({
+                                                                    title: "Tareas Creadas",
+                                                                    type: "success",
+                                                                    confirmButtonText: "Aceptar",
+                                                                    allowOutsideClick: false
+                                                                }, function (isConfirm) {
+                                                                    if (isConfirm) {
+                                                                        location.reload();
+                                                                    }
+                                                                });
+                                                            } else {
+                                                                swal("Error", "No se pudo crear las tareas", "error");
+                                                            }
+                                                        }).fail(function (jqXHR, textStatus, errorThrown) {
+                                                            console.error("Error en la llamada AJAX:", textStatus, errorThrown);
+                                                            swal("Error", "Hubo un problema al comunicarse con el servidor", "error");
+                                                        }); 
+                                                    }
+                                                })
+
+                                            }else if(response ==="no pasado"){
+                                                $.ajax({
+                                                    url: '/crear_plan',
+                                                    type: 'POST',
+                                                    data:data,
+                                                    beforeSend: function() {
+                                                        swal({
+                                                            title: "Planificando",
+                                                            text: "Espere un momento por favor...",
+                                                            imageUrl: "/img/Spinner-1s-200px2.gif",
+                                                            showConfirmButton: false,
+                                                            allowOutsideClick: false
+                                                        });
+                                                    }
+                                                }).done(function (response) {
+                                                    if (response === "ok") {
+                                                        swal({
+                                                            title: "Tareas Creadas",
+                                                            type: "success",
+                                                            confirmButtonText: "Aceptar",
+                                                            allowOutsideClick: false
+                                                        }, function (isConfirm) {
+                                                            if (isConfirm) {
+                                                                location.reload();
+                                                            }
+                                                        });
+                                                    } else {
+                                                        swal("Error", "No se pudo crear las tareas", "error");
+                                                    }
+                                                }).fail(function (jqXHR, textStatus, errorThrown) {
+                                                    console.error("Error en la llamada AJAX:", textStatus, errorThrown);
+                                                    swal("Error", "Hubo un problema al comunicarse con el servidor", "error");
+                                                }); 
+                                            }
+                                        })
+                                    }
+                                })
+                            }else if(response === "negativa"){
+                                $.ajax({
+                                    url: '/verificar_tareas2',
+                                    type: 'POST',
+                                    data:data,
+                                    beforeSend: function() {
+                                        swal({
+                                            title: "Verificando",
+                                            text: "Espere un momento por favor...",
+                                            imageUrl: "/img/Spinner-1s-200px2.gif",
+                                            showConfirmButton: false,
+                                            allowOutsideClick: false
+                                        });
+                                    }
+                                }).done(function(response){
+                                    if(response ==="pasado"){
+                                        swal({
+                                            title: "Ya existen las tareas maximas diarias para algunas fechas a planificar",
+                                            text: "¿Desea continuar con la planificación?",
+                                            type: "warning",
+                                            showCancelButton: true,
+                                            confirmButtonClass: "btn-primary",
+                                            confirmButtonText: "Si",
+                                            cancelButtonText: "No",
+                                            closeOnConfirm: false 
+                                        }, function(isConfirm){
+                                            if(isConfirm){
+                                                $.ajax({
+                                                    url: '/crear_plan',
+                                                    type: 'POST',
+                                                    data:data,
+                                                    beforeSend: function() {
+                                                        swal({
+                                                            title: "Planificando",
+                                                            text: "Espere un momento por favor...",
+                                                            imageUrl: "/img/Spinner-1s-200px2.gif",
+                                                            showConfirmButton: false,
+                                                            allowOutsideClick: false
+                                                        });
+                                                    }
+                                                }).done(function (response) {
+                                                    if (response === "ok") {
+                                                        swal({
+                                                            title: "Tareas Creadas",
+                                                            type: "success",
+                                                            confirmButtonText: "Aceptar",
+                                                            allowOutsideClick: false
+                                                        }, function (isConfirm) {
+                                                            if (isConfirm) {
+                                                                location.reload();
+                                                            }
+                                                        });
+                                                    } else {
+                                                        swal("Error", "No se pudo crear las tareas", "error");
+                                                    }
+                                                }).fail(function (jqXHR, textStatus, errorThrown) {
+                                                    console.error("Error en la llamada AJAX:", textStatus, errorThrown);
+                                                    swal("Error", "Hubo un problema al comunicarse con el servidor", "error");
+                                                }); 
+                                            }
+                                        })
+
+                                    }else if(response ==="no pasado"){
+                                        $.ajax({
+                                            url: '/crear_plan',
+                                            type: 'POST',
+                                            data:data,
+                                            beforeSend: function() {
+                                                swal({
+                                                    title: "Planificando",
+                                                    text: "Espere un momento por favor...",
+                                                    imageUrl: "/img/Spinner-1s-200px2.gif",
+                                                    showConfirmButton: false,
+                                                    allowOutsideClick: false
+                                                });
+                                            }
+                                        }) .done(function (response) {
+                                            if (response === "ok") {
+                                                swal({
+                                                    title: "Tareas Creadas",
+                                                    type: "success",
+                                                    confirmButtonText: "Aceptar",
+                                                    allowOutsideClick: false
+                                                }, function (isConfirm) {
+                                                    if (isConfirm) {
+                                                        location.reload();
+                                                    }
+                                                });
+                                            } else {
+                                                swal("Error", "No se pudo crear las tareas", "error");
+                                            }
+                                        }).fail(function (jqXHR, textStatus, errorThrown) {
+                                            console.error("Error en la llamada AJAX:", textStatus, errorThrown);
+                                            swal("Error", "Hubo un problema al comunicarse con el servidor", "error");
+                                        });
+                                    }
+                                })
+                            }
+                        });
+                    }
                 }
-                )
+                );
             }else if(response === "cuenta_negativa"){
-                
+                $.ajax({
+                    url: '/verificar_tareas1',
+                    type: 'POST',
+                    data:data,
+                    beforeSend: function() {
+                        swal({
+                            title: "Verificando",
+                            text: "Espere un momento por favor...",
+                            imageUrl: "/img/Spinner-1s-200px2.gif",
+                            showConfirmButton: false,
+                            allowOutsideClick: false
+                        });
+                    }
+                }).done(function(response){
+                    if(response === "positiva"){
+                        swal({
+                            title: "Ya existen tareas para algunos equipos seleccionados en las fechas a planificar",
+                            text: "¿Desea continuar con la planificación?",
+                            type: "warning",
+                            showCancelButton: true,
+                            confirmButtonClass: "btn-primary",
+                            confirmButtonText: "Si",
+                            cancelButtonText: "No",
+                            closeOnConfirm: false 
+                        }, function (isConfirm){
+                            if(isConfirm){
+                                $.ajax({
+                                    url: '/verificar_tareas2',
+                                    type: 'POST',
+                                    data:data,
+                                    beforeSend: function() {
+                                        swal({
+                                            title: "Verificando",
+                                            text: "Espere un momento por favor...",
+                                            imageUrl: "/img/Spinner-1s-200px2.gif",
+                                            showConfirmButton: false,
+                                            allowOutsideClick: false
+                                        });
+                                    }
+                                })
+                            }
+                        })
+                    }else if(response === "negativa"){
+                        $.ajax({
+                            url: '/verificar_tareas2',
+                            type: 'POST',
+                            data:data,
+                            beforeSend: function() {
+                                swal({
+                                    title: "Verificando",
+                                    text: "Espere un momento por favor...",
+                                    imageUrl: "/img/Spinner-1s-200px2.gif",
+                                    showConfirmButton: false,
+                                    allowOutsideClick: false
+                                });
+                            }
+                        }).done(function(response){
+                            if(response ==="pasado"){
+                                swal({
+                                    title: "Ya existen las tareas maximas diarias para algunas fechas a planificar",
+                                    text: "¿Desea continuar con la planificación?",
+                                    type: "warning",
+                                    showCancelButton: true,
+                                    confirmButtonClass: "btn-primary",
+                                    confirmButtonText: "Si",
+                                    cancelButtonText: "No",
+                                    closeOnConfirm: false 
+                                }, function(isConfirm){
+                                    if(isConfirm){
+                                        $.ajax({
+                                            url: '/crear_plan',
+                                            type: 'POST',
+                                            data:data,
+                                            beforeSend: function() {
+                                                swal({
+                                                    title: "Planificando",
+                                                    text: "Espere un momento por favor...",
+                                                    imageUrl: "/img/Spinner-1s-200px2.gif",
+                                                    showConfirmButton: false,
+                                                    allowOutsideClick: false
+                                                });
+                                            }
+                                        }) .done(function (response) {
+                                            if (response === "ok") {
+                                                swal({
+                                                    title: "Tareas Creadas",
+                                                    type: "success",
+                                                    confirmButtonText: "Aceptar",
+                                                    allowOutsideClick: false
+                                                }, function (isConfirm) {
+                                                    if (isConfirm) {
+                                                        location.reload();
+                                                    }
+                                                });
+                                            } else {
+                                                swal("Error", "No se pudo crear las tareas", "error");
+                                            }
+                                        }).fail(function (jqXHR, textStatus, errorThrown) {
+                                            console.error("Error en la llamada AJAX:", textStatus, errorThrown);
+                                            swal("Error", "Hubo un problema al comunicarse con el servidor", "error");
+                                        });
+                                    }
+                                })
+
+                            }else if(response ==="no pasado"){
+                                $.ajax({
+                                    url: '/crear_plan',
+                                    type: 'POST',
+                                    data:data,
+                                    beforeSend: function() {
+                                        swal({
+                                            title: "Planificando",
+                                            text: "Espere un momento por favor...",
+                                            imageUrl: "/img/Spinner-1s-200px2.gif",
+                                            showConfirmButton: false,
+                                            allowOutsideClick: false
+                                        });
+                                    }
+                                }) .done(function (response) {
+                                    if (response === "ok") {
+                                        swal({
+                                            title: "Tareas Creadas",
+                                            type: "success",
+                                            confirmButtonText: "Aceptar",
+                                            allowOutsideClick: false
+                                        }, function (isConfirm) {
+                                            if (isConfirm) {
+                                                location.reload();
+                                            }
+                                        });
+                                    } else {
+                                        swal("Error", "No se pudo crear las tareas", "error");
+                                    }
+                                }).fail(function (jqXHR, textStatus, errorThrown) {
+                                    console.error("Error en la llamada AJAX:", textStatus, errorThrown);
+                                    swal("Error", "Hubo un problema al comunicarse con el servidor", "error");
+                                });
+                            }
+                        })
+                    }
+                });
             }
         })
         

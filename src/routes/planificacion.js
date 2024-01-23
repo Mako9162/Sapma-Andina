@@ -772,50 +772,523 @@ router.post('/verificar_tareas', isLoggedIn, authRole(['Plan', 'Admincli']), asy
 
 });
 
-router.post('/verificar_tareas1', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) =>{
+router.post('/verificar_tareas1', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
     
     try {
-        
-        const {date1, ano1, date2, ano2, tecnico, valoresColumnas} = req.body;
+        const { date1, ano1, date2, ano2, tecnico, valoresColumnas } = req.body;
         const fechaInicial = moment(`${ano1}-${date1}`, 'YYYY-MMM').startOf('month').format('YYYY-MM-DD');
-        const fechaFinal = moment(`${ano2}-${date2}`, 'YYYY-MMM').endOf('month').format('YYYY-MM-DD'); 
-        const valores = valoresColumnas.map(function(row) {
-            return {
-                ID: row.ID,
-                CICLO: row.CICLO
-            }; 
+        const fechaFinal = moment(`${ano2}-${date2}`, 'YYYY-MMM').endOf('month').format('YYYY-MM-DD');
+        const valores = valoresColumnas.map(function (row) {
+            return row.ID;
         });
+
+        const ids = [valores];
+        const verificacion = await pool.query(`
+            SELECT
+                EP.ep_id_equipo AS ID_EQUIPO,
+                EP.ep_id_tipo_protocolo AS TIPO_PROTOCOLO,
+                EP.ep_id_protocolo AS PROTOCOLO,
+                CD.c_detalle_id AS ID_CICLO,
+                CD.c_detalle_periodicidad AS PERIODICIDAD,
+                CD.c_detalle_periodo AS PERIODO,
+                TP.Indice AS INDICE
+            FROM
+                EquipoProtocolo EP
+                JOIN Ciclo_equipos CE ON CE.equipo_id = EP.ep_id_equipo
+                JOIN Ciclos_detalle CD ON CD.c_detalle_id = CE.equipo_ciclo
+                    AND CD.c_detalle_ttarea = EP.ep_id_tipo_protocolo
+                JOIN TipoProtocolo TP ON TP.Id = EP.ep_id_tipo_protocolo
+            WHERE
+                EP.ep_id_equipo IN ? ORDER BY TP.Indice ASC;`, [ids]);
+
+        const resultadoConTecnico = verificacion.map(item => ({ ...item, tecnico }));
+
+        const gruposPorIndice = resultadoConTecnico.reduce((grupos, item) => {
+            const indice = item.INDICE;
+
+            if (!grupos[indice]) {
+                grupos[indice] = [];
+            }
+
+            grupos[indice].push(item);
+
+            return grupos;
+        }, {});
+
+        const arraysDeGrupos = Object.values(gruposPorIndice);
+        const arrayverifi = arraysDeGrupos[0];
+
+        const resultadoFinal = arrayverifi.flatMap(item => {
+            const fechas = [];
+            const fechaActual = moment(fechaInicial);
+
+            while (fechaActual.isSameOrBefore(fechaFinal)) {
+                let dayToConsider = Math.min(fechaActual.date(), 28); 
+
+                fechas.push({ ...item, fecha: fechaActual.set('date', dayToConsider).format('YYYY-MM-DD') });
+
+                switch (item.PERIODICIDAD) {
+                    case 'Diario':
+                        fechaActual.add(getPeriodoValue(item.PERIODO), 'days');
+                        break;
+                    case 'Semanal':
+                        fechaActual.add(getPeriodoValue(item.PERIODO), 'weeks');
+                        break;
+                    case 'Mensual':
+                        fechaActual.add(getPeriodoValue(item.PERIODO), 'months');
+                        break;
+                    case 'Anual':
+                        fechaActual.add(getPeriodoValue(item.PERIODO), 'years');
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            return fechas;
+        });
+
+        const final = resultadoFinal.map(item => ({
+            ID_EQUIPO: item.ID_EQUIPO,
+            fecha: item.fecha
+        }));
+
+        let existeTarea = false;
+
+        for (const item of final) {
+            try {
+                const countQuery = await pool.query("SELECT COUNT(*) as count FROM Tareas WHERE Fecha = ? AND Id_Equipo = ?", [item.fecha, item.ID_EQUIPO]);
+                const countResult = countQuery[0].count;
         
-        console.log(valores);
+                if (countResult > 0) {
+                    existeTarea = true;
+                    break;
+                }
+            } catch (error) {
+                console.error(`Error al ejecutar la consulta COUNT para el equipo ${item.ID_EQUIPO} y la fecha ${item.fecha}:`, error);
+            }
+        }
+        
+        if (existeTarea) {
+            res.send("positiva");
+        } else {
+            res.send("negativa");
+        }
+
+        function getPeriodoValue(periodo) {
+            switch (periodo) {
+                case 'TLD':
+                    return 1;
+                case 'TLS':
+                    return 1;
+                case 'TLM':
+                    return 1;
+                case 'TLA':
+                    return 1;
+                default:
+                    return parseInt(periodo) || 1;
+            }
+        }
     } catch (error) {
         console.log(error);
     }
-    console.log("Segunda verificación");
+});
+
+router.post('/verificar_tareas2', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
+    try {
+
+        const maximo = req.app.locals.maximo;
+        const { date1, ano1, date2, ano2, tecnico, valoresColumnas } = req.body;
+        const fechaInicial = moment(`${ano1}-${date1}`, 'YYYY-MMM').startOf('month').format('YYYY-MM-DD');
+        const fechaFinal = moment(`${ano2}-${date2}`, 'YYYY-MMM').endOf('month').format('YYYY-MM-DD');
+        const valores = valoresColumnas.map(function (row) {
+            return row.ID;
+        });
+
+        const ids = [valores];
+        const verificacion = await pool.query(`
+            SELECT
+                EP.ep_id_equipo AS ID_EQUIPO,
+                EP.ep_id_tipo_protocolo AS TIPO_PROTOCOLO,
+                EP.ep_id_protocolo AS PROTOCOLO,
+                CD.c_detalle_id AS ID_CICLO,
+                CD.c_detalle_periodicidad AS PERIODICIDAD,
+                CD.c_detalle_periodo AS PERIODO,
+                TP.Indice AS INDICE
+            FROM
+                EquipoProtocolo EP
+                JOIN Ciclo_equipos CE ON CE.equipo_id = EP.ep_id_equipo
+                JOIN Ciclos_detalle CD ON CD.c_detalle_id = CE.equipo_ciclo
+                    AND CD.c_detalle_ttarea = EP.ep_id_tipo_protocolo
+                JOIN TipoProtocolo TP ON TP.Id = EP.ep_id_tipo_protocolo
+            WHERE
+                EP.ep_id_equipo IN ? ORDER BY TP.Indice ASC;`, [ids]);
+
+        const resultadoConTecnico = verificacion.map(item => ({ ...item, tecnico }));
+
+        const gruposPorIndice = resultadoConTecnico.reduce((grupos, item) => {
+            const indice = item.INDICE;
+
+            if (!grupos[indice]) {
+                grupos[indice] = [];
+            }
+
+            grupos[indice].push(item);
+
+            return grupos;
+        }, {});
+
+        const arraysDeGrupos = Object.values(gruposPorIndice);
+        const arrayverifi = arraysDeGrupos[0];
+
+        const resultadoFinal = arrayverifi.flatMap(item => {
+            const fechas = [];
+            const fechaActual = moment(fechaInicial);
+
+            while (fechaActual.isSameOrBefore(fechaFinal)) {
+                let dayToConsider = Math.min(fechaActual.date(), 28); 
+
+                fechas.push({ ...item, fecha: fechaActual.set('date', dayToConsider).format('YYYY-MM-DD') });
+
+                switch (item.PERIODICIDAD) {
+                    case 'Diario':
+                        fechaActual.add(getPeriodoValue(item.PERIODO), 'days');
+                        break;
+                    case 'Semanal':
+                        fechaActual.add(getPeriodoValue(item.PERIODO), 'weeks');
+                        break;
+                    case 'Mensual':
+                        fechaActual.add(getPeriodoValue(item.PERIODO), 'months');
+                        break;
+                    case 'Anual':
+                        fechaActual.add(getPeriodoValue(item.PERIODO), 'years');
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            return fechas;
+        });
+
+        const final = resultadoFinal.map(item => ({
+            ID_EQUIPO: item.ID_EQUIPO,
+            fecha: item.fecha
+        }));
+
+        let existeTarea = false;
+
+        for (const item of final) {
+            try {
+                const countQuery = await pool.query("SELECT COUNT(*) as count FROM Tareas WHERE Fecha = ?", [item.fecha]);
+                const countResult = countQuery[0].count;
+        
+                if (countResult > maximo) {
+                    existeTarea = true;
+                    break;
+                }
+            } catch (error) {
+                console.error(`Error al ejecutar la consulta COUNT para el equipo ${item.ID_EQUIPO} y la fecha ${item.fecha}:`, error);
+            }
+        }
+
+        if(existeTarea){
+            res.send("pasado")
+        }else{
+            res.send("no pasado")
+        }
+
+        function getPeriodoValue(periodo) {
+            switch (periodo) {
+                case 'TLD':
+                    return 1;
+                case 'TLS':
+                    return 1;
+                case 'TLM':
+                    return 1;
+                case 'TLA':
+                    return 1;
+                default:
+                    return parseInt(periodo) || 1;
+            }
+        }
+    } catch (error) {
+        console.log(error);
+    }
 });
 
 router.post('/crear_plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
     
     try {
 
-        const maximo = req.app.locals.maximo;
-        const {date1, ano1, date2, ano2, tecnico, valoresColumnas} = req.body;
+        const {usuario} = req.user;
+        const { date1, ano1, date2, ano2, tecnico, valoresColumnas } = req.body;
         const fechaInicial = moment(`${ano1}-${date1}`, 'YYYY-MMM').startOf('month').format('YYYY-MM-DD');
-        const fechaFinal = moment(`${ano2}-${date2}`, 'YYYY-MMM').endOf('month').format('YYYY-MM-DD'); 
+        const fechaFinal = moment(`${ano2}-${date2}`, 'YYYY-MMM').endOf('month').format('YYYY-MM-DD');
+        const valores = valoresColumnas.map(function (row) {
+            return row.ID;
+        });
 
-        const valoresColumnasConTecnico = valoresColumnas.map(function(row) {
-            return {
-                ID: row.ID,
-                CICLO: row.CICLO,
-                tecnico: tecnico
-            }; 
+        const ids = [valores];
+        const verificacion = await pool.query(`
+            SELECT
+                EP.ep_id_equipo AS ID_EQUIPO,
+                EP.ep_id_tipo_protocolo AS TIPO_PROTOCOLO,
+                EP.ep_id_protocolo AS PROTOCOLO,
+                CD.c_detalle_id AS ID_CICLO,
+                CD.c_detalle_periodicidad AS PERIODICIDAD,
+                CD.c_detalle_periodo AS PERIODO,
+                TP.Indice AS INDICE
+            FROM
+                EquipoProtocolo EP
+                JOIN Ciclo_equipos CE ON CE.equipo_id = EP.ep_id_equipo
+                JOIN Ciclos_detalle CD ON CD.c_detalle_id = CE.equipo_ciclo
+                AND CD.c_detalle_ttarea = EP.ep_id_tipo_protocolo
+                JOIN TipoProtocolo TP ON TP.Id = EP.ep_id_tipo_protocolo
+            WHERE
+                EP.ep_id_equipo IN ? ORDER BY TP.Indice ASC;`, [ids]);
+
+        const resultadoConTecnico = verificacion.map(item => ({ ...item, tecnico }));
+
+        const gruposPorIndice = resultadoConTecnico.reduce((grupos, item) => {
+            const indice = item.INDICE;
+
+            if (!grupos[indice]) {
+                grupos[indice] = [];
+            }
+
+            grupos[indice].push(item);
+
+            return grupos;
+        }, {});
+
+        const arraysDeGrupos = Object.values(gruposPorIndice);
+        const arrayverifi = arraysDeGrupos[0];
+
+        const resultadoFinal = arrayverifi.flatMap(item => {
+            const fechas = [];
+            const fechaActual = moment(fechaInicial);
+
+            while (fechaActual.isSameOrBefore(fechaFinal)) {
+                let dayToConsider = Math.min(fechaActual.date(), 28); 
+
+                fechas.push({ ...item, fecha: fechaActual.set('date', dayToConsider).format('YYYY-MM-DD') });
+
+                switch (item.PERIODICIDAD) {
+                    case 'Diario':
+                        fechaActual.add(getPeriodoValue(item.PERIODO), 'days');
+                        break;
+                    case 'Semanal':
+                        fechaActual.add(getPeriodoValue(item.PERIODO), 'weeks');
+                        break;
+                    case 'Mensual':
+                        fechaActual.add(getPeriodoValue(item.PERIODO), 'months');
+                        break;
+                    case 'Anual':
+                        fechaActual.add(getPeriodoValue(item.PERIODO), 'years');
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            return fechas;
+        });
+
+        const final = resultadoFinal.map(item => ({
+            Fecha: item.fecha,  
+            Id_Tecnico: item.tecnico, 
+            Id_Equipo: item.ID_EQUIPO,
+            Id_Protocolo: item.PROTOCOLO
+        }));
+
+        const insertIds = [];
+
+        for (const item of final) {
+            try {
+                const result = await pool.query('INSERT INTO Tareas (Fecha, Id_Tecnico, Id_Equipo, Id_Protocolo, Contingente, Prueba) VALUES (?,?,?,?,?,?)', [item.Fecha, item.Id_Tecnico, item.Id_Equipo, item.Id_Protocolo, 0, 0]);
+                insertIds.push(result.insertId);
+            } catch (error) {
+                console.error(`Error al insertar en Tareas: ${error}`);
+            }
+        }
+
+        try {
+            const updateTareas = await pool.query("UPDATE Tareas_Estado SET te_usuario = ?, te_metodo = ? WHERE te_id_tarea IN (?);", [usuario, "C", insertIds]);
+        } catch (error) {
+            console.error(`Error al actualizar Tareas_Estado: ${error}`);
+        }
+
+        const tareas = await pool.query(
+            "SELECT\n" +
+            "	T.Id AS ID,\n" +
+            "	DATE_FORMAT(T.Fecha, '%Y-%m-%d') AS FECHA,\n" +
+            "	Id_Equipo AS EQUIPO\n" +
+            "FROM\n" +
+            "	Tareas T\n" +
+            "WHERE\n" +
+            "	T.Id IN (?)\n" +
+            "ORDER BY T.Fecha ASC;", [insertIds]);
+        
+        const arrayverifi1 = arraysDeGrupos[1];    
+
+        const periodo = parseInt(arrayverifi1[0].PERIODO);
+        const toleranciaDias = 10; 
+        
+        const fechasInicialesExcluidas = fechaInicial; 
+        
+        const tareasCumplenPeriodo = tareas.filter((tarea, index) => {
+            const fechaInicial = moment(`${ano1}-${date1}`, 'YYYY-MMM');
+            const fechaTarea = moment(tarea.FECHA);
+            const diferenciaDias = fechaTarea.diff(fechaInicial, 'days');
+        
+            return diferenciaDias >= 0 &&
+                !fechasInicialesExcluidas.includes(tarea.FECHA) &&
+                (diferenciaDias % periodo <= toleranciaDias || (periodo - diferenciaDias % periodo) <= toleranciaDias);
         });
         
-        console.log(valoresColumnasConTecnico);
+        const tareasCumplenPeriodoConProtocolo = tareasCumplenPeriodo.map(tarea => {
+            const equipoInfo = arrayverifi1.find(info => info.ID_EQUIPO === tarea.EQUIPO);
 
+            if (equipoInfo) {
+                return {
+                    ID: tarea.ID,
+                    PROTOCOLO: equipoInfo.PROTOCOLO,
+                };
+            }
+
+            return tarea;
+        });
+
+        for (const tarea of tareasCumplenPeriodoConProtocolo) {
+            try {
+                await pool.query('UPDATE Tareas SET Id_Protocolo = ? WHERE Id = ?', [tarea.PROTOCOLO, tarea.ID]);
+            } catch (error) {
+                console.error(`Error al actualizar la tarea con ID ${tarea.ID}: ${error}`);
+            }
+        }
+
+        const tareasfinal = await pool.query(
+            "SELECT\n" +
+            "	T.Id AS ID,\n" +
+            "	DATE_FORMAT(T.Fecha, '%Y-%m-%d') AS FECHA,\n" +
+            "	U.Descripcion AS TECNICO,\n" +
+            "	E.Descripcion AS ESTADO,\n" +
+            "	EQ.Codigo AS EQUIPO,\n" +
+            "	TP.Descripcion AS TIPO,\n" +
+            "	P.Descripcion AS PROTOCOLO \n" +
+            "FROM\n" +
+            "	Tareas T\n" +
+            "	INNER JOIN Usuarios U ON U.Id = T.Id_Tecnico\n" +
+            "	INNER JOIN Estados E ON E.Id = T.Id_Estado\n" +
+            "	INNER JOIN Equipos EQ ON EQ.Id = T.Id_Equipo\n" +
+            "	INNER JOIN Protocolos P ON P.Id = T.Id_Protocolo \n" +
+            "	INNER JOIN TipoProtocolo TP ON TP.Id = P.Id_TipoProtocolo\n" +
+            "WHERE\n" +
+            "	T.Id IN (?)\n" +
+            "ORDER BY T.Fecha ASC;", [insertIds]);
+
+            var info = [];
+
+            for (var i = 0; i < tareasfinal.length; i++) {
+                info.push({
+                    Tarea: tareasfinal[i].ID,
+                    Fecha: tareasfinal[i].FECHA,
+                    Técnico: tareasfinal[i].TECNICO,
+                    Estado: tareasfinal[i].ESTADO,
+                    TAG: tareasfinal[i].EQUIPO,
+                    Tipo_de_Protocolo: tareasfinal[i].TIPO,
+                    Protocolo: tareasfinal[i].PROTOCOLO,
+                    Creado_por: usuario
+                });
+            } 
+    
+            var wb = XLSX.utils.book_new();
+            var ws = XLSX.utils.json_to_sheet(info);
+    
+            var range = XLSX.utils.decode_range(ws['!ref']);
+            var colWidths = [];
+            for (var col = range.s.c; col <= range.e.c; col++) {
+                var maxWidth = 0;
+                for (var row = range.s.r; row <= range.e.r; row++) {
+                    var cell_address = {c:col, r:row};
+                    var cell_ref = XLSX.utils.encode_cell(cell_address);
+                    var cell = ws[cell_ref];
+                    if (cell) {
+                        var cellValue = cell.v.toString();
+                        if (cellValue.length > maxWidth) {
+                            maxWidth = cellValue.length;
+                        }
+                    }
+                }
+                colWidths.push({wch:maxWidth});
+            }
+    
+            ws['!cols'] = colWidths;
+    
+            XLSX.utils.book_append_sheet(wb, ws);
+    
+            var buffer = XLSX.write(wb, {type:'buffer', bookType:'xlsx'});    
+            const datemail = new Date().toLocaleDateString('en-GB');
+            const filePathName1 = path.resolve(__dirname, "../views/email/tareas.hbs"); 
+            const mensaje = fs.readFileSync(filePathName1, "utf8");
+            const template = hbs.compile(mensaje);
+            const context = {
+                    datemail, 
+                };
+            const html = template(context); 
+            const email_plan = await pool.query(
+            "SELECT\n" +
+                "	U.Id,\n" +
+                "	U.Email \n" +
+                "FROM\n" +
+                "	Usuarios U \n" +
+                "WHERE\n" +
+                "	U.Id_Perfil = 2 \n" +
+                "	AND U.Id_Cliente = 1 \n" +
+                "	AND U.Activo = 1;"
+            );     
+            const {Email} = req.user;  
+            await transporter.sendMail({
+            from: "SAPMA <sapmadand@sercoing.cl>",
+            to: "marancibia@sercoing.cl",
+            // to: [email_plan, Email],
+            // bcc: "sapmadet@sercoing.cl",
+            subject: "SAPMA - Tareas Creadas",
+            html,
+            attachments: [
+                {
+                filename: "imagen1.png",
+                path: "./src/public/img/imagen1.png",
+                cid: "imagen1",
+    
+                },
+                {
+                filename: 'tareas_'+datemail+'.xlsx',
+                content: buffer
+                }
+            ],
+            });
+    
+
+        res.send("ok");    
+
+        function getPeriodoValue(periodo) {
+            switch (periodo) {
+                case 'TLD':
+                    return 1;
+                case 'TLS':
+                    return 1;
+                case 'TLM':
+                    return 1;
+                case 'TLA':
+                    return 1;
+                default:
+                    return parseInt(periodo) || 1;
+            }
+        }
     } catch (error) {
-
-       console.log(error); 
-
+        console.log(error);
     }
 
 });
