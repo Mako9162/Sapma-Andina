@@ -1,7 +1,6 @@
 var table;
 var table1;
 
-
 $(document).ready(function() {
 
     var year = new Date().getFullYear();
@@ -10,56 +9,6 @@ $(document).ready(function() {
         $('#ano1').append('<option value="' + (year + i) + '">' + (year + i) + '</option>');
         $('#ano2').append('<option value="' + (year + i) + '">' + (year + i) + '</option>');
     }
-
-    // var date1 = document.querySelector('#inicial_plan');
-    // var date2 = document.querySelector('#final_plan');
-
-    // table1 = $('#tabla_verificar').DataTable({
-    //     "searching": true,
-    //     "lengthChange": false,
-    //     "colReorder": true,
-    //     "dom": 'frtip',
-    //     "bDestroy": true, 	
-    //     "bInfo": true,
-    //     "iDisplayLength": 10,
-    //     "autoWidth": true,
-    //     "scrollY": true, 
-    //     "language": {
-    //         "sProcessing": "Procesando...",
-    //         "sLengthMenu": "Mostrar _MENU_ registros",
-    //         "sZeroRecords": "No se encontraron resultados",
-    //         "sEmptyTable": "Ningún dato disponible en esta tabla",
-    //         "sInfo": "Mostrando un total de _TOTAL_ registros",
-    //         "sInfoEmpty": "Mostrando un total de 0 registros",
-    //         "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
-    //         "sInfoPostFix": "",
-    //         "sSearch": "Buscar:",
-    //         "sUrl": "",
-    //         "sInfoThousands": ".",
-    //         "sLoadingRecords": "Cargando...",
-    //         "oPaginate": {
-    //             "sFirst": "Primero",
-    //             "sLast": "Último",
-    //             "sNext": "Siguiente",
-    //             "sPrevious": "Anterior"
-    //         },
-    //         "oAria": {
-    //             "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
-    //             "sSortDescending": ": Activar para ordenar la columna de manera descendente"
-    //         },
-    //         "select" : {
-    //             "rows" : {
-    //                 "_" : "Has seleccionado %d filas",
-    //                 "0" : "Click en una fila para seleccionar",
-    //                 "1" : "Has seleccionado 1 fila"
-    //             }
-    //         }
-    //     }
-    // });
-
-    // date1.addEventListener('change', function() {
-    //     date2.min = this.value;
-    // });	
 
     function _(element)
     {
@@ -162,7 +111,25 @@ $(document).ready(function() {
 
         });
 
-        $("div.botones").html('<button id="seleccionar" class="btn btn-inline btn-secondary btn-sm">Seleccionar</button>'
+        table.on('select', function (e, dt, type, indexes) {
+            var selectedRows = table.rows({ selected: true }).count();
+    
+            if (selectedRows > 5) {
+                table.rows(indexes).deselect();
+            }
+    
+            if (type === 'row') {
+                for (var i = 0; i < indexes.length; i++) {
+                    var rowData = table.row(indexes[i]).data();
+                    if (rowData[8].trim() === 'Sin ciclo asignado') {
+                        table.rows(indexes[i]).deselect();
+                    }
+                }
+            }
+        });
+
+        
+        $("div.botones").html('<button id="seleccionar" class="btn btn-inline btn-secondary btn-sm">Borrar selección</button>'
         )
 
         $('#seleccionar').on('click', function () {
@@ -170,10 +137,20 @@ $(document).ready(function() {
     
             if (table.rows({ selected: true }).count() > 0) {
                 table.rows().deselect();
-            } else {
-                table.rows(visibleRows).select();
             }
         });
+
+        // $('#tabla_plan tbody').on('click', 'tr', function () {
+        //     var visibleRows = table.rows({ search: 'applied' }).nodes();
+
+        //     if (table.rows({ selected: true }).count() >= 5) {
+
+        //         table.row(this).deselect();
+        //     } else {
+
+        //         table.row(this).select();
+        //     }
+        // });
     
     }
 
@@ -226,13 +203,112 @@ $(document).ready(function() {
                         <td>${item.SECTOR}</td>
                         <td hidden="true">${item.IDCICLO}</td>
                         <td>${ciclo}</td>
-                        <td hidden="true"><a>Ver tareas</a></td>
+                        <td><a class="ver-tareas"><center>Ver Tareas</center></a></td>
                     </tr>
                 `);
             });
     
             initDataTable();
         });
+    });
+
+    $('#tabla_plan tbody').on('click', 'a.ver-tareas', function () {
+        var idFila = $(this).closest('tr').find('td:first').text(); 
+        var equipo = $(this).closest('tr').find('td:eq(1)').text();
+
+        $.ajax({
+            url: '/obtener_detalles_tareas',
+            type: 'POST',
+            data: { id: idFila }
+        }).done(function (response) {
+            if (response.success) {
+                var detalles = response.detalles;
+
+                var tablaDetalle = $('#tabla_detalle_tareas tbody');
+                tablaDetalle.empty();
+    
+                detalles.forEach(function (detalle) {
+                    tablaDetalle.append(`
+                        <tr>
+                            <td>${detalle.ID}</td>
+                            <td>${detalle.FECHA}</td>
+                            <td>${detalle.TECNICO}</td>
+                            <td>${detalle.ESTADO}</td>
+                            <td>${detalle.EQUIPO}</td>
+                            <td>${detalle.TIPO}</td>
+                            <td>${detalle.PROTOCOLO}</td>
+                        </tr>
+                    `);
+                });
+
+                table1 = $('#tabla_detalle_tareas').DataTable({
+                    "dom": 'Bfrtp',
+                    'select': {
+                        'style': 'single'
+                    },
+                    "bInfo": true,
+                    "iDisplayLength": 8,
+                    "searching": true,
+                    "lengthChange": false,
+                    "colReorder": true,
+                    "buttons": [
+                        {
+                            "extend": 'excelHtml5',
+                            "text": '<i class="fa fa-file-excel-o"></i>',
+                            "title": 'Tareas_'+ equipo,
+                            "titleAttr": 'Exportar a Excel',
+                            "className": 'btn btn-rounded btn-success'
+                        }    
+                    ],
+                    "language": {
+                        "sProcessing": "Procesando...",
+                        "sLengthMenu": "Mostrar _MENU_ registros",
+                        "sZeroRecords": "No se encontraron resultados",
+                        "sEmptyTable": "Ningún dato disponible en esta tabla",
+                        "sInfo": "Mostrando un total de _TOTAL_ registros",
+                        "sInfoEmpty": "Mostrando un total de 0 registros",
+                        "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                        "sInfoPostFix": "",
+                        "sSearch": "Buscar:",
+                        "sUrl": "",
+                        "sInfoThousands": ".",
+                        "sLoadingRecords": "Cargando...",
+                        "oPaginate": {
+                            "sFirst": "Primero",
+                            "sLast": "Último",
+                            "sNext": "Siguiente",
+                            "sPrevious": "Anterior"
+                        },
+                        "oAria": {
+                            "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                            "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                        },
+                        "select" : {
+                            "rows" : {
+                                "_" : "Has seleccionado %d filas",
+                                "0" : "Click en una fila para seleccionar",
+                                "1" : "Has seleccionado 1 fila"
+                            }
+                        }
+                    }
+                });
+
+                $('#titulo_detalle_tareas').text('Tareas del equipo '+equipo);
+                $('#detalle_tareas').modal('show');
+            } else {
+                console.error(response.error);
+            }
+        });
+    });
+
+    $('#detalle_tareas').on('hidden.bs.modal', function () {
+
+        if (table1) {
+            table1.destroy();
+            table1 = null;
+        }
+
+        $('#tabla_detalle_ciclo tbody').empty();
     });
 
     $('#planificar').on('click', function () {
@@ -245,81 +321,6 @@ $(document).ready(function() {
             swal("Error", "Debe seleccionar uno o varios equipos planificar", "error");
         }
     });
-
-    // $('#planificacion').on('hidden.bs.modal', function (e) {
-    //     $('#inicial_plan').val('');
-    //     $('#final_plan').val('');
-    //     $('#tecnico').val('').trigger('change');
-    //     $('#div_tecnico').hide();
-    //     $('#crear_plan').prop('disabled', true);
-    // });    
-
-    // $('#verificar').on('click', function () {
-    //     var fecha1 = $('#inicial_plan').val();
-    //     var fecha2 = $('#final_plan').val();
-    
-    //     if (!fecha1 || !fecha2) {
-    //         swal("Error", "Ingrese ambas fechas.", "error");
-    //         return;
-    //     }
-
-    //     var filasSeleccionadas = table.rows({ selected: true }).data();
-    //     var idsSeleccionados = filasSeleccionadas.toArray().map(function(row) {
-    //         return row[0]; 
-    //     });
-    //     var fecha_inicial = $('#inicial_plan').val();
-    //     var fecha_final = $('#final_plan').val();
-        
-    //     var data = {
-    //         idsSeleccionados,
-    //         fecha_inicial,
-    //         fecha_final
-    //     }
-    
-    //     $.ajax({
-    //         url: '/verificar',
-    //         type: 'POST',
-    //         data: data,
-    //         success: function(response) {
-    //             if (response && response.length > 0) {
-    //                 $('#tabla_verificar tbody').empty();
-    
-    //                 response.forEach(function(tarea) {
-
-    //                     var fechaFormateada = new Date(tarea.FECHA).toLocaleDateString('es-ES', {
-    //                         day: '2-digit',
-    //                         month: '2-digit',
-    //                         year: 'numeric'
-    //                     });
-
-    //                     var row = '<tr>' +
-    //                         '<td>' + tarea.ID + '</td>' +
-    //                         '<td>' + tarea.EQUIPO + '</td>' +
-    //                         '<td>' + fechaFormateada + '</td>' +
-    //                         '<td>' + tarea.ESTADO + '</td>' +
-    //                         '<td>' + tarea.TECNICO + '</td>' +
-    //                         '</tr>';
-    //                     $('#tabla_verificar tbody').append(row);
-    //                 });
-    //             } 
-
-    //             $('#verificar_tareas').modal('show');
-    //         },
-    //         error: function(error) {
-    //             console.log('Error en la solicitud AJAX:', error);
-    //         }
-    //     });
-    // });
-
-    // $('#cancelar_ver').on('click', function () {
-    //     $('#verificar_tareas').modal('hide');
-    // });
-
-    // $('#ir').on('click', function () {
-    //     $('#crear_plan').prop('disabled', false);
-    //     $('#div_tecnico').show();
-    //     $('#verificar_tareas').modal('hide');
-    // });
 
     $('#crear_plan').on('click', function () {
 
@@ -762,5 +763,7 @@ $(document).ready(function() {
         })
         
     });
+
+
 
 });

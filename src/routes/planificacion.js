@@ -1130,149 +1130,255 @@ router.post('/crear_plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (re
             "	T.Id IN (?)\n" +
             "ORDER BY T.Fecha ASC;", [insertIds]);
         
-        const arrayverifi1 = arraysDeGrupos[1];    
+        const arrayverifi1 = arraysDeGrupos[1];  
 
-        const periodo = parseInt(arrayverifi1[0].PERIODO);
-        const toleranciaDias = 10; 
-        
-        const fechasInicialesExcluidas = fechaInicial; 
-        
-        const tareasCumplenPeriodo = tareas.filter((tarea, index) => {
-            const fechaInicial = moment(`${ano1}-${date1}`, 'YYYY-MMM');
-            const fechaTarea = moment(tarea.FECHA);
-            const diferenciaDias = fechaTarea.diff(fechaInicial, 'days');
-        
-            return diferenciaDias >= 0 &&
-                !fechasInicialesExcluidas.includes(tarea.FECHA) &&
-                (diferenciaDias % periodo <= toleranciaDias || (periodo - diferenciaDias % periodo) <= toleranciaDias);
-        });
-        
-        const tareasCumplenPeriodoConProtocolo = tareasCumplenPeriodo.map(tarea => {
-            const equipoInfo = arrayverifi1.find(info => info.ID_EQUIPO === tarea.EQUIPO);
-
-            if (equipoInfo) {
-                return {
-                    ID: tarea.ID,
-                    PROTOCOLO: equipoInfo.PROTOCOLO,
-                };
-            }
-
-            return tarea;
-        });
-
-        for (const tarea of tareasCumplenPeriodoConProtocolo) {
-            try {
-                await pool.query('UPDATE Tareas SET Id_Protocolo = ? WHERE Id = ?', [tarea.PROTOCOLO, tarea.ID]);
-            } catch (error) {
-                console.error(`Error al actualizar la tarea con ID ${tarea.ID}: ${error}`);
-            }
-        }
-
-        const tareasfinal = await pool.query(
-            "SELECT\n" +
-            "	T.Id AS ID,\n" +
-            "	DATE_FORMAT(T.Fecha, '%Y-%m-%d') AS FECHA,\n" +
-            "	U.Descripcion AS TECNICO,\n" +
-            "	E.Descripcion AS ESTADO,\n" +
-            "	EQ.Codigo AS EQUIPO,\n" +
-            "	TP.Descripcion AS TIPO,\n" +
-            "	P.Descripcion AS PROTOCOLO \n" +
-            "FROM\n" +
-            "	Tareas T\n" +
-            "	INNER JOIN Usuarios U ON U.Id = T.Id_Tecnico\n" +
-            "	INNER JOIN Estados E ON E.Id = T.Id_Estado\n" +
-            "	INNER JOIN Equipos EQ ON EQ.Id = T.Id_Equipo\n" +
-            "	INNER JOIN Protocolos P ON P.Id = T.Id_Protocolo \n" +
-            "	INNER JOIN TipoProtocolo TP ON TP.Id = P.Id_TipoProtocolo\n" +
-            "WHERE\n" +
-            "	T.Id IN (?)\n" +
-            "ORDER BY T.Fecha ASC;", [insertIds]);
-
-            var info = [];
-
-            for (var i = 0; i < tareasfinal.length; i++) {
-                info.push({
-                    Tarea: tareasfinal[i].ID,
-                    Fecha: tareasfinal[i].FECHA,
-                    Técnico: tareasfinal[i].TECNICO,
-                    Estado: tareasfinal[i].ESTADO,
-                    TAG: tareasfinal[i].EQUIPO,
-                    Tipo_de_Protocolo: tareasfinal[i].TIPO,
-                    Protocolo: tareasfinal[i].PROTOCOLO,
-                    Creado_por: usuario
-                });
-            } 
+        if (typeof arrayverifi1 === 'undefined') {
+            
+            const tareasfinal = await pool.query(
+                "SELECT\n" +
+                "	T.Id AS ID,\n" +
+                "	DATE_FORMAT(T.Fecha, '%Y-%m-%d') AS FECHA,\n" +
+                "	U.Descripcion AS TECNICO,\n" +
+                "	E.Descripcion AS ESTADO,\n" +
+                "	EQ.Codigo AS EQUIPO,\n" +
+                "	TP.Descripcion AS TIPO,\n" +
+                "	P.Descripcion AS PROTOCOLO \n" +
+                "FROM\n" +
+                "	Tareas T\n" +
+                "	INNER JOIN Usuarios U ON U.Id = T.Id_Tecnico\n" +
+                "	INNER JOIN Estados E ON E.Id = T.Id_Estado\n" +
+                "	INNER JOIN Equipos EQ ON EQ.Id = T.Id_Equipo\n" +
+                "	INNER JOIN Protocolos P ON P.Id = T.Id_Protocolo \n" +
+                "	INNER JOIN TipoProtocolo TP ON TP.Id = P.Id_TipoProtocolo\n" +
+                "WHERE\n" +
+                "	T.Id IN (?)\n" +
+                "ORDER BY T.Fecha ASC;", [insertIds]);
     
-            var wb = XLSX.utils.book_new();
-            var ws = XLSX.utils.json_to_sheet(info);
+                var info = [];
     
-            var range = XLSX.utils.decode_range(ws['!ref']);
-            var colWidths = [];
-            for (var col = range.s.c; col <= range.e.c; col++) {
-                var maxWidth = 0;
-                for (var row = range.s.r; row <= range.e.r; row++) {
-                    var cell_address = {c:col, r:row};
-                    var cell_ref = XLSX.utils.encode_cell(cell_address);
-                    var cell = ws[cell_ref];
-                    if (cell) {
-                        var cellValue = cell.v.toString();
-                        if (cellValue.length > maxWidth) {
-                            maxWidth = cellValue.length;
+                for (var i = 0; i < tareasfinal.length; i++) {
+                    info.push({
+                        Tarea: tareasfinal[i].ID,
+                        Fecha: tareasfinal[i].FECHA,
+                        Técnico: tareasfinal[i].TECNICO,
+                        Estado: tareasfinal[i].ESTADO,
+                        TAG: tareasfinal[i].EQUIPO,
+                        Tipo_de_Protocolo: tareasfinal[i].TIPO,
+                        Protocolo: tareasfinal[i].PROTOCOLO,
+                        Creado_por: usuario
+                    });
+                } 
+        
+                var wb = XLSX.utils.book_new();
+                var ws = XLSX.utils.json_to_sheet(info);
+        
+                var range = XLSX.utils.decode_range(ws['!ref']);
+                var colWidths = [];
+                for (var col = range.s.c; col <= range.e.c; col++) {
+                    var maxWidth = 0;
+                    for (var row = range.s.r; row <= range.e.r; row++) {
+                        var cell_address = {c:col, r:row};
+                        var cell_ref = XLSX.utils.encode_cell(cell_address);
+                        var cell = ws[cell_ref];
+                        if (cell) {
+                            var cellValue = cell.v.toString();
+                            if (cellValue.length > maxWidth) {
+                                maxWidth = cellValue.length;
+                            }
                         }
                     }
+                    colWidths.push({wch:maxWidth});
                 }
-                colWidths.push({wch:maxWidth});
-            }
+        
+                ws['!cols'] = colWidths;
+        
+                XLSX.utils.book_append_sheet(wb, ws);
+        
+                var buffer = XLSX.write(wb, {type:'buffer', bookType:'xlsx'});    
+                const datemail = new Date().toLocaleDateString('en-GB');
+                const filePathName1 = path.resolve(__dirname, "../views/email/tareas.hbs"); 
+                const mensaje = fs.readFileSync(filePathName1, "utf8");
+                const template = hbs.compile(mensaje);
+                const context = {
+                        datemail, 
+                    };
+                const html = template(context); 
+                const email_plan = await pool.query(
+                "SELECT\n" +
+                    "	U.Id,\n" +
+                    "	U.Email \n" +
+                    "FROM\n" +
+                    "	Usuarios U \n" +
+                    "WHERE\n" +
+                    "	U.Id_Perfil = 2 \n" +
+                    "	AND U.Id_Cliente = 1 \n" +
+                    "	AND U.Activo = 1;"
+                );     
+                const {Email} = req.user;  
+                await transporter.sendMail({
+                from: "SAPMA <sapmadand@sercoing.cl>",
+                to: "marancibia@sercoing.cl",
+                // to: [email_plan, Email],
+                // bcc: "sapmadet@sercoing.cl",
+                subject: "SAPMA - Tareas Creadas",
+                html,
+                attachments: [
+                    {
+                    filename: "imagen1.png",
+                    path: "./src/public/img/imagen1.png",
+                    cid: "imagen1",
+        
+                    },
+                    {
+                    filename: 'tareas_'+datemail+'.xlsx',
+                    content: buffer
+                    }
+                ],
+                });
+            res.send("ok"); 
+
+        } else {
+            
+            const periodo = parseInt(arrayverifi1[0].PERIODO);
+            const toleranciaDias = 10; 
+            
+            const fechasInicialesExcluidas = fechaInicial; 
+            
+            const tareasCumplenPeriodo = tareas.filter((tarea, index) => {
+                const fechaInicial = moment(`${ano1}-${date1}`, 'YYYY-MMM');
+                const fechaTarea = moment(tarea.FECHA);
+                const diferenciaDias = fechaTarea.diff(fechaInicial, 'days');
+            
+                return diferenciaDias >= 0 &&
+                    !fechasInicialesExcluidas.includes(tarea.FECHA) &&
+                    (diferenciaDias % periodo <= toleranciaDias || (periodo - diferenciaDias % periodo) <= toleranciaDias);
+            });
+            
+            const tareasCumplenPeriodoConProtocolo = tareasCumplenPeriodo.map(tarea => {
+                const equipoInfo = arrayverifi1.find(info => info.ID_EQUIPO === tarea.EQUIPO);
     
-            ws['!cols'] = colWidths;
-    
-            XLSX.utils.book_append_sheet(wb, ws);
-    
-            var buffer = XLSX.write(wb, {type:'buffer', bookType:'xlsx'});    
-            const datemail = new Date().toLocaleDateString('en-GB');
-            const filePathName1 = path.resolve(__dirname, "../views/email/tareas.hbs"); 
-            const mensaje = fs.readFileSync(filePathName1, "utf8");
-            const template = hbs.compile(mensaje);
-            const context = {
-                    datemail, 
-                };
-            const html = template(context); 
-            const email_plan = await pool.query(
-            "SELECT\n" +
-                "	U.Id,\n" +
-                "	U.Email \n" +
-                "FROM\n" +
-                "	Usuarios U \n" +
-                "WHERE\n" +
-                "	U.Id_Perfil = 2 \n" +
-                "	AND U.Id_Cliente = 1 \n" +
-                "	AND U.Activo = 1;"
-            );     
-            const {Email} = req.user;  
-            await transporter.sendMail({
-            from: "SAPMA <sapmadand@sercoing.cl>",
-            to: "marancibia@sercoing.cl",
-            // to: [email_plan, Email],
-            // bcc: "sapmadet@sercoing.cl",
-            subject: "SAPMA - Tareas Creadas",
-            html,
-            attachments: [
-                {
-                filename: "imagen1.png",
-                path: "./src/public/img/imagen1.png",
-                cid: "imagen1",
-    
-                },
-                {
-                filename: 'tareas_'+datemail+'.xlsx',
-                content: buffer
+                if (equipoInfo) {
+                    return {
+                        ID: tarea.ID,
+                        PROTOCOLO: equipoInfo.PROTOCOLO,
+                    };
                 }
-            ],
+    
+                return tarea;
             });
     
-
-        res.send("ok");    
-
+            for (const tarea of tareasCumplenPeriodoConProtocolo) {
+                try {
+                    await pool.query('UPDATE Tareas SET Id_Protocolo = ? WHERE Id = ?', [tarea.PROTOCOLO, tarea.ID]);
+                } catch (error) {
+                    console.error(`Error al actualizar la tarea con ID ${tarea.ID}: ${error}`);
+                }
+            }
+    
+            const tareasfinal = await pool.query(
+                "SELECT\n" +
+                "	T.Id AS ID,\n" +
+                "	DATE_FORMAT(T.Fecha, '%Y-%m-%d') AS FECHA,\n" +
+                "	U.Descripcion AS TECNICO,\n" +
+                "	E.Descripcion AS ESTADO,\n" +
+                "	EQ.Codigo AS EQUIPO,\n" +
+                "	TP.Descripcion AS TIPO,\n" +
+                "	P.Descripcion AS PROTOCOLO \n" +
+                "FROM\n" +
+                "	Tareas T\n" +
+                "	INNER JOIN Usuarios U ON U.Id = T.Id_Tecnico\n" +
+                "	INNER JOIN Estados E ON E.Id = T.Id_Estado\n" +
+                "	INNER JOIN Equipos EQ ON EQ.Id = T.Id_Equipo\n" +
+                "	INNER JOIN Protocolos P ON P.Id = T.Id_Protocolo \n" +
+                "	INNER JOIN TipoProtocolo TP ON TP.Id = P.Id_TipoProtocolo\n" +
+                "WHERE\n" +
+                "	T.Id IN (?)\n" +
+                "ORDER BY T.Fecha ASC;", [insertIds]);
+    
+                var info = [];
+    
+                for (var i = 0; i < tareasfinal.length; i++) {
+                    info.push({
+                        Tarea: tareasfinal[i].ID,
+                        Fecha: tareasfinal[i].FECHA,
+                        Técnico: tareasfinal[i].TECNICO,
+                        Estado: tareasfinal[i].ESTADO,
+                        TAG: tareasfinal[i].EQUIPO,
+                        Tipo_de_Protocolo: tareasfinal[i].TIPO,
+                        Protocolo: tareasfinal[i].PROTOCOLO,
+                        Creado_por: usuario
+                    });
+                } 
+        
+                var wb = XLSX.utils.book_new();
+                var ws = XLSX.utils.json_to_sheet(info);
+        
+                var range = XLSX.utils.decode_range(ws['!ref']);
+                var colWidths = [];
+                for (var col = range.s.c; col <= range.e.c; col++) {
+                    var maxWidth = 0;
+                    for (var row = range.s.r; row <= range.e.r; row++) {
+                        var cell_address = {c:col, r:row};
+                        var cell_ref = XLSX.utils.encode_cell(cell_address);
+                        var cell = ws[cell_ref];
+                        if (cell) {
+                            var cellValue = cell.v.toString();
+                            if (cellValue.length > maxWidth) {
+                                maxWidth = cellValue.length;
+                            }
+                        }
+                    }
+                    colWidths.push({wch:maxWidth});
+                }
+        
+                ws['!cols'] = colWidths;
+        
+                XLSX.utils.book_append_sheet(wb, ws);
+        
+                var buffer = XLSX.write(wb, {type:'buffer', bookType:'xlsx'});    
+                const datemail = new Date().toLocaleDateString('en-GB');
+                const filePathName1 = path.resolve(__dirname, "../views/email/tareas.hbs"); 
+                const mensaje = fs.readFileSync(filePathName1, "utf8");
+                const template = hbs.compile(mensaje);
+                const context = {
+                        datemail, 
+                    };
+                const html = template(context); 
+                const email_plan = await pool.query(
+                "SELECT\n" +
+                    "	U.Id,\n" +
+                    "	U.Email \n" +
+                    "FROM\n" +
+                    "	Usuarios U \n" +
+                    "WHERE\n" +
+                    "	U.Id_Perfil = 2 \n" +
+                    "	AND U.Id_Cliente = 1 \n" +
+                    "	AND U.Activo = 1;"
+                );     
+                const {Email} = req.user;  
+                await transporter.sendMail({
+                from: "SAPMA <sapmadand@sercoing.cl>",
+                to: "marancibia@sercoing.cl",
+                // to: [email_plan, Email],
+                // bcc: "sapmadet@sercoing.cl",
+                subject: "SAPMA - Tareas Creadas",
+                html,
+                attachments: [
+                    {
+                    filename: "imagen1.png",
+                    path: "./src/public/img/imagen1.png",
+                    cid: "imagen1",
+        
+                    },
+                    {
+                    filename: 'tareas_'+datemail+'.xlsx',
+                    content: buffer
+                    }
+                ],
+                });
+            res.send("ok"); 
+        }
+         
         function getPeriodoValue(periodo) {
             switch (periodo) {
                 case 'TLD':
@@ -1287,6 +1393,9 @@ router.post('/crear_plan', isLoggedIn, authRole(['Plan', 'Admincli']), async (re
                     return parseInt(periodo) || 1;
             }
         }
+
+
+
     } catch (error) {
         console.log(error);
     }
@@ -1911,6 +2020,37 @@ function insertTarea(resultado) {
         });
     });
 }
+
+router.post('/obtener_detalles_tareas', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
+    try {
+        const { id } = req.body;
+
+        const consulta = await pool.query("SELECT\n" +
+            "    T.Id AS ID,\n" +
+            "    DATE_FORMAT( T.Fecha, '%Y-%m-%d' ) AS FECHA,\n" +
+            "    U.Descripcion AS TECNICO,\n" +
+            "    E.Descripcion AS ESTADO,\n" +
+            "    EQ.Codigo AS EQUIPO,\n" +
+            "    TP.Descripcion AS TIPO,\n" +
+            "    P.Descripcion AS PROTOCOLO \n" +
+            "FROM\n" +
+            "    Tareas T\n" +
+            "    INNER JOIN Usuarios U ON U.Id = T.Id_Tecnico\n" +
+            "    INNER JOIN Estados E ON E.Id = T.Id_Estado\n" +
+            "    INNER JOIN Equipos EQ ON EQ.Id = T.Id_Equipo\n" +
+            "    INNER JOIN Protocolos P ON P.Id = T.Id_Protocolo\n" +
+            "    INNER JOIN TipoProtocolo TP ON TP.Id = P.Id_TipoProtocolo \n" +
+            "WHERE\n" +
+            "    T.Id_Equipo = ? \n" +
+            "ORDER BY\n" +
+            "    T.Fecha ASC;", [id]);
+
+        res.json({ success: true, detalles: consulta });
+    } catch (error) {
+        res.json({ success: false, error: error.message });
+    }
+});
+
 
 module.exports = router;
 
