@@ -3,12 +3,14 @@ var table1;
 
 $(document).ready(function() {
 
-    var year = new Date().getFullYear();
+    var currentYear = new Date().getFullYear();
 
-    for (var i = 0; i < 2; i++) {
-        $('#ano1').append('<option value="' + (year + i) + '">' + (year + i) + '</option>');
-        $('#ano2').append('<option value="' + (year + i) + '">' + (year + i) + '</option>');
-    }
+    for (var i = -10; i <= 10; i++) {
+        var yearToAdd = currentYear + i;
+        var selectedAttribute = (i === 0) ? 'selected' : ''; 
+        $('#ano1').append('<option value="' + yearToAdd + '" ' + selectedAttribute + '>' + yearToAdd + '</option>');
+        $('#ano2').append('<option value="' + yearToAdd + '" ' + selectedAttribute + '>' + yearToAdd + '</option>');
+    }  
 
     function _(element)
     {
