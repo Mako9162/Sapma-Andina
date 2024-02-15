@@ -1107,7 +1107,7 @@ EP.ep_id_equipo IN ? ORDER BY TP.Indice ASC;`, [ids]);
         }
 
         try {
-            const updateTareas = await pool.query("UPDATE Tareas_Validacion SET Tv_usuario = ?, Tv_metodo = ? WHERE Tv_Id_Tarea IN (?);", [usuario, "C", insertIds]);
+            const updateTareas = await pool.query("UPDATE Tareas_Estado SET te_usuario = ?, te_metodo = ? WHERE te_Id_Tarea IN (?);", [usuario, "C", insertIds]);
         } catch (error) {
             console.error(`Error al actualizar Tareas_Estado: ${error}`);
         }
@@ -1638,7 +1638,7 @@ router.post('/verificacion_tareas', isLoggedIn, upload.single('file'), authRole(
             throw new Error('La hoja "CARGA" no está presente en el archivo.');
         }
 
-        const columnsToExtract = [0, 2, 4];
+        const columnsToExtract = [0, 2, 5];
 
         const data = [];
 
@@ -1976,7 +1976,7 @@ router.post('/planificacion_archivo', isLoggedIn, upload.single('file'), authRol
 
         const updatePromises = insertIds.map((taskId) => {
             return new Promise((resolve, reject) => {
-                const updateQuery = 'UPDATE Tareas_Validacion SET Tv_usuario = ?, Tv_metodo = ? WHERE Tv_Id_Tarea = ?';
+                const updateQuery = 'UPDATE Tareas_Estado SET te_usuario = ?, te_metodo = ? WHERE te_Id_Tarea = ?';
 
                 pool.query(updateQuery, [usuario, 'M', taskId], (updateError, updateResults, updateFields) => {
                     if (updateError) {
