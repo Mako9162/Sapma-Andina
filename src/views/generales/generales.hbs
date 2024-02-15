@@ -118,16 +118,15 @@
 								<th>Tarea</th>
 								<th>Fecha</th>
 								<th>Tag</th>
-								<th>Técnico planificado</th>
+								<th>Técnico planificador</th>
 								<th>Gerencia</th>
 								<th>Area</th>
 								<th>Sector</th>
 								<th>Tipo de servicio</th>
-								<th>Técnico</th>
 								<th>Estado de tarea</th>
 								<th>Estado equipo</th>
 								<th>Observación estado</th>
-								<th>Repuestos</th>
+								{{!-- <th>Repuestos</th> --}}
 								<th>Ver</th>
 							</tr>
 						<tbody>
@@ -142,11 +141,10 @@
 								<td>{{AREA}}</td>
 								<td>{{SECTOR}}</td>
 								<td>{{SERVICIO}}</td>
-								<td>{{TECNICO}}</td>
 								<td>{{ESTADO}}</td>
 								<td>{{ESTADO_EQUIPO}}</td>
 								<td>{{OBSERVACION_ESTADO}}</td>
-								<td>{{REPUESTOS}}</td>
+								{{!-- <td>{{REPUESTOS}}</td> --}}
 								{{#ifEquals ESTADO "Terminada sin validar"}}
 									<td><center><a href="/protocolo/{{ IDT }}" class="btn btn-inline btn-primary btn-sm ladda-button" target="_blank"><i class="fa fa-file-archive-o"></i></a></center></td>	
 								{{else}}
