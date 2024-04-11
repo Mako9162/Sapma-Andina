@@ -997,12 +997,12 @@ router.post('/guardar_equipo', isLoggedIn, authRole(['Plan', 'Admincli']), async
                 
                 const obs_final = date1+" | "+Login+" | OBS: "+obs_dand;
 
-                const cuarta = await pool.query("INSERT INTO Equipos_Dinamicos (ed_serie, ed_certificacion, ed_marca, ed_modelo, ed_peso, ed_agente, ed_equipo_critico, ed_tipo_equipo, ed_activo, ed_observacion) Values\n" +
-                "(?,?,?,?,?,?,?,?,?,?);", [serie, cer, marca, modelo, pesoConMedida, agente, critico, tipoe, 1 , obs_final]);
+                const cuarta = await pool.query("INSERT INTO Equipos_Dinamicos (ed_serie, ed_certificacion, ed_marca, ed_modelo, ed_peso, ed_agente, ed_equipo_critico, ed_tipo_equipo, ed_activo, ed_observacion, ed_ph) Values\n" +
+                "(?,?,?,?,?,?,?,?,?,?,?);", [serie, cer, marca, modelo, pesoConMedida, agente, critico, tipoe, 1 , obs_final, ph]);
     
                 const obs = "REGISTRADO POR: "+Login;
     
-                const quinta = await pool.query("INSERT INTO Equipos_LOG (el_Id_equipo, el_Id_estado, el_Id_usuario, el_Fecha, el_Observacion) VALUES (?,?,?, NOW(), ?);",
+                const quinta = await pool.query("INSERT INTO Equnpm startipos_LOG (el_Id_equipo, el_Id_estado, el_Id_usuario, el_Fecha, el_Observacion) VALUES (?,?,?, NOW(), ?);",
                 [newId, 1, Id, obs]);
     
                 res.json({message: "Equipo creado"});

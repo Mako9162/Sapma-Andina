@@ -20,6 +20,7 @@
     "connect-flash": "^0.1.1",
     "cors": "^2.8.5",
     "cron": "^2.2.0",
+    "crypto": "^1.0.1",
     "D": "^1.0.0",
     "download": "^8.0.0",
     "download-pdf": "^0.1.6",
@@ -45,12 +46,15 @@
     "npm": "^9.8.1",
     "passport": "^0.6.0",
     "passport-local": "^1.0.0",
+    "puppeteer": "^22.6.0",
     "python-shell": "^3.0.1",
     "request-promise": "^0.0.1",
     "request-promise-native": "^0.0.0",
     "ssh2": "^1.11.0",
     "timeago.js": "^4.0.2",
     "tunnel-ssh": "^4.1.6",
-    "xlsx": "^0.18.5"
+    "web-streams-polyfill": "^4.0.0",
+    "xlsx": "^0.18.5",
+    "xlsx-populate": "^1.21.0"
   }
 }

@@ -25,820 +25,819 @@ const transporter = nodemailer.createTransport({
                         },
                     });
 
-const aprob = new Array();
-
-function enviar(  req, res, result){
-    res.render( 'aprob/aprobadas' , { aprob: result });
-}
-
 router.get('/aprobadas', isLoggedIn, authRole(['Cli_C']), async (req, res)=>{
-    await enviar(req, res);
-    // await pool.query('Select * from Estados', (err, result) => {
-    // res.render('protocolos/protocolos', {estados:result} );
-    // });
+    res.render( 'aprob/aprobadas');
 });
 
 router.get('/aprobadasp', isLoggedIn,  async (req, res)=>{
-    await enviar(req, res);
-    // await pool.query('Select * from Estados', (err, result) => {
-    // res.render('protocolos/protocolos', {estados:result} );
-    // });
+    res.render( 'aprob/aprobadas');
 });
 
 router.get('/aprobadasb', isLoggedIn, authRole(['Cli_B', 'GerVer']), async (req, res)=>{
-    await enviar(req, res);
-    // await pool.query('Select * from Estados', (err, result) => {
-    // res.render('protocolos/protocolos', {estados:result} );
-    // });
+    res.render( 'aprob/aprobadas');
 });
 
 router.get('/aprobadasa', isLoggedIn, authRole(['Cli_A']), async (req, res)=>{
-    await enviar(req, res);
-    // await pool.query('Select * from Estados', (err, result) => {
-    // res.render('protocolos/protocolos', {estados:result} );
-    // });
+    res.render( 'aprob/aprobadas');
 });
 
 router.get('/aprobadasd', isLoggedIn, authRole(['Cli_D']), async (req, res)=>{
-    await enviar(req, res);
-    // await pool.query('Select * from Estados', (err, result) => {
-    // res.render('protocolos/protocolos', {estados:result} );
-    // });
+    res.render( 'aprob/aprobadas');
 });
 
 router.get('/aprobadase', isLoggedIn, authRole(['Cli_E']), async (req, res)=>{
-    await enviar(req, res);
-    // await pool.query('Select * from Estados', (err, result) => {
-    // res.render('protocolos/protocolos', {estados:result} );
-    // });
+    res.render( 'aprob/aprobadas');
 });
 
+router.post('/aprobadas', isLoggedIn, authRole(['Cli_C','Cli_B', 'GerVer', 'Cli_A', 'Cli_D', 'Cli_E', 'Admincli', 'Plan']), async (req, res)=>{
+    try {
+        const {tarea} = req.body;
+        const {date1} = req.body;
+        const {date2} = req.body;  
 
+        if (tarea > 0){            
+            
+            const aprob = await pool.query(
+                "SELECT\n" +
+                "        	VD.TAREA AS TAREA,\n" +
+                "        	date_format(VD.FECHA, '%d-%m-%Y') AS FECHA,\n" +
+                "        	VD.ESTADO_TAREA AS ESTADO_TAREA,\n" +
+                "        	VD.SERVICIO AS SERVICIO,\n" +
+                "        	VD.CODIGO AS CODIGO,\n" +
+                "        	VD.GERENCIA AS GERENCIA,\n" +
+                "        	VD.AREA AS AREA,\n" +
+                "        	VD.SECTOR AS SECTOR,\n" +
+                "        	VD.DETALLE_UBICACION AS DETALLE,\n" +
+                "        	VD.UBICACION_TECNICA AS TECNICA,\n" +
+                "        	VT.Val_obs AS OBS,\n" +
+                "        IF\n" +
+                "        	(\n" +
+                "        		VD.ESTADO_EQUIPO = 'SC',\n" +
+                "        		'No aplica',\n" +
+                "        	IF\n" +
+                "        		(\n" +
+                "        			VD.ESTADO_EQUIPO = 'SSR',\n" +
+                "        			'Sistema sin revisar.',\n" +
+                "        		IF\n" +
+                "        			(\n" +
+                "        				VD.ESTADO_EQUIPO = 'SOP',\n" +
+                "        				'Sistema operativo',\n" +
+                "        			IF\n" +
+                "        				(\n" +
+                "        					VD.ESTADO_EQUIPO = 'SOCO',\n" +
+                "        					'Sist. operativo con obs.',\n" +
+                "        				IF\n" +
+                "        					(\n" +
+                "        						VD.ESTADO_EQUIPO = 'SFS',\n" +
+                "        						'Sist. fuera de serv.',\n" +
+                "        					IF\n" +
+                "        					( VD.ESTADO_EQUIPO = 'SNO', 'Sist. no operativo', VD.ESTADO_EQUIPO )))))) AS ESTADO_EQUIPO,\n" +
+                "			IF (VD.OBS_ESTADO_EQUIPO = 'SC', '', CONVERT(CAST(CONVERT(CONCAT(UPPER(LEFT(VD.OBS_ESTADO_EQUIPO,1)), SUBSTRING(VD.OBS_ESTADO_EQUIPO FROM 2))USING latin1) AS BINARY) USING UTF8))	AS OBS_EQUIPO,\n" +
+                "        	VD.REPUESTOS AS REPUESTOS \n" +
+                "        FROM\n" +
+                "        	VIEW_DetalleEquiposDET VD\n" +
+                "        	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
+                "        	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
+                "        	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
+                "           INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
+                "        WHERE\n" +
+                "        	T.Id_Estado = 4 \n" +
+                "           AND U.Descripcion  NOT LIKE '%test' \n" +
+                "           AND VD.TAREA = "+tarea+"\n" +
+                "        ORDER BY\n" +
+                "        	TAREA DESC;"
+            );
 
-router.post('/aprobadas', isLoggedIn, authRole(['Cli_C']), async (req, res)=>{
-    const {tarea} = req.body;
-    const {Id_Cliente} = req.user;
-    const {est} = req.body;
-    const {date1} = req.body;
-    const {date2} = req.body;
-
-    if (tarea > 0){
-        await pool.query(
-                    "SELECT\n" +
-        "        	VD.TAREA AS TAREA,\n" +
-        "        	date_format(VD.FECHA, '%d-%m-%Y') AS FECHA,\n" +
-        "        	VD.ESTADO_TAREA AS ESTADO_TAREA,\n" +
-        "        	VD.SERVICIO AS SERVICIO,\n" +
-        "        	VD.CODIGO AS CODIGO,\n" +
-        "        	VD.GERENCIA AS GERENCIA,\n" +
-        "        	VD.AREA AS AREA,\n" +
-        "        	VD.SECTOR AS SECTOR,\n" +
-        "        	VD.DETALLE_UBICACION AS DETALLE,\n" +
-        "        	VD.UBICACION_TECNICA AS TECNICA,\n" +
-        "        	VT.Val_obs AS OBS,\n" +
-        "        IF\n" +
-        "        	(\n" +
-        "        		VD.ESTADO_EQUIPO = 'SC',\n" +
-        "        		'No aplica',\n" +
-        "        	IF\n" +
-        "        		(\n" +
-        "        			VD.ESTADO_EQUIPO = 'SSR',\n" +
-        "        			'Sistema sin revisar.',\n" +
-        "        		IF\n" +
-        "        			(\n" +
-        "        				VD.ESTADO_EQUIPO = 'SOP',\n" +
-        "        				'Sistema operativo',\n" +
-        "        			IF\n" +
-        "        				(\n" +
-        "        					VD.ESTADO_EQUIPO = 'SOCO',\n" +
-        "        					'Sist. operativo con obs.',\n" +
-        "        				IF\n" +
-        "        					(\n" +
-        "        						VD.ESTADO_EQUIPO = 'SFS',\n" +
-        "        						'Sist. fuera de serv.',\n" +
-        "        					IF\n" +
-        "        					( VD.ESTADO_EQUIPO = 'SNO', 'Sist. no operativo', VD.ESTADO_EQUIPO )))))) AS ESTADO_EQUIPO,\n" +
-        "			IF (VD.OBS_ESTADO_EQUIPO = 'SC', '', CONVERT(CAST(CONVERT(CONCAT(UPPER(LEFT(VD.OBS_ESTADO_EQUIPO,1)), SUBSTRING(VD.OBS_ESTADO_EQUIPO FROM 2))USING latin1) AS BINARY) USING UTF8))	AS OBS_EQUIPO,\n" +
-        "        	VD.REPUESTOS AS REPUESTOS \n" +
-        "        FROM\n" +
-        "        	VIEW_DetalleEquiposDET VD\n" +
-        "        	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-        "        	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
-        "        	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
-        "           INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
-        "        WHERE\n" +
-        "        	T.Id_Estado = 4 \n" +
-        "           AND U.Descripcion  NOT LIKE '%test' \n" +
-        "           AND VD.TAREA = "+tarea+"\n" +
-        "        ORDER BY\n" +
-        "        	TAREA DESC;",
-    (err, result) => { 
-        if (!result.length){
-            res.render( 'aprob/aprobadas' , { title: "No se encuentran tareas en el rango seleccionado!!!" });
+            if(!aprob){
+                res.json({ title: "No se encuentran tareas en el rango seleccionado!!!" });
+            }else{
+                res.json(aprob);
+            }
+        
         }else{
-            aprob.push(result);        
-            enviar(req, res, result);
-        }        
-    });
-    
-    }else{
-        await pool.query(
-            "SELECT\n" +
-            "	VD.TAREA AS TAREA,\n" +
-            "	date_format(VD.FECHA, '%d-%m-%Y') AS FECHA,\n" +
-            "	VD.ESTADO_TAREA AS ESTADO_TAREA,\n" +
-            "	VD.SERVICIO AS SERVICIO,\n" +
-            "	VD.CODIGO AS CODIGO,\n" +
-            "	VD.GERENCIA AS GERENCIA,\n" +
-            "	VD.AREA AS AREA,\n" +
-            "	VD.SECTOR AS SECTOR,\n" +
-            "	VD.DETALLE_UBICACION AS DETALLE,\n" +
-            "	VD.UBICACION_TECNICA AS TECNICA,\n" +
-            "	VT.Val_obs AS OBS,\n" +
-            "IF\n" +
-            "	(\n" +
-            "		VD.ESTADO_EQUIPO = 'SC',\n" +
-            "		'No aplica',\n" +
-            "	IF\n" +
-            "		(\n" +
-            "			VD.ESTADO_EQUIPO = 'SSR',\n" +
-            "			'Sistema sin revisar.',\n" +
-            "		IF\n" +
-            "			(\n" +
-            "				VD.ESTADO_EQUIPO = 'SOP',\n" +
-            "				'Sistema operativo',\n" +
-            "			IF\n" +
-            "				(\n" +
-            "					VD.ESTADO_EQUIPO = 'SOCO',\n" +
-            "					'Sist. operativo con obs.',\n" +
-            "				IF\n" +
-            "					(\n" +
-            "						VD.ESTADO_EQUIPO = 'SFS',\n" +
-            "						'Sist. fuera de serv.',\n" +
-            "					IF\n" +
-            "					( VD.ESTADO_EQUIPO = 'SNO', 'Sist. no operativo', VD.ESTADO_EQUIPO )))))) AS ESTADO_EQUIPO,\n" +
-            "			IF (VD.OBS_ESTADO_EQUIPO = 'SC', '', CONVERT(CAST(CONVERT(CONCAT(UPPER(LEFT(VD.OBS_ESTADO_EQUIPO,1)), SUBSTRING(VD.OBS_ESTADO_EQUIPO FROM 2))USING latin1) AS BINARY) USING UTF8))	AS OBS_EQUIPO,\n" +
-            "	VD.REPUESTOS AS REPUESTOS \n" +
-            "FROM\n" +
-            "	VIEW_DetalleEquiposDET VD\n" +
-            "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-            "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
-            "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
-            "   INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
-            "WHERE\n" +
-            "	T.Id_Estado = 4 \n" +
-            "   AND U.Descripcion  NOT LIKE '%test' \n" +
-            "	AND VD.FECHA BETWEEN \""+date1+"\" AND \""+date2+"\" \n" +
-            "ORDER BY\n" +
-            "	TAREA DESC;",
-             (err, result) => { 
-        if (!result.length){
-            res.render( 'aprob/aprobadas', { title: "No se encuentran tareas en el rango seleccionado!!!" });
-        }else{
-            enviar(req, res, result);
-            aprob.push(result);
+
+            const aprob = await pool.query(
+                "SELECT\n" +
+                "	VD.TAREA AS TAREA,\n" +
+                "	date_format(VD.FECHA, '%d-%m-%Y') AS FECHA,\n" +
+                "	VD.ESTADO_TAREA AS ESTADO_TAREA,\n" +
+                "	VD.SERVICIO AS SERVICIO,\n" +
+                "	VD.CODIGO AS CODIGO,\n" +
+                "	VD.GERENCIA AS GERENCIA,\n" +
+                "	VD.AREA AS AREA,\n" +
+                "	VD.SECTOR AS SECTOR,\n" +
+                "	VD.DETALLE_UBICACION AS DETALLE,\n" +
+                "	VD.UBICACION_TECNICA AS TECNICA,\n" +
+                "	VT.Val_obs AS OBS,\n" +
+                "IF\n" +
+                "	(\n" +
+                "		VD.ESTADO_EQUIPO = 'SC',\n" +
+                "		'No aplica',\n" +
+                "	IF\n" +
+                "		(\n" +
+                "			VD.ESTADO_EQUIPO = 'SSR',\n" +
+                "			'Sistema sin revisar.',\n" +
+                "		IF\n" +
+                "			(\n" +
+                "				VD.ESTADO_EQUIPO = 'SOP',\n" +
+                "				'Sistema operativo',\n" +
+                "			IF\n" +
+                "				(\n" +
+                "					VD.ESTADO_EQUIPO = 'SOCO',\n" +
+                "					'Sist. operativo con obs.',\n" +
+                "				IF\n" +
+                "					(\n" +
+                "						VD.ESTADO_EQUIPO = 'SFS',\n" +
+                "						'Sist. fuera de serv.',\n" +
+                "					IF\n" +
+                "					( VD.ESTADO_EQUIPO = 'SNO', 'Sist. no operativo', VD.ESTADO_EQUIPO )))))) AS ESTADO_EQUIPO,\n" +
+                "			IF (VD.OBS_ESTADO_EQUIPO = 'SC', '', CONVERT(CAST(CONVERT(CONCAT(UPPER(LEFT(VD.OBS_ESTADO_EQUIPO,1)), SUBSTRING(VD.OBS_ESTADO_EQUIPO FROM 2))USING latin1) AS BINARY) USING UTF8))	AS OBS_EQUIPO,\n" +
+                "	VD.REPUESTOS AS REPUESTOS \n" +
+                "FROM\n" +
+                "	VIEW_DetalleEquiposDET VD\n" +
+                "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
+                "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
+                "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
+                "   INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
+                "WHERE\n" +
+                "	T.Id_Estado = 4 \n" +
+                "   AND U.Descripcion  NOT LIKE '%test' \n" +
+                "	AND VD.FECHA BETWEEN \""+date1+"\" AND \""+date2+"\" \n" +
+                "ORDER BY\n" +
+                "	TAREA DESC;"
+            );
+
+            if(!aprob){
+                res.json({ title: "No se encuentran tareas en el rango seleccionado!!!" });
+            }else{
+                res.json(aprob);
+            }
+
         }
-    });
+
+    } catch (error) {
+        console.log(error);
     }
 
 });
 
 router.post('/aprobadasp', isLoggedIn, async (req, res)=>{
-    const {tarea} = req.body;
-    const {Id_Cliente} = req.user;
-    const {est} = req.body;
-    const {date1} = req.body;
-    const {date2} = req.body;
+   
+    try {
+        const {tarea} = req.body;
+        const {date1} = req.body;
+        const {date2} = req.body;  
 
-    if (tarea > 0){
-        await pool.query(
-                    "SELECT\n" +
-        "        	VD.TAREA AS TAREA,\n" +
-        "        	date_format(VD.FECHA, '%d-%m-%Y') AS FECHA,\n" +
-        "        	VD.ESTADO_TAREA AS ESTADO_TAREA,\n" +
-        "        	VD.SERVICIO AS SERVICIO,\n" +
-        "        	VD.CODIGO AS CODIGO,\n" +
-        "        	VD.GERENCIA AS GERENCIA,\n" +
-        "        	VD.AREA AS AREA,\n" +
-        "        	VD.SECTOR AS SECTOR,\n" +
-        "        	VD.DETALLE_UBICACION AS DETALLE,\n" +
-        "        	VD.UBICACION_TECNICA AS TECNICA,\n" +
-        "        	VT.Val_obs AS OBS,\n" +
-        "        IF\n" +
-        "        	(\n" +
-        "        		VD.ESTADO_EQUIPO = 'SC',\n" +
-        "        		'No aplica',\n" +
-        "        	IF\n" +
-        "        		(\n" +
-        "        			VD.ESTADO_EQUIPO = 'SSR',\n" +
-        "        			'Sistema sin revisar.',\n" +
-        "        		IF\n" +
-        "        			(\n" +
-        "        				VD.ESTADO_EQUIPO = 'SOP',\n" +
-        "        				'Sistema operativo',\n" +
-        "        			IF\n" +
-        "        				(\n" +
-        "        					VD.ESTADO_EQUIPO = 'SOCO',\n" +
-        "        					'Sist. operativo con obs.',\n" +
-        "        				IF\n" +
-        "        					(\n" +
-        "        						VD.ESTADO_EQUIPO = 'SFS',\n" +
-        "        						'Sist. fuera de serv.',\n" +
-        "        					IF\n" +
-        "        					( VD.ESTADO_EQUIPO = 'SNO', 'Sist. no operativo', VD.ESTADO_EQUIPO )))))) AS ESTADO_EQUIPO,\n" +
-        "			IF (VD.OBS_ESTADO_EQUIPO = 'SC', '', CONVERT(CAST(CONVERT(CONCAT(UPPER(LEFT(VD.OBS_ESTADO_EQUIPO,1)), SUBSTRING(VD.OBS_ESTADO_EQUIPO FROM 2))USING latin1) AS BINARY) USING UTF8))	AS OBS_EQUIPO,\n" +
-        "        	VD.REPUESTOS AS REPUESTOS \n" +
-        "        FROM\n" +
-        "        	VIEW_DetalleEquiposDET VD\n" +
-        "        	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-        "        	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
-        "        	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
-        "           INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
-        "        WHERE\n" +
-        "        	T.Id_Estado = 4 \n" +
-        "           AND U.Descripcion  NOT LIKE '%test' \n" +
-        "           AND VD.TAREA = "+tarea+"\n" +
-        "        ORDER BY\n" +
-        "        	TAREA DESC;",
-    (err, result) => { 
-        if (!result.length){
-            res.render( 'aprob/aprobadas' , { title: "No se encuentran tareas en el rango seleccionado!!!" });
+        if (tarea > 0){            
+            
+            const aprob = await pool.query(
+                "SELECT\n" +
+                "        	VD.TAREA AS TAREA,\n" +
+                "        	date_format(VD.FECHA, '%d-%m-%Y') AS FECHA,\n" +
+                "        	VD.ESTADO_TAREA AS ESTADO_TAREA,\n" +
+                "        	VD.SERVICIO AS SERVICIO,\n" +
+                "        	VD.CODIGO AS CODIGO,\n" +
+                "        	VD.GERENCIA AS GERENCIA,\n" +
+                "        	VD.AREA AS AREA,\n" +
+                "        	VD.SECTOR AS SECTOR,\n" +
+                "        	VD.DETALLE_UBICACION AS DETALLE,\n" +
+                "        	VD.UBICACION_TECNICA AS TECNICA,\n" +
+                "        	VT.Val_obs AS OBS,\n" +
+                "        IF\n" +
+                "        	(\n" +
+                "        		VD.ESTADO_EQUIPO = 'SC',\n" +
+                "        		'No aplica',\n" +
+                "        	IF\n" +
+                "        		(\n" +
+                "        			VD.ESTADO_EQUIPO = 'SSR',\n" +
+                "        			'Sistema sin revisar.',\n" +
+                "        		IF\n" +
+                "        			(\n" +
+                "        				VD.ESTADO_EQUIPO = 'SOP',\n" +
+                "        				'Sistema operativo',\n" +
+                "        			IF\n" +
+                "        				(\n" +
+                "        					VD.ESTADO_EQUIPO = 'SOCO',\n" +
+                "        					'Sist. operativo con obs.',\n" +
+                "        				IF\n" +
+                "        					(\n" +
+                "        						VD.ESTADO_EQUIPO = 'SFS',\n" +
+                "        						'Sist. fuera de serv.',\n" +
+                "        					IF\n" +
+                "        					( VD.ESTADO_EQUIPO = 'SNO', 'Sist. no operativo', VD.ESTADO_EQUIPO )))))) AS ESTADO_EQUIPO,\n" +
+                "			IF (VD.OBS_ESTADO_EQUIPO = 'SC', '', CONVERT(CAST(CONVERT(CONCAT(UPPER(LEFT(VD.OBS_ESTADO_EQUIPO,1)), SUBSTRING(VD.OBS_ESTADO_EQUIPO FROM 2))USING latin1) AS BINARY) USING UTF8))	AS OBS_EQUIPO,\n" +
+                "        	VD.REPUESTOS AS REPUESTOS \n" +
+                "        FROM\n" +
+                "        	VIEW_DetalleEquiposDET VD\n" +
+                "        	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
+                "        	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
+                "        	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
+                "           INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
+                "        WHERE\n" +
+                "        	T.Id_Estado = 4 \n" +
+                "           AND U.Descripcion  NOT LIKE '%test' \n" +
+                "           AND VD.TAREA = "+tarea+"\n" +
+                "        ORDER BY\n" +
+                "        	TAREA DESC;"
+            );
+
+            if(!aprob){
+                res.json({ title: "No se encuentran tareas en el rango seleccionado!!!" });
+            }else{
+                res.json(aprob);
+            }
+        
         }else{
-            aprob.push(result);        
-            enviar(req, res, result);
-        }        
-    });
-    
-    }else{
-        await pool.query(
-            "SELECT\n" +
-            "	VD.TAREA AS TAREA,\n" +
-            "	date_format(VD.FECHA, '%d-%m-%Y') AS FECHA,\n" +
-            "	VD.ESTADO_TAREA AS ESTADO_TAREA,\n" +
-            "	VD.SERVICIO AS SERVICIO,\n" +
-            "	VD.CODIGO AS CODIGO,\n" +
-            "	VD.GERENCIA AS GERENCIA,\n" +
-            "	VD.AREA AS AREA,\n" +
-            "	VD.SECTOR AS SECTOR,\n" +
-            "	VD.DETALLE_UBICACION AS DETALLE,\n" +
-            "	VD.UBICACION_TECNICA AS TECNICA,\n" +
-            "	VT.Val_obs AS OBS,\n" +
-            "IF\n" +
-            "	(\n" +
-            "		VD.ESTADO_EQUIPO = 'SC',\n" +
-            "		'No aplica',\n" +
-            "	IF\n" +
-            "		(\n" +
-            "			VD.ESTADO_EQUIPO = 'SSR',\n" +
-            "			'Sistema sin revisar.',\n" +
-            "		IF\n" +
-            "			(\n" +
-            "				VD.ESTADO_EQUIPO = 'SOP',\n" +
-            "				'Sistema operativo',\n" +
-            "			IF\n" +
-            "				(\n" +
-            "					VD.ESTADO_EQUIPO = 'SOCO',\n" +
-            "					'Sist. operativo con obs.',\n" +
-            "				IF\n" +
-            "					(\n" +
-            "						VD.ESTADO_EQUIPO = 'SFS',\n" +
-            "						'Sist. fuera de serv.',\n" +
-            "					IF\n" +
-            "					( VD.ESTADO_EQUIPO = 'SNO', 'Sist. no operativo', VD.ESTADO_EQUIPO )))))) AS ESTADO_EQUIPO,\n" +
-            "			IF (VD.OBS_ESTADO_EQUIPO = 'SC', '', CONVERT(CAST(CONVERT(CONCAT(UPPER(LEFT(VD.OBS_ESTADO_EQUIPO,1)), SUBSTRING(VD.OBS_ESTADO_EQUIPO FROM 2))USING latin1) AS BINARY) USING UTF8))	AS OBS_EQUIPO,\n" +
-            "	VD.REPUESTOS AS REPUESTOS \n" +
-            "FROM\n" +
-            "	VIEW_DetalleEquiposDET VD\n" +
-            "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-            "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
-            "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
-            "   INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
-            "WHERE\n" +
-            "	T.Id_Estado = 4 \n" +
-            "   AND U.Descripcion  NOT LIKE '%test' \n" +
-            "	AND VD.FECHA BETWEEN \""+date1+"\" AND \""+date2+"\" \n" +
-            "ORDER BY\n" +
-            "	TAREA DESC;",
-             (err, result) => { 
-        if (!result.length){
-            res.render( 'aprob/aprobadas', { title: "No se encuentran tareas en el rango seleccionado!!!" });
-        }else{
-            enviar(req, res, result);
-            aprob.push(result);
+
+            const aprob = await pool.query(
+                "SELECT\n" +
+                "	VD.TAREA AS TAREA,\n" +
+                "	date_format(VD.FECHA, '%d-%m-%Y') AS FECHA,\n" +
+                "	VD.ESTADO_TAREA AS ESTADO_TAREA,\n" +
+                "	VD.SERVICIO AS SERVICIO,\n" +
+                "	VD.CODIGO AS CODIGO,\n" +
+                "	VD.GERENCIA AS GERENCIA,\n" +
+                "	VD.AREA AS AREA,\n" +
+                "	VD.SECTOR AS SECTOR,\n" +
+                "	VD.DETALLE_UBICACION AS DETALLE,\n" +
+                "	VD.UBICACION_TECNICA AS TECNICA,\n" +
+                "	VT.Val_obs AS OBS,\n" +
+                "IF\n" +
+                "	(\n" +
+                "		VD.ESTADO_EQUIPO = 'SC',\n" +
+                "		'No aplica',\n" +
+                "	IF\n" +
+                "		(\n" +
+                "			VD.ESTADO_EQUIPO = 'SSR',\n" +
+                "			'Sistema sin revisar.',\n" +
+                "		IF\n" +
+                "			(\n" +
+                "				VD.ESTADO_EQUIPO = 'SOP',\n" +
+                "				'Sistema operativo',\n" +
+                "			IF\n" +
+                "				(\n" +
+                "					VD.ESTADO_EQUIPO = 'SOCO',\n" +
+                "					'Sist. operativo con obs.',\n" +
+                "				IF\n" +
+                "					(\n" +
+                "						VD.ESTADO_EQUIPO = 'SFS',\n" +
+                "						'Sist. fuera de serv.',\n" +
+                "					IF\n" +
+                "					( VD.ESTADO_EQUIPO = 'SNO', 'Sist. no operativo', VD.ESTADO_EQUIPO )))))) AS ESTADO_EQUIPO,\n" +
+                "			IF (VD.OBS_ESTADO_EQUIPO = 'SC', '', CONVERT(CAST(CONVERT(CONCAT(UPPER(LEFT(VD.OBS_ESTADO_EQUIPO,1)), SUBSTRING(VD.OBS_ESTADO_EQUIPO FROM 2))USING latin1) AS BINARY) USING UTF8))	AS OBS_EQUIPO,\n" +
+                "	VD.REPUESTOS AS REPUESTOS \n" +
+                "FROM\n" +
+                "	VIEW_DetalleEquiposDET VD\n" +
+                "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
+                "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
+                "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
+                "   INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
+                "WHERE\n" +
+                "	T.Id_Estado = 4 \n" +
+                "   AND U.Descripcion  NOT LIKE '%test' \n" +
+                "	AND VD.FECHA BETWEEN \""+date1+"\" AND \""+date2+"\" \n" +
+                "ORDER BY\n" +
+                "	TAREA DESC;"
+            );
+
+            if(!aprob){
+                res.json({ title: "No se encuentran tareas en el rango seleccionado!!!" });
+            }else{
+                res.json(aprob);
+            }
+
         }
-    });
+
+    } catch (error) {
+        console.log(error);
     }
 
 });
 
 router.post('/aprobadasb', isLoggedIn, authRole(['Cli_B', 'GerVer']), async (req, res)=>{
-    const {tarea} = req.body;
-    const {Id_Cliente} = req.user;
-    const {est} = req.body;
-    const {date1} = req.body;
-    const {date2} = req.body;
+    try {
+        const {tarea} = req.body;
+        const {date1} = req.body;
+        const {date2} = req.body;  
 
-    if (tarea > 0){
-        await pool.query(
-                    "SELECT\n" +
-        "        	VD.TAREA AS TAREA,\n" +
-        "        	date_format(VD.FECHA, '%d-%m-%Y') AS FECHA,\n" +
-        "        	VD.ESTADO_TAREA AS ESTADO_TAREA,\n" +
-        "        	VD.SERVICIO AS SERVICIO,\n" +
-        "        	VD.CODIGO AS CODIGO,\n" +
-        "        	VD.GERENCIA AS GERENCIA,\n" +
-        "        	VD.AREA AS AREA,\n" +
-        "        	VD.SECTOR AS SECTOR,\n" +
-        "        	VD.DETALLE_UBICACION AS DETALLE,\n" +
-        "        	VD.UBICACION_TECNICA AS TECNICA,\n" +
-        "        	VT.Val_obs AS OBS,\n" +
-        "        IF\n" +
-        "        	(\n" +
-        "        		VD.ESTADO_EQUIPO = 'SC',\n" +
-        "        		'No aplica',\n" +
-        "        	IF\n" +
-        "        		(\n" +
-        "        			VD.ESTADO_EQUIPO = 'SSR',\n" +
-        "        			'Sistema sin revisar.',\n" +
-        "        		IF\n" +
-        "        			(\n" +
-        "        				VD.ESTADO_EQUIPO = 'SOP',\n" +
-        "        				'Sistema operativo',\n" +
-        "        			IF\n" +
-        "        				(\n" +
-        "        					VD.ESTADO_EQUIPO = 'SOCO',\n" +
-        "        					'Sist. operativo con obs.',\n" +
-        "        				IF\n" +
-        "        					(\n" +
-        "        						VD.ESTADO_EQUIPO = 'SFS',\n" +
-        "        						'Sist. fuera de serv.',\n" +
-        "        					IF\n" +
-        "        					( VD.ESTADO_EQUIPO = 'SNO', 'Sist. no operativo', VD.ESTADO_EQUIPO )))))) AS ESTADO_EQUIPO,\n" +
-        "			IF (VD.OBS_ESTADO_EQUIPO = 'SC', '', CONVERT(CAST(CONVERT(CONCAT(UPPER(LEFT(VD.OBS_ESTADO_EQUIPO,1)), SUBSTRING(VD.OBS_ESTADO_EQUIPO FROM 2))USING latin1) AS BINARY) USING UTF8))	AS OBS_EQUIPO,\n" +
-        "        	VD.REPUESTOS AS REPUESTOS \n" +
-        "        FROM\n" +
-        "        	VIEW_DetalleEquiposDET VD\n" +
-        "        	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-        "        	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
-        "        	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
-        "           INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
-        "        WHERE\n" +
-        "        	T.Id_Estado = 4 \n" +
-        "           AND U.Descripcion  NOT LIKE '%test' \n" +
-        "           AND VD.TAREA = "+tarea+"\n" +
-        "        ORDER BY\n" +
-        "        	TAREA DESC;",
-    (err, result) => { 
-        if (!result.length){
-            res.render( 'aprob/aprobadas' , { title: "No se encuentran tareas en el rango seleccionado!!!" });
+        if (tarea > 0){            
+            
+            const aprob = await pool.query(
+                "SELECT\n" +
+                "        	VD.TAREA AS TAREA,\n" +
+                "        	date_format(VD.FECHA, '%d-%m-%Y') AS FECHA,\n" +
+                "        	VD.ESTADO_TAREA AS ESTADO_TAREA,\n" +
+                "        	VD.SERVICIO AS SERVICIO,\n" +
+                "        	VD.CODIGO AS CODIGO,\n" +
+                "        	VD.GERENCIA AS GERENCIA,\n" +
+                "        	VD.AREA AS AREA,\n" +
+                "        	VD.SECTOR AS SECTOR,\n" +
+                "        	VD.DETALLE_UBICACION AS DETALLE,\n" +
+                "        	VD.UBICACION_TECNICA AS TECNICA,\n" +
+                "        	VT.Val_obs AS OBS,\n" +
+                "        IF\n" +
+                "        	(\n" +
+                "        		VD.ESTADO_EQUIPO = 'SC',\n" +
+                "        		'No aplica',\n" +
+                "        	IF\n" +
+                "        		(\n" +
+                "        			VD.ESTADO_EQUIPO = 'SSR',\n" +
+                "        			'Sistema sin revisar.',\n" +
+                "        		IF\n" +
+                "        			(\n" +
+                "        				VD.ESTADO_EQUIPO = 'SOP',\n" +
+                "        				'Sistema operativo',\n" +
+                "        			IF\n" +
+                "        				(\n" +
+                "        					VD.ESTADO_EQUIPO = 'SOCO',\n" +
+                "        					'Sist. operativo con obs.',\n" +
+                "        				IF\n" +
+                "        					(\n" +
+                "        						VD.ESTADO_EQUIPO = 'SFS',\n" +
+                "        						'Sist. fuera de serv.',\n" +
+                "        					IF\n" +
+                "        					( VD.ESTADO_EQUIPO = 'SNO', 'Sist. no operativo', VD.ESTADO_EQUIPO )))))) AS ESTADO_EQUIPO,\n" +
+                "			IF (VD.OBS_ESTADO_EQUIPO = 'SC', '', CONVERT(CAST(CONVERT(CONCAT(UPPER(LEFT(VD.OBS_ESTADO_EQUIPO,1)), SUBSTRING(VD.OBS_ESTADO_EQUIPO FROM 2))USING latin1) AS BINARY) USING UTF8))	AS OBS_EQUIPO,\n" +
+                "        	VD.REPUESTOS AS REPUESTOS \n" +
+                "        FROM\n" +
+                "        	VIEW_DetalleEquiposDET VD\n" +
+                "        	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
+                "        	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
+                "        	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
+                "           INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
+                "        WHERE\n" +
+                "        	T.Id_Estado = 4 \n" +
+                "           AND U.Descripcion  NOT LIKE '%test' \n" +
+                "           AND VD.TAREA = "+tarea+"\n" +
+                "        ORDER BY\n" +
+                "        	TAREA DESC;"
+            );
+
+            if(!aprob){
+                res.json({ title: "No se encuentran tareas en el rango seleccionado!!!" });
+            }else{
+                res.json(aprob);
+            }
+        
         }else{
-            aprob.push(result);        
-            enviar(req, res, result);
-        }        
-    });
-    
-    }else{
-        await pool.query(
-            "SELECT\n" +
-            "	VD.TAREA AS TAREA,\n" +
-            "	date_format(VD.FECHA, '%d-%m-%Y') AS FECHA,\n" +
-            "	VD.ESTADO_TAREA AS ESTADO_TAREA,\n" +
-            "	VD.SERVICIO AS SERVICIO,\n" +
-            "	VD.CODIGO AS CODIGO,\n" +
-            "	VD.GERENCIA AS GERENCIA,\n" +
-            "	VD.AREA AS AREA,\n" +
-            "	VD.SECTOR AS SECTOR,\n" +
-            "	VD.DETALLE_UBICACION AS DETALLE,\n" +
-            "	VD.UBICACION_TECNICA AS TECNICA,\n" +
-            "	VT.Val_obs AS OBS,\n" +
-            "IF\n" +
-            "	(\n" +
-            "		VD.ESTADO_EQUIPO = 'SC',\n" +
-            "		'No aplica',\n" +
-            "	IF\n" +
-            "		(\n" +
-            "			VD.ESTADO_EQUIPO = 'SSR',\n" +
-            "			'Sistema sin revisar.',\n" +
-            "		IF\n" +
-            "			(\n" +
-            "				VD.ESTADO_EQUIPO = 'SOP',\n" +
-            "				'Sistema operativo',\n" +
-            "			IF\n" +
-            "				(\n" +
-            "					VD.ESTADO_EQUIPO = 'SOCO',\n" +
-            "					'Sist. operativo con obs.',\n" +
-            "				IF\n" +
-            "					(\n" +
-            "						VD.ESTADO_EQUIPO = 'SFS',\n" +
-            "						'Sist. fuera de serv.',\n" +
-            "					IF\n" +
-            "					( VD.ESTADO_EQUIPO = 'SNO', 'Sist. no operativo', VD.ESTADO_EQUIPO )))))) AS ESTADO_EQUIPO,\n" +
-            "			IF (VD.OBS_ESTADO_EQUIPO = 'SC', '', CONVERT(CAST(CONVERT(CONCAT(UPPER(LEFT(VD.OBS_ESTADO_EQUIPO,1)), SUBSTRING(VD.OBS_ESTADO_EQUIPO FROM 2))USING latin1) AS BINARY) USING UTF8))	AS OBS_EQUIPO,\n" +
-            "	VD.REPUESTOS AS REPUESTOS \n" +
-            "FROM\n" +
-            "	VIEW_DetalleEquiposDET VD\n" +
-            "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-            "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
-            "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
-            "   INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
-            "WHERE\n" +
-            "	T.Id_Estado = 4 \n" +
-            "   AND U.Descripcion  NOT LIKE '%test' \n" +
-            "	AND VD.FECHA BETWEEN \""+date1+"\" AND \""+date2+"\" \n" +
-            "ORDER BY\n" +
-            "	TAREA DESC;",
-             (err, result) => { 
-        if (!result.length){
-            res.render( 'aprob/aprobadas', { title: "No se encuentran tareas en el rango seleccionado!!!" });
-        }else{
-            enviar(req, res, result);
-            aprob.push(result);
+
+            const aprob = await pool.query(
+                "SELECT\n" +
+                "	VD.TAREA AS TAREA,\n" +
+                "	date_format(VD.FECHA, '%d-%m-%Y') AS FECHA,\n" +
+                "	VD.ESTADO_TAREA AS ESTADO_TAREA,\n" +
+                "	VD.SERVICIO AS SERVICIO,\n" +
+                "	VD.CODIGO AS CODIGO,\n" +
+                "	VD.GERENCIA AS GERENCIA,\n" +
+                "	VD.AREA AS AREA,\n" +
+                "	VD.SECTOR AS SECTOR,\n" +
+                "	VD.DETALLE_UBICACION AS DETALLE,\n" +
+                "	VD.UBICACION_TECNICA AS TECNICA,\n" +
+                "	VT.Val_obs AS OBS,\n" +
+                "IF\n" +
+                "	(\n" +
+                "		VD.ESTADO_EQUIPO = 'SC',\n" +
+                "		'No aplica',\n" +
+                "	IF\n" +
+                "		(\n" +
+                "			VD.ESTADO_EQUIPO = 'SSR',\n" +
+                "			'Sistema sin revisar.',\n" +
+                "		IF\n" +
+                "			(\n" +
+                "				VD.ESTADO_EQUIPO = 'SOP',\n" +
+                "				'Sistema operativo',\n" +
+                "			IF\n" +
+                "				(\n" +
+                "					VD.ESTADO_EQUIPO = 'SOCO',\n" +
+                "					'Sist. operativo con obs.',\n" +
+                "				IF\n" +
+                "					(\n" +
+                "						VD.ESTADO_EQUIPO = 'SFS',\n" +
+                "						'Sist. fuera de serv.',\n" +
+                "					IF\n" +
+                "					( VD.ESTADO_EQUIPO = 'SNO', 'Sist. no operativo', VD.ESTADO_EQUIPO )))))) AS ESTADO_EQUIPO,\n" +
+                "			IF (VD.OBS_ESTADO_EQUIPO = 'SC', '', CONVERT(CAST(CONVERT(CONCAT(UPPER(LEFT(VD.OBS_ESTADO_EQUIPO,1)), SUBSTRING(VD.OBS_ESTADO_EQUIPO FROM 2))USING latin1) AS BINARY) USING UTF8))	AS OBS_EQUIPO,\n" +
+                "	VD.REPUESTOS AS REPUESTOS \n" +
+                "FROM\n" +
+                "	VIEW_DetalleEquiposDET VD\n" +
+                "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
+                "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
+                "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
+                "   INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
+                "WHERE\n" +
+                "	T.Id_Estado = 4 \n" +
+                "   AND U.Descripcion  NOT LIKE '%test' \n" +
+                "	AND VD.FECHA BETWEEN \""+date1+"\" AND \""+date2+"\" \n" +
+                "ORDER BY\n" +
+                "	TAREA DESC;"
+            );
+
+            if(!aprob){
+                res.json({ title: "No se encuentran tareas en el rango seleccionado!!!" });
+            }else{
+                res.json(aprob);
+            }
+
         }
-    });
+
+    } catch (error) {
+        console.log(error);
     }
 
 });
 
 router.post('/aprobadasa', isLoggedIn, authRole(['Cli_A']), async (req, res)=>{
-    const {tarea} = req.body;
-    const {Id_Cliente} = req.user;
-    const {est} = req.body;
-    const {date1} = req.body;
-    const {date2} = req.body;
+    try {
+        const {tarea} = req.body;
+        const {date1} = req.body;
+        const {date2} = req.body;  
 
-    if (tarea > 0){
-        await pool.query(
-                    "SELECT\n" +
-        "        	VD.TAREA AS TAREA,\n" +
-        "        	date_format(VD.FECHA, '%d-%m-%Y') AS FECHA,\n" +
-        "        	VD.ESTADO_TAREA AS ESTADO_TAREA,\n" +
-        "        	VD.SERVICIO AS SERVICIO,\n" +
-        "        	VD.CODIGO AS CODIGO,\n" +
-        "        	VD.GERENCIA AS GERENCIA,\n" +
-        "        	VD.AREA AS AREA,\n" +
-        "        	VD.SECTOR AS SECTOR,\n" +
-        "        	VD.DETALLE_UBICACION AS DETALLE,\n" +
-        "        	VD.UBICACION_TECNICA AS TECNICA,\n" +
-        "        	VT.Val_obs AS OBS,\n" +
-        "        IF\n" +
-        "        	(\n" +
-        "        		VD.ESTADO_EQUIPO = 'SC',\n" +
-        "        		'No aplica',\n" +
-        "        	IF\n" +
-        "        		(\n" +
-        "        			VD.ESTADO_EQUIPO = 'SSR',\n" +
-        "        			'Sistema sin revisar.',\n" +
-        "        		IF\n" +
-        "        			(\n" +
-        "        				VD.ESTADO_EQUIPO = 'SOP',\n" +
-        "        				'Sistema operativo',\n" +
-        "        			IF\n" +
-        "        				(\n" +
-        "        					VD.ESTADO_EQUIPO = 'SOCO',\n" +
-        "        					'Sist. operativo con obs.',\n" +
-        "        				IF\n" +
-        "        					(\n" +
-        "        						VD.ESTADO_EQUIPO = 'SFS',\n" +
-        "        						'Sist. fuera de serv.',\n" +
-        "        					IF\n" +
-        "        					( VD.ESTADO_EQUIPO = 'SNO', 'Sist. no operativo', VD.ESTADO_EQUIPO )))))) AS ESTADO_EQUIPO,\n" +
-        "			IF (VD.OBS_ESTADO_EQUIPO = 'SC', '', CONVERT(CAST(CONVERT(CONCAT(UPPER(LEFT(VD.OBS_ESTADO_EQUIPO,1)), SUBSTRING(VD.OBS_ESTADO_EQUIPO FROM 2))USING latin1) AS BINARY) USING UTF8))	AS OBS_EQUIPO,\n" +
-        "        	VD.REPUESTOS AS REPUESTOS \n" +
-        "        FROM\n" +
-        "        	VIEW_DetalleEquiposDET VD\n" +
-        "        	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-        "        	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
-        "        	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
-        "           INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
-        "        WHERE\n" +
-        "        	T.Id_Estado = 4 \n" +
-        "           AND U.Descripcion  NOT LIKE '%test' \n" +
-        "           AND VD.TAREA = "+tarea+"\n" +
-        "        ORDER BY\n" +
-        "        	TAREA DESC;",
-    (err, result) => { 
-        if (!result.length){
-            res.render( 'aprob/aprobadas' , { title: "No se encuentran tareas en el rango seleccionado!!!" });
+        if (tarea > 0){            
+            
+            const aprob = await pool.query(
+                "SELECT\n" +
+                "        	VD.TAREA AS TAREA,\n" +
+                "        	date_format(VD.FECHA, '%d-%m-%Y') AS FECHA,\n" +
+                "        	VD.ESTADO_TAREA AS ESTADO_TAREA,\n" +
+                "        	VD.SERVICIO AS SERVICIO,\n" +
+                "        	VD.CODIGO AS CODIGO,\n" +
+                "        	VD.GERENCIA AS GERENCIA,\n" +
+                "        	VD.AREA AS AREA,\n" +
+                "        	VD.SECTOR AS SECTOR,\n" +
+                "        	VD.DETALLE_UBICACION AS DETALLE,\n" +
+                "        	VD.UBICACION_TECNICA AS TECNICA,\n" +
+                "        	VT.Val_obs AS OBS,\n" +
+                "        IF\n" +
+                "        	(\n" +
+                "        		VD.ESTADO_EQUIPO = 'SC',\n" +
+                "        		'No aplica',\n" +
+                "        	IF\n" +
+                "        		(\n" +
+                "        			VD.ESTADO_EQUIPO = 'SSR',\n" +
+                "        			'Sistema sin revisar.',\n" +
+                "        		IF\n" +
+                "        			(\n" +
+                "        				VD.ESTADO_EQUIPO = 'SOP',\n" +
+                "        				'Sistema operativo',\n" +
+                "        			IF\n" +
+                "        				(\n" +
+                "        					VD.ESTADO_EQUIPO = 'SOCO',\n" +
+                "        					'Sist. operativo con obs.',\n" +
+                "        				IF\n" +
+                "        					(\n" +
+                "        						VD.ESTADO_EQUIPO = 'SFS',\n" +
+                "        						'Sist. fuera de serv.',\n" +
+                "        					IF\n" +
+                "        					( VD.ESTADO_EQUIPO = 'SNO', 'Sist. no operativo', VD.ESTADO_EQUIPO )))))) AS ESTADO_EQUIPO,\n" +
+                "			IF (VD.OBS_ESTADO_EQUIPO = 'SC', '', CONVERT(CAST(CONVERT(CONCAT(UPPER(LEFT(VD.OBS_ESTADO_EQUIPO,1)), SUBSTRING(VD.OBS_ESTADO_EQUIPO FROM 2))USING latin1) AS BINARY) USING UTF8))	AS OBS_EQUIPO,\n" +
+                "        	VD.REPUESTOS AS REPUESTOS \n" +
+                "        FROM\n" +
+                "        	VIEW_DetalleEquiposDET VD\n" +
+                "        	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
+                "        	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
+                "        	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
+                "           INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
+                "        WHERE\n" +
+                "        	T.Id_Estado = 4 \n" +
+                "           AND U.Descripcion  NOT LIKE '%test' \n" +
+                "           AND VD.TAREA = "+tarea+"\n" +
+                "        ORDER BY\n" +
+                "        	TAREA DESC;"
+            );
+
+            if(!aprob){
+                res.json({ title: "No se encuentran tareas en el rango seleccionado!!!" });
+            }else{
+                res.json(aprob);
+            }
+        
         }else{
-            aprob.push(result);        
-            enviar(req, res, result);
-        }        
-    });
-    
-    }else{
-        await pool.query(
-            "SELECT\n" +
-            "	VD.TAREA AS TAREA,\n" +
-            "	date_format(VD.FECHA, '%d-%m-%Y') AS FECHA,\n" +
-            "	VD.ESTADO_TAREA AS ESTADO_TAREA,\n" +
-            "	VD.SERVICIO AS SERVICIO,\n" +
-            "	VD.CODIGO AS CODIGO,\n" +
-            "	VD.GERENCIA AS GERENCIA,\n" +
-            "	VD.AREA AS AREA,\n" +
-            "	VD.SECTOR AS SECTOR,\n" +
-            "	VD.DETALLE_UBICACION AS DETALLE,\n" +
-            "	VD.UBICACION_TECNICA AS TECNICA,\n" +
-            "	VT.Val_obs AS OBS,\n" +
-            "IF\n" +
-            "	(\n" +
-            "		VD.ESTADO_EQUIPO = 'SC',\n" +
-            "		'No aplica',\n" +
-            "	IF\n" +
-            "		(\n" +
-            "			VD.ESTADO_EQUIPO = 'SSR',\n" +
-            "			'Sistema sin revisar.',\n" +
-            "		IF\n" +
-            "			(\n" +
-            "				VD.ESTADO_EQUIPO = 'SOP',\n" +
-            "				'Sistema operativo',\n" +
-            "			IF\n" +
-            "				(\n" +
-            "					VD.ESTADO_EQUIPO = 'SOCO',\n" +
-            "					'Sist. operativo con obs.',\n" +
-            "				IF\n" +
-            "					(\n" +
-            "						VD.ESTADO_EQUIPO = 'SFS',\n" +
-            "						'Sist. fuera de serv.',\n" +
-            "					IF\n" +
-            "					( VD.ESTADO_EQUIPO = 'SNO', 'Sist. no operativo', VD.ESTADO_EQUIPO )))))) AS ESTADO_EQUIPO,\n" +
-            "			IF (VD.OBS_ESTADO_EQUIPO = 'SC', '', CONVERT(CAST(CONVERT(CONCAT(UPPER(LEFT(VD.OBS_ESTADO_EQUIPO,1)), SUBSTRING(VD.OBS_ESTADO_EQUIPO FROM 2))USING latin1) AS BINARY) USING UTF8))	AS OBS_EQUIPO,\n" +
-            "	VD.REPUESTOS AS REPUESTOS \n" +
-            "FROM\n" +
-            "	VIEW_DetalleEquiposDET VD\n" +
-            "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-            "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
-            "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
-            "   INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
-            "WHERE\n" +
-            "	T.Id_Estado = 4 \n" +
-            "   AND U.Descripcion  NOT LIKE '%test' \n" +
-            "	AND VD.FECHA BETWEEN \""+date1+"\" AND \""+date2+"\" \n" +
-            "ORDER BY\n" +
-            "	TAREA DESC;",
-             (err, result) => { 
-        if (!result.length){
-            res.render( 'aprob/aprobadas', { title: "No se encuentran tareas en el rango seleccionado!!!" });
-        }else{
-            enviar(req, res, result);
-            aprob.push(result);
+
+            const aprob = await pool.query(
+                "SELECT\n" +
+                "	VD.TAREA AS TAREA,\n" +
+                "	date_format(VD.FECHA, '%d-%m-%Y') AS FECHA,\n" +
+                "	VD.ESTADO_TAREA AS ESTADO_TAREA,\n" +
+                "	VD.SERVICIO AS SERVICIO,\n" +
+                "	VD.CODIGO AS CODIGO,\n" +
+                "	VD.GERENCIA AS GERENCIA,\n" +
+                "	VD.AREA AS AREA,\n" +
+                "	VD.SECTOR AS SECTOR,\n" +
+                "	VD.DETALLE_UBICACION AS DETALLE,\n" +
+                "	VD.UBICACION_TECNICA AS TECNICA,\n" +
+                "	VT.Val_obs AS OBS,\n" +
+                "IF\n" +
+                "	(\n" +
+                "		VD.ESTADO_EQUIPO = 'SC',\n" +
+                "		'No aplica',\n" +
+                "	IF\n" +
+                "		(\n" +
+                "			VD.ESTADO_EQUIPO = 'SSR',\n" +
+                "			'Sistema sin revisar.',\n" +
+                "		IF\n" +
+                "			(\n" +
+                "				VD.ESTADO_EQUIPO = 'SOP',\n" +
+                "				'Sistema operativo',\n" +
+                "			IF\n" +
+                "				(\n" +
+                "					VD.ESTADO_EQUIPO = 'SOCO',\n" +
+                "					'Sist. operativo con obs.',\n" +
+                "				IF\n" +
+                "					(\n" +
+                "						VD.ESTADO_EQUIPO = 'SFS',\n" +
+                "						'Sist. fuera de serv.',\n" +
+                "					IF\n" +
+                "					( VD.ESTADO_EQUIPO = 'SNO', 'Sist. no operativo', VD.ESTADO_EQUIPO )))))) AS ESTADO_EQUIPO,\n" +
+                "			IF (VD.OBS_ESTADO_EQUIPO = 'SC', '', CONVERT(CAST(CONVERT(CONCAT(UPPER(LEFT(VD.OBS_ESTADO_EQUIPO,1)), SUBSTRING(VD.OBS_ESTADO_EQUIPO FROM 2))USING latin1) AS BINARY) USING UTF8))	AS OBS_EQUIPO,\n" +
+                "	VD.REPUESTOS AS REPUESTOS \n" +
+                "FROM\n" +
+                "	VIEW_DetalleEquiposDET VD\n" +
+                "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
+                "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
+                "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
+                "   INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
+                "WHERE\n" +
+                "	T.Id_Estado = 4 \n" +
+                "   AND U.Descripcion  NOT LIKE '%test' \n" +
+                "	AND VD.FECHA BETWEEN \""+date1+"\" AND \""+date2+"\" \n" +
+                "ORDER BY\n" +
+                "	TAREA DESC;"
+            );
+
+            if(!aprob){
+                res.json({ title: "No se encuentran tareas en el rango seleccionado!!!" });
+            }else{
+                res.json(aprob);
+            }
+
         }
-    });
+
+    } catch (error) {
+        console.log(error);
     }
 
 });
 
 router.post('/aprobadasd', isLoggedIn, authRole(['Cli_D']), async (req, res)=>{
-    const {tarea} = req.body;
-    const {Id_Cliente} = req.user;
-    const {est} = req.body;
-    const {date1} = req.body;
-    const {date2} = req.body;
+    try {
+        const {tarea} = req.body;
+        const {date1} = req.body;
+        const {date2} = req.body;  
 
-    if (tarea > 0){
-        await pool.query(
-                    "SELECT\n" +
-        "        	VD.TAREA AS TAREA,\n" +
-        "        	date_format(VD.FECHA, '%d-%m-%Y') AS FECHA,\n" +
-        "        	VD.ESTADO_TAREA AS ESTADO_TAREA,\n" +
-        "        	VD.SERVICIO AS SERVICIO,\n" +
-        "        	VD.CODIGO AS CODIGO,\n" +
-        "        	VD.GERENCIA AS GERENCIA,\n" +
-        "        	VD.AREA AS AREA,\n" +
-        "        	VD.SECTOR AS SECTOR,\n" +
-        "        	VD.DETALLE_UBICACION AS DETALLE,\n" +
-        "        	VD.UBICACION_TECNICA AS TECNICA,\n" +
-        "        	VT.Val_obs AS OBS,\n" +
-        "        IF\n" +
-        "        	(\n" +
-        "        		VD.ESTADO_EQUIPO = 'SC',\n" +
-        "        		'No aplica',\n" +
-        "        	IF\n" +
-        "        		(\n" +
-        "        			VD.ESTADO_EQUIPO = 'SSR',\n" +
-        "        			'Sistema sin revisar.',\n" +
-        "        		IF\n" +
-        "        			(\n" +
-        "        				VD.ESTADO_EQUIPO = 'SOP',\n" +
-        "        				'Sistema operativo',\n" +
-        "        			IF\n" +
-        "        				(\n" +
-        "        					VD.ESTADO_EQUIPO = 'SOCO',\n" +
-        "        					'Sist. operativo con obs.',\n" +
-        "        				IF\n" +
-        "        					(\n" +
-        "        						VD.ESTADO_EQUIPO = 'SFS',\n" +
-        "        						'Sist. fuera de serv.',\n" +
-        "        					IF\n" +
-        "        					( VD.ESTADO_EQUIPO = 'SNO', 'Sist. no operativo', VD.ESTADO_EQUIPO )))))) AS ESTADO_EQUIPO,\n" +
-        "			IF (VD.OBS_ESTADO_EQUIPO = 'SC', '', CONVERT(CAST(CONVERT(CONCAT(UPPER(LEFT(VD.OBS_ESTADO_EQUIPO,1)), SUBSTRING(VD.OBS_ESTADO_EQUIPO FROM 2))USING latin1) AS BINARY) USING UTF8))	AS OBS_EQUIPO,\n" +
-        "        	VD.REPUESTOS AS REPUESTOS \n" +
-        "        FROM\n" +
-        "        	VIEW_DetalleEquiposDET VD\n" +
-        "        	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-        "        	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
-        "        	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
-        "           INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
-        "        WHERE\n" +
-        "        	T.Id_Estado = 4 \n" +
-        "           AND U.Descripcion  NOT LIKE '%test' \n" +
-        "           AND VD.TAREA = "+tarea+"\n" +
-        "        ORDER BY\n" +
-        "        	TAREA DESC;",
-    (err, result) => { 
-        if (!result.length){
-            res.render( 'aprob/aprobadas' , { title: "No se encuentran tareas en el rango seleccionado!!!" });
+        if (tarea > 0){            
+            
+            const aprob = await pool.query(
+                "SELECT\n" +
+                "        	VD.TAREA AS TAREA,\n" +
+                "        	date_format(VD.FECHA, '%d-%m-%Y') AS FECHA,\n" +
+                "        	VD.ESTADO_TAREA AS ESTADO_TAREA,\n" +
+                "        	VD.SERVICIO AS SERVICIO,\n" +
+                "        	VD.CODIGO AS CODIGO,\n" +
+                "        	VD.GERENCIA AS GERENCIA,\n" +
+                "        	VD.AREA AS AREA,\n" +
+                "        	VD.SECTOR AS SECTOR,\n" +
+                "        	VD.DETALLE_UBICACION AS DETALLE,\n" +
+                "        	VD.UBICACION_TECNICA AS TECNICA,\n" +
+                "        	VT.Val_obs AS OBS,\n" +
+                "        IF\n" +
+                "        	(\n" +
+                "        		VD.ESTADO_EQUIPO = 'SC',\n" +
+                "        		'No aplica',\n" +
+                "        	IF\n" +
+                "        		(\n" +
+                "        			VD.ESTADO_EQUIPO = 'SSR',\n" +
+                "        			'Sistema sin revisar.',\n" +
+                "        		IF\n" +
+                "        			(\n" +
+                "        				VD.ESTADO_EQUIPO = 'SOP',\n" +
+                "        				'Sistema operativo',\n" +
+                "        			IF\n" +
+                "        				(\n" +
+                "        					VD.ESTADO_EQUIPO = 'SOCO',\n" +
+                "        					'Sist. operativo con obs.',\n" +
+                "        				IF\n" +
+                "        					(\n" +
+                "        						VD.ESTADO_EQUIPO = 'SFS',\n" +
+                "        						'Sist. fuera de serv.',\n" +
+                "        					IF\n" +
+                "        					( VD.ESTADO_EQUIPO = 'SNO', 'Sist. no operativo', VD.ESTADO_EQUIPO )))))) AS ESTADO_EQUIPO,\n" +
+                "			IF (VD.OBS_ESTADO_EQUIPO = 'SC', '', CONVERT(CAST(CONVERT(CONCAT(UPPER(LEFT(VD.OBS_ESTADO_EQUIPO,1)), SUBSTRING(VD.OBS_ESTADO_EQUIPO FROM 2))USING latin1) AS BINARY) USING UTF8))	AS OBS_EQUIPO,\n" +
+                "        	VD.REPUESTOS AS REPUESTOS \n" +
+                "        FROM\n" +
+                "        	VIEW_DetalleEquiposDET VD\n" +
+                "        	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
+                "        	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
+                "        	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
+                "           INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
+                "        WHERE\n" +
+                "        	T.Id_Estado = 4 \n" +
+                "           AND U.Descripcion  NOT LIKE '%test' \n" +
+                "           AND VD.TAREA = "+tarea+"\n" +
+                "        ORDER BY\n" +
+                "        	TAREA DESC;"
+            );
+
+            if(!aprob){
+                res.json({ title: "No se encuentran tareas en el rango seleccionado!!!" });
+            }else{
+                res.json(aprob);
+            }
+        
         }else{
-            aprob.push(result);        
-            enviar(req, res, result);
-        }        
-    });
-    
-    }else{
-        await pool.query(
-            "SELECT\n" +
-            "	VD.TAREA AS TAREA,\n" +
-            "	date_format(VD.FECHA, '%d-%m-%Y') AS FECHA,\n" +
-            "	VD.ESTADO_TAREA AS ESTADO_TAREA,\n" +
-            "	VD.SERVICIO AS SERVICIO,\n" +
-            "	VD.CODIGO AS CODIGO,\n" +
-            "	VD.GERENCIA AS GERENCIA,\n" +
-            "	VD.AREA AS AREA,\n" +
-            "	VD.SECTOR AS SECTOR,\n" +
-            "	VD.DETALLE_UBICACION AS DETALLE,\n" +
-            "	VD.UBICACION_TECNICA AS TECNICA,\n" +
-            "	VT.Val_obs AS OBS,\n" +
-            "IF\n" +
-            "	(\n" +
-            "		VD.ESTADO_EQUIPO = 'SC',\n" +
-            "		'No aplica',\n" +
-            "	IF\n" +
-            "		(\n" +
-            "			VD.ESTADO_EQUIPO = 'SSR',\n" +
-            "			'Sistema sin revisar.',\n" +
-            "		IF\n" +
-            "			(\n" +
-            "				VD.ESTADO_EQUIPO = 'SOP',\n" +
-            "				'Sistema operativo',\n" +
-            "			IF\n" +
-            "				(\n" +
-            "					VD.ESTADO_EQUIPO = 'SOCO',\n" +
-            "					'Sist. operativo con obs.',\n" +
-            "				IF\n" +
-            "					(\n" +
-            "						VD.ESTADO_EQUIPO = 'SFS',\n" +
-            "						'Sist. fuera de serv.',\n" +
-            "					IF\n" +
-            "					( VD.ESTADO_EQUIPO = 'SNO', 'Sist. no operativo', VD.ESTADO_EQUIPO )))))) AS ESTADO_EQUIPO,\n" +
-            "			IF (VD.OBS_ESTADO_EQUIPO = 'SC', '', CONVERT(CAST(CONVERT(CONCAT(UPPER(LEFT(VD.OBS_ESTADO_EQUIPO,1)), SUBSTRING(VD.OBS_ESTADO_EQUIPO FROM 2))USING latin1) AS BINARY) USING UTF8))	AS OBS_EQUIPO,\n" +
-            "	VD.REPUESTOS AS REPUESTOS \n" +
-            "FROM\n" +
-            "	VIEW_DetalleEquiposDET VD\n" +
-            "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-            "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
-            "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
-            "   INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
-            "WHERE\n" +
-            "	T.Id_Estado = 4 \n" +
-            "   AND U.Descripcion  NOT LIKE '%test' \n" +
-            "	AND VD.FECHA BETWEEN \""+date1+"\" AND \""+date2+"\" \n" +
-            "ORDER BY\n" +
-            "	TAREA DESC;",
-             (err, result) => { 
-        if (!result.length){
-            res.render( 'aprob/aprobadas', { title: "No se encuentran tareas en el rango seleccionado!!!" });
-        }else{
-            enviar(req, res, result);
-            aprob.push(result);
+
+            const aprob = await pool.query(
+                "SELECT\n" +
+                "	VD.TAREA AS TAREA,\n" +
+                "	date_format(VD.FECHA, '%d-%m-%Y') AS FECHA,\n" +
+                "	VD.ESTADO_TAREA AS ESTADO_TAREA,\n" +
+                "	VD.SERVICIO AS SERVICIO,\n" +
+                "	VD.CODIGO AS CODIGO,\n" +
+                "	VD.GERENCIA AS GERENCIA,\n" +
+                "	VD.AREA AS AREA,\n" +
+                "	VD.SECTOR AS SECTOR,\n" +
+                "	VD.DETALLE_UBICACION AS DETALLE,\n" +
+                "	VD.UBICACION_TECNICA AS TECNICA,\n" +
+                "	VT.Val_obs AS OBS,\n" +
+                "IF\n" +
+                "	(\n" +
+                "		VD.ESTADO_EQUIPO = 'SC',\n" +
+                "		'No aplica',\n" +
+                "	IF\n" +
+                "		(\n" +
+                "			VD.ESTADO_EQUIPO = 'SSR',\n" +
+                "			'Sistema sin revisar.',\n" +
+                "		IF\n" +
+                "			(\n" +
+                "				VD.ESTADO_EQUIPO = 'SOP',\n" +
+                "				'Sistema operativo',\n" +
+                "			IF\n" +
+                "				(\n" +
+                "					VD.ESTADO_EQUIPO = 'SOCO',\n" +
+                "					'Sist. operativo con obs.',\n" +
+                "				IF\n" +
+                "					(\n" +
+                "						VD.ESTADO_EQUIPO = 'SFS',\n" +
+                "						'Sist. fuera de serv.',\n" +
+                "					IF\n" +
+                "					( VD.ESTADO_EQUIPO = 'SNO', 'Sist. no operativo', VD.ESTADO_EQUIPO )))))) AS ESTADO_EQUIPO,\n" +
+                "			IF (VD.OBS_ESTADO_EQUIPO = 'SC', '', CONVERT(CAST(CONVERT(CONCAT(UPPER(LEFT(VD.OBS_ESTADO_EQUIPO,1)), SUBSTRING(VD.OBS_ESTADO_EQUIPO FROM 2))USING latin1) AS BINARY) USING UTF8))	AS OBS_EQUIPO,\n" +
+                "	VD.REPUESTOS AS REPUESTOS \n" +
+                "FROM\n" +
+                "	VIEW_DetalleEquiposDET VD\n" +
+                "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
+                "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
+                "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
+                "   INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
+                "WHERE\n" +
+                "	T.Id_Estado = 4 \n" +
+                "   AND U.Descripcion  NOT LIKE '%test' \n" +
+                "	AND VD.FECHA BETWEEN \""+date1+"\" AND \""+date2+"\" \n" +
+                "ORDER BY\n" +
+                "	TAREA DESC;"
+            );
+
+            if(!aprob){
+                res.json({ title: "No se encuentran tareas en el rango seleccionado!!!" });
+            }else{
+                res.json(aprob);
+            }
+
         }
-    });
+
+    } catch (error) {
+        console.log(error);
     }
 
 });
 
 router.post('/aprobadase', isLoggedIn, authRole(['Cli_E']), async (req, res)=>{
-    const {tarea} = req.body;
-    const {Id_Cliente} = req.user;
-    const {est} = req.body;
-    const {date1} = req.body;
-    const {date2} = req.body;
+    try {
+        const {tarea} = req.body;
+        const {date1} = req.body;
+        const {date2} = req.body;  
 
-    if (tarea > 0){
-        await pool.query(
-                    "SELECT\n" +
-        "        	VD.TAREA AS TAREA,\n" +
-        "        	date_format(VD.FECHA, '%d-%m-%Y') AS FECHA,\n" +
-        "        	VD.ESTADO_TAREA AS ESTADO_TAREA,\n" +
-        "        	VD.SERVICIO AS SERVICIO,\n" +
-        "        	VD.CODIGO AS CODIGO,\n" +
-        "        	VD.GERENCIA AS GERENCIA,\n" +
-        "        	VD.AREA AS AREA,\n" +
-        "        	VD.SECTOR AS SECTOR,\n" +
-        "        	VD.DETALLE_UBICACION AS DETALLE,\n" +
-        "        	VD.UBICACION_TECNICA AS TECNICA,\n" +
-        "        	VT.Val_obs AS OBS,\n" +
-        "        IF\n" +
-        "        	(\n" +
-        "        		VD.ESTADO_EQUIPO = 'SC',\n" +
-        "        		'No aplica',\n" +
-        "        	IF\n" +
-        "        		(\n" +
-        "        			VD.ESTADO_EQUIPO = 'SSR',\n" +
-        "        			'Sistema sin revisar.',\n" +
-        "        		IF\n" +
-        "        			(\n" +
-        "        				VD.ESTADO_EQUIPO = 'SOP',\n" +
-        "        				'Sistema operativo',\n" +
-        "        			IF\n" +
-        "        				(\n" +
-        "        					VD.ESTADO_EQUIPO = 'SOCO',\n" +
-        "        					'Sist. operativo con obs.',\n" +
-        "        				IF\n" +
-        "        					(\n" +
-        "        						VD.ESTADO_EQUIPO = 'SFS',\n" +
-        "        						'Sist. fuera de serv.',\n" +
-        "        					IF\n" +
-        "        					( VD.ESTADO_EQUIPO = 'SNO', 'Sist. no operativo', VD.ESTADO_EQUIPO )))))) AS ESTADO_EQUIPO,\n" +
-        "			IF (VD.OBS_ESTADO_EQUIPO = 'SC', '', CONVERT(CAST(CONVERT(CONCAT(UPPER(LEFT(VD.OBS_ESTADO_EQUIPO,1)), SUBSTRING(VD.OBS_ESTADO_EQUIPO FROM 2))USING latin1) AS BINARY) USING UTF8))	AS OBS_EQUIPO,\n" +
-        "        	VD.REPUESTOS AS REPUESTOS \n" +
-        "        FROM\n" +
-        "        	VIEW_DetalleEquiposDET VD\n" +
-        "        	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-        "        	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
-        "        	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
-        "           INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
-        "        WHERE\n" +
-        "        	T.Id_Estado = 4 \n" +
-        "           AND U.Descripcion  NOT LIKE '%test' \n" +
-        "           AND VD.TAREA = "+tarea+"\n" +
-        "        ORDER BY\n" +
-        "        	TAREA DESC;",
-    (err, result) => { 
-        if (!result.length){
-            res.render( 'aprob/aprobadas' , { title: "No se encuentran tareas en el rango seleccionado!!!" });
+        if (tarea > 0){            
+            
+            const aprob = await pool.query(
+                "SELECT\n" +
+                "        	VD.TAREA AS TAREA,\n" +
+                "        	date_format(VD.FECHA, '%d-%m-%Y') AS FECHA,\n" +
+                "        	VD.ESTADO_TAREA AS ESTADO_TAREA,\n" +
+                "        	VD.SERVICIO AS SERVICIO,\n" +
+                "        	VD.CODIGO AS CODIGO,\n" +
+                "        	VD.GERENCIA AS GERENCIA,\n" +
+                "        	VD.AREA AS AREA,\n" +
+                "        	VD.SECTOR AS SECTOR,\n" +
+                "        	VD.DETALLE_UBICACION AS DETALLE,\n" +
+                "        	VD.UBICACION_TECNICA AS TECNICA,\n" +
+                "        	VT.Val_obs AS OBS,\n" +
+                "        IF\n" +
+                "        	(\n" +
+                "        		VD.ESTADO_EQUIPO = 'SC',\n" +
+                "        		'No aplica',\n" +
+                "        	IF\n" +
+                "        		(\n" +
+                "        			VD.ESTADO_EQUIPO = 'SSR',\n" +
+                "        			'Sistema sin revisar.',\n" +
+                "        		IF\n" +
+                "        			(\n" +
+                "        				VD.ESTADO_EQUIPO = 'SOP',\n" +
+                "        				'Sistema operativo',\n" +
+                "        			IF\n" +
+                "        				(\n" +
+                "        					VD.ESTADO_EQUIPO = 'SOCO',\n" +
+                "        					'Sist. operativo con obs.',\n" +
+                "        				IF\n" +
+                "        					(\n" +
+                "        						VD.ESTADO_EQUIPO = 'SFS',\n" +
+                "        						'Sist. fuera de serv.',\n" +
+                "        					IF\n" +
+                "        					( VD.ESTADO_EQUIPO = 'SNO', 'Sist. no operativo', VD.ESTADO_EQUIPO )))))) AS ESTADO_EQUIPO,\n" +
+                "			IF (VD.OBS_ESTADO_EQUIPO = 'SC', '', CONVERT(CAST(CONVERT(CONCAT(UPPER(LEFT(VD.OBS_ESTADO_EQUIPO,1)), SUBSTRING(VD.OBS_ESTADO_EQUIPO FROM 2))USING latin1) AS BINARY) USING UTF8))	AS OBS_EQUIPO,\n" +
+                "        	VD.REPUESTOS AS REPUESTOS \n" +
+                "        FROM\n" +
+                "        	VIEW_DetalleEquiposDET VD\n" +
+                "        	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
+                "        	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
+                "        	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
+                "           INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
+                "        WHERE\n" +
+                "        	T.Id_Estado = 4 \n" +
+                "           AND U.Descripcion  NOT LIKE '%test' \n" +
+                "           AND VD.TAREA = "+tarea+"\n" +
+                "        ORDER BY\n" +
+                "        	TAREA DESC;"
+            );
+
+            if(!aprob){
+                res.json({ title: "No se encuentran tareas en el rango seleccionado!!!" });
+            }else{
+                res.json(aprob);
+            }
+        
         }else{
-            aprob.push(result);        
-            enviar(req, res, result);
-        }        
-    });
-    
-    }else{
-        await pool.query(
-            "SELECT\n" +
-            "	VD.TAREA AS TAREA,\n" +
-            "	date_format(VD.FECHA, '%d-%m-%Y') AS FECHA,\n" +
-            "	VD.ESTADO_TAREA AS ESTADO_TAREA,\n" +
-            "	VD.SERVICIO AS SERVICIO,\n" +
-            "	VD.CODIGO AS CODIGO,\n" +
-            "	VD.GERENCIA AS GERENCIA,\n" +
-            "	VD.AREA AS AREA,\n" +
-            "	VD.SECTOR AS SECTOR,\n" +
-            "	VD.DETALLE_UBICACION AS DETALLE,\n" +
-            "	VD.UBICACION_TECNICA AS TECNICA,\n" +
-            "	VT.Val_obs AS OBS,\n" +
-            "IF\n" +
-            "	(\n" +
-            "		VD.ESTADO_EQUIPO = 'SC',\n" +
-            "		'No aplica',\n" +
-            "	IF\n" +
-            "		(\n" +
-            "			VD.ESTADO_EQUIPO = 'SSR',\n" +
-            "			'Sistema sin revisar.',\n" +
-            "		IF\n" +
-            "			(\n" +
-            "				VD.ESTADO_EQUIPO = 'SOP',\n" +
-            "				'Sistema operativo',\n" +
-            "			IF\n" +
-            "				(\n" +
-            "					VD.ESTADO_EQUIPO = 'SOCO',\n" +
-            "					'Sist. operativo con obs.',\n" +
-            "				IF\n" +
-            "					(\n" +
-            "						VD.ESTADO_EQUIPO = 'SFS',\n" +
-            "						'Sist. fuera de serv.',\n" +
-            "					IF\n" +
-            "					( VD.ESTADO_EQUIPO = 'SNO', 'Sist. no operativo', VD.ESTADO_EQUIPO )))))) AS ESTADO_EQUIPO,\n" +
-            "			IF (VD.OBS_ESTADO_EQUIPO = 'SC', '', CONVERT(CAST(CONVERT(CONCAT(UPPER(LEFT(VD.OBS_ESTADO_EQUIPO,1)), SUBSTRING(VD.OBS_ESTADO_EQUIPO FROM 2))USING latin1) AS BINARY) USING UTF8))	AS OBS_EQUIPO,\n" +
-            "	VD.REPUESTOS AS REPUESTOS \n" +
-            "FROM\n" +
-            "	VIEW_DetalleEquiposDET VD\n" +
-            "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
-            "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
-            "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
-            "   INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
-            "WHERE\n" +
-            "	T.Id_Estado = 4 \n" +
-            "   AND U.Descripcion  NOT LIKE '%test' \n" +
-            "	AND VD.FECHA BETWEEN \""+date1+"\" AND \""+date2+"\" \n" +
-            "ORDER BY\n" +
-            "	TAREA DESC;",
-             (err, result) => { 
-        if (!result.length){
-            res.render( 'aprob/aprobadas', { title: "No se encuentran tareas en el rango seleccionado!!!" });
-        }else{
-            enviar(req, res, result);
-            aprob.push(result);
+
+            const aprob = await pool.query(
+                "SELECT\n" +
+                "	VD.TAREA AS TAREA,\n" +
+                "	date_format(VD.FECHA, '%d-%m-%Y') AS FECHA,\n" +
+                "	VD.ESTADO_TAREA AS ESTADO_TAREA,\n" +
+                "	VD.SERVICIO AS SERVICIO,\n" +
+                "	VD.CODIGO AS CODIGO,\n" +
+                "	VD.GERENCIA AS GERENCIA,\n" +
+                "	VD.AREA AS AREA,\n" +
+                "	VD.SECTOR AS SECTOR,\n" +
+                "	VD.DETALLE_UBICACION AS DETALLE,\n" +
+                "	VD.UBICACION_TECNICA AS TECNICA,\n" +
+                "	VT.Val_obs AS OBS,\n" +
+                "IF\n" +
+                "	(\n" +
+                "		VD.ESTADO_EQUIPO = 'SC',\n" +
+                "		'No aplica',\n" +
+                "	IF\n" +
+                "		(\n" +
+                "			VD.ESTADO_EQUIPO = 'SSR',\n" +
+                "			'Sistema sin revisar.',\n" +
+                "		IF\n" +
+                "			(\n" +
+                "				VD.ESTADO_EQUIPO = 'SOP',\n" +
+                "				'Sistema operativo',\n" +
+                "			IF\n" +
+                "				(\n" +
+                "					VD.ESTADO_EQUIPO = 'SOCO',\n" +
+                "					'Sist. operativo con obs.',\n" +
+                "				IF\n" +
+                "					(\n" +
+                "						VD.ESTADO_EQUIPO = 'SFS',\n" +
+                "						'Sist. fuera de serv.',\n" +
+                "					IF\n" +
+                "					( VD.ESTADO_EQUIPO = 'SNO', 'Sist. no operativo', VD.ESTADO_EQUIPO )))))) AS ESTADO_EQUIPO,\n" +
+                "			IF (VD.OBS_ESTADO_EQUIPO = 'SC', '', CONVERT(CAST(CONVERT(CONCAT(UPPER(LEFT(VD.OBS_ESTADO_EQUIPO,1)), SUBSTRING(VD.OBS_ESTADO_EQUIPO FROM 2))USING latin1) AS BINARY) USING UTF8))	AS OBS_EQUIPO,\n" +
+                "	VD.REPUESTOS AS REPUESTOS \n" +
+                "FROM\n" +
+                "	VIEW_DetalleEquiposDET VD\n" +
+                "	INNER JOIN Tareas T ON T.Id = VD.TAREA\n" +
+                "	INNER JOIN Tareas_Estado TV ON TV.te_Id_Tarea = VD.TAREA\n" +
+                "	INNER JOIN Validacion_Tareas VT ON VT.Val_tarea_id = VD.TAREA \n" +
+                "   INNER JOIN Usuarios U ON T.Id_Tecnico = U.Id \n" +
+                "WHERE\n" +
+                "	T.Id_Estado = 4 \n" +
+                "   AND U.Descripcion  NOT LIKE '%test' \n" +
+                "	AND VD.FECHA BETWEEN \""+date1+"\" AND \""+date2+"\" \n" +
+                "ORDER BY\n" +
+                "	TAREA DESC;"
+            );
+
+            if(!aprob){
+                res.json({ title: "No se encuentran tareas en el rango seleccionado!!!" });
+            }else{
+                res.json(aprob);
+            }
+
         }
-    });
+
+    } catch (error) {
+        console.log(error);
     }
 
 });

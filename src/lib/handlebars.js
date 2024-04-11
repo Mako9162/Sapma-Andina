@@ -15,6 +15,28 @@ handlebars.registerHelper('eq', function (a, b) {
     return a === b;
 });
 
+// Define el helper de Handlebars para la comparación condicional
+handlebars.registerHelper('ifCond', function(v1, v2, options) {
+    if(v1 === v2) {
+        return options.fn(this);
+    }
+    return options.inverse(this);
+});
+
+handlebars.registerHelper('ifAny', function () {
+    var args = Array.prototype.slice.call(arguments, 0, -1);
+    var options = arguments[arguments.length - 1];
+    var value = String(args.shift());
+    if (args.map(String).indexOf(value) >= 0) {
+        return options.fn(this);
+    }
+    return options.inverse(this);
+});
+
+
+
+
+
 
   
 
