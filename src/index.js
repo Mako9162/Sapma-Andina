@@ -100,7 +100,6 @@ app.use(require('./routes/planificacion'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
-
 //Inicio de servidor
 var server = app.listen(app.get('port'), () => {
   console.log('Servidor en línea. Puerto:', app.get('port'));

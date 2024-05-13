@@ -299,7 +299,8 @@ router.post('/pdfs', isLoggedIn, async (req, res) => {
     clearTimeout(temporizador);
     console.log(error);
   }
-});    
+});  
+  
 
 router.get('/archivo', isLoggedIn, async (req, res) => {
   const { usuario } = req.user;

@@ -38,4 +38,5 @@ $(document).ready(function(){
 		clearInterval(countdownInterval);
 		modalShown = false; 
 	});
+
 });

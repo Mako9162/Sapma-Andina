@@ -46,6 +46,18 @@ router.get('/home', isLoggedIn, (req, res) => {
         res.render('home/home');  
 });
 
+router.post('/tarea_mes', isLoggedIn, async (req, res) => {
+    try {
+        let {start, end} = req.body;
+        start = moment(start, 'YYYY-MM-DD').format('DD-MM-YYYY');
+        end = moment(end, 'YYYY-MM-DD').format('DD-MM-YYYY');
+        const tareas = await pool.query("SELECT vfe_fProtocolo AS FECHA, vfe_idTarea AS ID, vfe_idEstado AS ESTADO FROM VIEW_feEjecucionTareas WHERE vfe_fProtocolo BETWEEN ? AND ?;", [start, end]);
+        res.json(tareas);
+    } catch (error) {
+        console.log(error);
+    }
+});
+
 router.get('/users', isLoggedIn, authRole(['Plan', 'Admincli']), async (req, res) => {
 
     
