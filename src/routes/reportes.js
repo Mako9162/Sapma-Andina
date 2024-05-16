@@ -4,7 +4,7 @@ const pool = require('../database');
 const { isLoggedIn } = require('../lib/auth');
 const { authRole } = require('../lib/rol');
 const moment = require('moment');
-const XLSX = require('xlsx');
+const XLSX = require('xlsx-js-style');
 const path = require('path');
 const fs = require('fs');
 const nodemailer = require('nodemailer');
@@ -736,6 +736,20 @@ router.post('/generar', isLoggedIn,  authRole(['Plan', 'Admincli']), async (req,
             ];
         });
 
+        function applyStyle(ws) {
+            for (let cell in ws) {
+                // Ignora las propiedades que no son celdas
+                if(cell[0] === '!') continue;
+        
+                ws[cell].s = {
+                    font: {
+                        sz: 9, // Tamaño de fuente 9
+                        name: 'Calibri' // Tipo de fuente Calibri
+                    }
+                };
+            }
+        }
+
         let wb = XLSX.utils.book_new();
 
         let ws_data = [
@@ -770,6 +784,7 @@ router.post('/generar', isLoggedIn,  authRole(['Plan', 'Admincli']), async (req,
             ...rows_equipos
         ];
         let ws1 = XLSX.utils.aoa_to_sheet(ws_data);
+        applyStyle(ws1);
         XLSX.utils.book_append_sheet(wb, ws1, 'equipos');
 
         let ws_data_tareas = [
@@ -791,6 +806,7 @@ router.post('/generar', isLoggedIn,  authRole(['Plan', 'Admincli']), async (req,
             ...rows_tareas
         ];
         let ws2 = XLSX.utils.aoa_to_sheet(ws_data_tareas);
+        applyStyle(ws2);
         XLSX.utils.book_append_sheet(wb, ws2, 'tareas');
 
         let ws_data_eo = [
@@ -803,6 +819,7 @@ router.post('/generar', isLoggedIn,  authRole(['Plan', 'Admincli']), async (req,
             ...rows_estado_op
         ];
         let ws3 = XLSX.utils.aoa_to_sheet(ws_data_eo);
+        applyStyle(ws3);
         XLSX.utils.book_append_sheet(wb, ws3, 'eo');
 
         let ws_data_ejecucion = [
@@ -815,6 +832,7 @@ router.post('/generar', isLoggedIn,  authRole(['Plan', 'Admincli']), async (req,
             ...rows_ejecucion
         ];
         let ws4 = XLSX.utils.aoa_to_sheet(ws_data_ejecucion);
+        applyStyle(ws4);
         XLSX.utils.book_append_sheet(wb, ws4, 'ejecucion');
 
         let ws_data_incidencias = [
@@ -828,6 +846,7 @@ router.post('/generar', isLoggedIn,  authRole(['Plan', 'Admincli']), async (req,
             ...rows_incidencias
         ];
         let ws5 = XLSX.utils.aoa_to_sheet(ws_data_incidencias);
+        applyStyle(ws5);
         XLSX.utils.book_append_sheet(wb, ws5, 'incidencias')
 
         let ws_data_tecnico = [
@@ -840,6 +859,7 @@ router.post('/generar', isLoggedIn,  authRole(['Plan', 'Admincli']), async (req,
             ...rows_tecnico
         ];
         let ws6 = XLSX.utils.aoa_to_sheet(ws_data_tecnico);
+        applyStyle(ws6);
         XLSX.utils.book_append_sheet(wb, ws6, 'tecnico')
 
         let ws_data_impedimento = [
@@ -852,6 +872,7 @@ router.post('/generar', isLoggedIn,  authRole(['Plan', 'Admincli']), async (req,
             ...rows_impedimento
         ];
         let ws7 = XLSX.utils.aoa_to_sheet(ws_data_impedimento);
+        applyStyle(ws7);
         XLSX.utils.book_append_sheet(wb, ws7, 'impedimento')
 
         const datemail = moment().format('YYYY-MM-DD');

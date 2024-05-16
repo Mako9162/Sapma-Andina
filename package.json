@@ -55,6 +55,7 @@
     "tunnel-ssh": "^4.1.6",
     "web-streams-polyfill": "^4.0.0",
     "xlsx": "^0.18.5",
+    "xlsx-js-style": "^1.2.0",
     "xlsx-populate": "^1.21.0"
   }
 }
