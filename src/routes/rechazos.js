@@ -76,10 +76,10 @@ router.post('/rechazos', authRole(['Cli_C','Cli_B', 'GerVer', 'Cli_A', 'Cli_D', 
 
           await transporter.sendMail({
               from: "SAPMA <sapmadand@sercoing.cl>",
-              to: "marancibia@sercoing.cl",
-              // to: arremailp,
-              // cc: Email,
-              // bcc: correo,
+              //to: "marancibia@sercoing.cl",
+              to: arremailp,
+              cc: Email,
+              bcc: correo,
               subject: "SAPMA - Tareas Rechazadas",
               html,
               attachments: [
@@ -237,6 +237,7 @@ router.get('/rechazadas', isLoggedIn, authRole(['Cli_C','Cli_B', 'GerVer', 'Cli_
         case 6:
         case 9:
 
+          
           const rechazadas = await pool.query('CALL sp_TareasFull ( "CONSULTA_CLIENTE", NULL, NULL, NULL, NULL, ?, ?, NULL, 1 );',
               [test, Id_Perfil]
           );
@@ -253,6 +254,7 @@ router.get('/rechazadas', isLoggedIn, authRole(['Cli_C','Cli_B', 'GerVer', 'Cli_
         case 5:
         case 7:
         case 8:
+        case 10:
 
               const rechazadas1 = await pool.query('CALL sp_TareasFull ( "CONSULTA_CLIENTE", NULL, NULL, NULL, NULL, ?, ?, ?, 1 );',
                     [test, Id_Perfil, Id]

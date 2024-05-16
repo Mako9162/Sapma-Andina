@@ -61,7 +61,7 @@ $(document).ready(function () {
               "titleAttr": "Exportar a Excel",
               "className": "btn btn-rounded btn-success",
               "exportOptions": {
-                "columns": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+                "columns": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,],
               },
               customize: function (xlsx) {
                 const sheet = xlsx.xl.worksheets["sheet1.xml"];
@@ -250,7 +250,7 @@ $(document).ready(function () {
             var rowIndex = cell.index().row;
             var rowData = table1.row(rowIndex).data();
             
-            if (rowData[17] === "") {
+            if (rowData[18] === "") {
                 e.preventDefault();
             }
         });
@@ -259,7 +259,7 @@ $(document).ready(function () {
   
         $('#seleccionar').on('click', function () {
             var filasSeleccionadasPorSeleccionar = table1.rows(function (idx, data, node) {
-                return data[17] !== "";
+                return data[18] !== "";
             }).indexes(); 
             
             var filasFiltradasSeleccionadas = table1.rows({ search: 'applied' }).indexes().filter(function(index) {
@@ -274,7 +274,7 @@ $(document).ready(function () {
         
         $('#deseleccionar').on('click', function () {
             var filasSeleccionadasPorSeleccionar = table1.rows(function (idx, data, node) {
-                return data[17] !== "";
+                return data[18] !== "";
             }).indexes(); 
             
             var filasFiltradasSeleccionadas = table1.rows({ search: 'applied' }).indexes().filter(function(index) {
@@ -310,8 +310,8 @@ $(document).ready(function () {
         $.each(data, function (index, value) {
             var rowData = [];
             var valor0 = table1.row(value).data()[0]; 
-            var valor13 = table1.row(value).data()[13]; 
-            var obs = $(value).find("td").eq(14).find("input").val(); 
+            var valor13 = table1.row(value).data()[16]; 
+            var obs = $(value).find("td").eq(17).find("input").val(); 
             rowData.push(valor0);
             rowData.push(valor13 + " " + date + " OBS: " + obs + " |"); 
             idt.push(rowData); 
@@ -383,8 +383,8 @@ $(document).ready(function () {
         $.each(data, function (index, value) {
             var rowData = [];
             var valor0 = table1.row(value).data()[0]; 
-            var valor13 = table1.row(value).data()[13]; 
-            var obs = $(value).find("td").eq(14).find("input").val(); 
+            var valor13 = table1.row(value).data()[16]; 
+            var obs = $(value).find("td").eq(17).find("input").val(); 
             rowData.push(valor0);
             rowData.push(valor13 + " " + date + " OBS: " + obs + " |"); 
             idt.push(rowData); 

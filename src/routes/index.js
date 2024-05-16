@@ -49,9 +49,18 @@ router.get('/home', isLoggedIn, (req, res) => {
 router.post('/tarea_mes', isLoggedIn, async (req, res) => {
     try {
         let {start, end} = req.body;
-        start = moment(start, 'YYYY-MM-DD').format('DD-MM-YYYY');
-        end = moment(end, 'YYYY-MM-DD').format('DD-MM-YYYY');
-        const tareas = await pool.query("SELECT vfe_fProtocolo AS FECHA, vfe_idTarea AS ID, vfe_idEstado AS ESTADO FROM VIEW_feEjecucionTareas WHERE vfe_fProtocolo BETWEEN ? AND ?;", [start, end]);
+        console.log(req.body);
+        const tareas = await pool.query("SELECT\n" +
+        "	T.Id AS ID,\n" +
+        "	T.Fecha AS FECHA,\n" +
+        "	T.Id_Estado AS ESTADO \n" +
+        "FROM\n" +
+        "	Tareas T\n" +
+        "	INNER JOIN Estados E ON E.Id = T.Id_Estado \n" +
+        "WHERE\n" +
+        "	T.Fecha BETWEEN ? \n" +
+        "	AND ? \n" +
+        "	AND T.Id_Estado IN ( 4, 5 );", [start, end]);
         res.json(tareas);
     } catch (error) {
         console.log(error);

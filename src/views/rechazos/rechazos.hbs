@@ -56,6 +56,7 @@
 									<th hidden="true">Tarea anterior</th>
 									<th hidden="true">Fecha anterior</th>
 									<th hidden="true">Estado anterior</th>
+									<th>Observación validador</th>
 									<th>Observaciones</th>
 									<th>Ver</th>
 								</tr>
@@ -78,16 +79,19 @@
 									<td hidden="true">{{IdTarea_Ant}}</td>
 									<td hidden="true">{{FechaTarea_Ant}}</td>
 									<td hidden="true">{{EstadoOperEquipo_Ant}}</td>
+									<td>{{ValidacionObservacion}}</td>
 									<td><input class="form-control" id="obs" name="obs" maxlength="300"></input></td>
-									<td><center><a href="/protocolo/{{ TAREA }}" class="btn btn-inline btn-primary btn-sm ladda-button" target="_blank"><i class="fa fa-file-archive-o"></i></a></center></td>	
+									<td><center><a href="/protocolo/{{ IdTarea }}" class="btn btn-inline btn-primary btn-sm ladda-button" target="_blank"><i class="fa fa-file-archive-o"></i></a></center></td>	
 								</tr>
 								{{/each}}	
 							</tbody>
 						</table>
 					</div>
 				</section>
+				{{#ifAny user.Id_Perfil "2" "4" "5" "6" "7" "8" "9"}}
 				<button type="button" class="btn btn-primary" id="mensaje">Agregar observación</button>
 				<button type="button" class="btn btn-success float-right" id="aprob">Aprobar</button>	
+				{{/ifAny}}
 			</div>
 		</div>	
 	</div>

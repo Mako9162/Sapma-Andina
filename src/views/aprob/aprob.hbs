@@ -88,15 +88,17 @@
 									<td hidden="true">{{FechaTarea_Ant}}</td>
 									<td hidden="true">{{EstadoOperEquipo_Ant}}</td>
 									<td><input class="form-control" id="obs" name="obs" maxlength="300"></input></td>
-									<td><center><a href="/protocolo/{{ TAREA }}" class="btn btn-inline btn-primary btn-sm ladda-button" target="_blank"><i class="fa fa-file-archive-o"></i></a></center></td>	
+									<td><center><a href="/protocolo/{{ IdTarea }}" class="btn btn-inline btn-primary btn-sm ladda-button" target="_blank"><i class="fa fa-file-archive-o"></i></a></center></td>	
 								</tr>
 							{{/each}}
 							</tbody>
 						</table>
 					</div>
 				</section>
+				{{#ifAny user.Id_Perfil "2" "4" "5" "6" "7" "8" "9"}}
 				<button id="aprobar" type="button" class="btn btn-success">Aprobar</button>
 				<button id="rechazar" type="button" class="btn btn-danger float-right">Rechazar</button>
+				{{/ifAny}}
 			</div>
 		</div>
 	</div>

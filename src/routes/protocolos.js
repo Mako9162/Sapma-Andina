@@ -83,7 +83,7 @@ router.post("/protocoloss", isLoggedIn,  async (req, res) => {
 });
 
 
-router.get("/protocolo/:IDT", isLoggedIn, authRole(['Cli_C', 'Cli_B', 'Cli_A', 'Cli_D', 'Cli_E', 'Plan', 'Admincli']), async (req, res) => {
+router.get("/protocolo/:IDT", isLoggedIn, authRole(['Cli_C', 'Cli_B', 'Cli_A', 'Cli_D', 'Cli_E', 'Plan', 'Admincli','GerVer']), async (req, res) => {
 
   try {
     
@@ -379,7 +379,7 @@ router.post("/protocolo/validar", isLoggedIn, authRole(['Plan', 'Admincli']), as
 });
 
 
-router.get("/pdf/:IDT/:CODIGO", isLoggedIn, authRole(['Cli_C', 'Cli_B', 'Cli_A', 'Cli_D', 'Cli_E', 'Plan', 'Admincli']), async (req, res) => {
+router.get("/pdf/:IDT/:CODIGO", isLoggedIn, authRole(['Cli_C', 'Cli_B', 'Cli_A', 'Cli_D', 'Cli_E', 'Plan', 'Admincli', 'GerVer']), async (req, res) => {
 
   try {
 
@@ -1774,97 +1774,21 @@ router.get("/pdfe/:IDT/:CODIGO", isLoggedIn, authRole(['Cli_E']), async (req, re
 router.post('/resumen_detalle', isLoggedIn, async (req, res) => {
     try {
       const {id} = req.body;
-      const info_prot = await pool.query(  "SELECT\n" +
-      " Tareas.Id AS TR_TAREA_ID,\n" +
-      " date_format(Tareas.Fecha, '%d-%m-%Y') AS FECHA,\n" +
-      " Protocolos.Id AS 'TR_PROT_ID',\n" +
-      " TipoProtocolo.Abreviacion AS 'TR_PROT_TAREATIPO',\n" +
-      " UPPER ( TipoProtocolo.Descripcion ) AS 'TR_PROT_DESC_TAREATIPO',\n" +
-      " Equipos.Codigo AS 'TR_EQUIPO_COD',\n" +
-      " Protocolos.Descripcion AS 'TR_PROT_DESC_PROT',\n" +
-      " Protocolo_Capitulo.Capitulo AS 'TR_PROT_CAPIT_ID',\n" +
-      " UPPER( Protocolo_Capitulo.Descripcion ) AS 'TR_PROT_DESC_CAPI',\n" +
-      " Protocolo_Capitulo.Es_Varios AS 'TR_PROT_ESVARIOS',\n" +
-      " Protocolo_Capturas.Correlativo AS 'TR_PROT_CAPTURA_ID',\n" +
-      " Protocolo_Capturas.Descripcion AS 'TR_PROT_CAPTURA',\n" +
-      " TipoRespuesta.Id AS 'TR_PROT_TRESP_ID',\n" +
-      " TipoRespuesta.Descripcion AS 'TR_PROT_TRESP_TIPO',\n" +
-      " Estados.Descripcion AS 'TR_ESTADO',\n" +
-      " CONVERT (CAST(CONVERT (IF\n" +
-      "                (\n" +
-      "                    Tarea_Respuesta.Respuesta = 'SC',\n" +
-      "                    'No aplica',\n" +
-      "                IF\n" +
-      "                    (\n" +
-      "                        Tarea_Respuesta.Respuesta = 'SSR',\n" +
-      "                        'Sistema sin revisar.',\n" +
-      "                    IF\n" +
-      "                        (\n" +
-      "                            Tarea_Respuesta.Respuesta = 'SOP',\n" +
-      "                            'Sistema operativo',\n" +
-      "                        IF\n" +
-      "                            (\n" +
-      "                                Tarea_Respuesta.Respuesta = 'SOCO',\n" +
-      "                                'Sist. operativo con obs.',\n" +
-      "                            IF\n" +
-      "                                (\n" +
-      "                                    Tarea_Respuesta.Respuesta = 'SFS',\n" +
-      "                                    'Sist. fuera de serv.',\n" +
-      "                                IF\n" +
-      "                                ( Tarea_Respuesta.Respuesta = 'SNO', 'Sist. no operativo', Tarea_Respuesta.Respuesta )))))) USING UTF8 \n" +
-      "            ) AS BINARY \n" +
-      "        ) USING UTF8 \n" +
-      "    ) AS 'TR_RESPUESTA',\n" +
-      "        	Usuarios.Descripcion AS 'TR_TECNICO',\n" +
-      "        	UPPER( TE.Descripcion ) AS 'TR_TIPO_EQUIPO',\n" +
-      "        IF\n" +
-      "        	( TipoContingente.Id > 0, 'SI', 'NO' ) AS 'TR_CONTINGENTE_YN',\n" +
-      "        	TipoContingente.Id AS 'TR_CONTINGENTE_ID',\n" +
-      "        	TipoContingente.Descripcion AS 'TR_CONTINGENTE_DESC',\n" +
-      "       IF\n" +
-      "        	( Tareas_Motivos.Motivo IS NULL, 'NO', 'SI' ) AS 'TR_INCIDENCIA_YN',\n" +
-      "        	Tareas_Motivos.Motivo AS 'TR_INCIDENCIA',\n" +
-      "        	EQ.SecDESC AS 'TR_SECTOR',\n" +
-      "        	EQ.AreaDESC AS 'TR_AREA',\n" +
-      "        	EQ.GerDESC AS 'TR_GERENCIA' \n" +
-      "        FROM\n" +
-      "        	Protocolos\n" +
-      "        	INNER JOIN Clientes ON Protocolos.Id_Cliente = Clientes.Id\n" +
-      "        	INNER JOIN Protocolo_Capitulo ON Protocolos.Id = Protocolo_Capitulo.Id_Protocolo\n" +
-      "        INNER JOIN TipoProtocolo ON Protocolos.Id_TipoProtocolo = TipoProtocolo.Id\n" +
-      "        	INNER JOIN Protocolo_Capturas ON Protocolos.Id = Protocolo_Capturas.Id_Protocolo \n" +
-      "        	AND Protocolo_Capitulo.Capitulo = Protocolo_Capturas.Capitulo\n" +
-      "        	INNER JOIN TipoRespuesta ON Protocolo_Capturas.Id_TipoRespuesta = TipoRespuesta.Id\n" +
-      "        	INNER JOIN Tareas ON Protocolos.Id = Tareas.Id_Protocolo\n" +
-      "        	INNER JOIN Tarea_Respuesta ON Tareas.Id = Tarea_Respuesta.Id_Tarea \n" +
-      "        	AND Protocolo_Capitulo.Capitulo = Tarea_Respuesta.Capitulo \n" +
-      "        	AND Protocolo_Capturas.Correlativo = Tarea_Respuesta.Correlativo\n" +
-      "        	INNER JOIN Estados ON Tareas.Id_Estado = Estados.Id\n" +
-      "        	INNER JOIN Equipos ON Tareas.Id_Equipo = Equipos.Id\n" +
-      "        	INNER JOIN Usuarios ON Tareas.Id_Tecnico = Usuarios.Id\n" +
-      "        	LEFT JOIN TipoContingente ON Tareas.Contingente = TipoContingente.Id\n" +
-      "       	LEFT JOIN Tareas_Motivos ON Tareas.Id = Tareas_Motivos.Id_Tarea\n" +
-      "      	INNER JOIN TipoEquipo TE ON TE.Id = Equipos.Id_Tipo\n" +
-      "        	INNER JOIN Usuarios U ON U.Id = Tareas.Id_Tecnico\n" +
-      "        	INNER JOIN (\n" +
-      "        	SELECT\n" +
-      "        		E.Id 'EqID',\n" +
-      "        		S.Descripcion 'SecDESC',\n" +
-      "        	A.Descripcion 'AreaDESC',\n" +
-      "       		G.Descripcion 'GerDESC',\n" +
-      "        		C.Descripcion 'CteDESC' \n" +
-      "       	FROM\n" +
-      "        		Equipos E\n" +
-      "        		INNER JOIN Sectores S ON E.Id_Sector = S.Id\n" +
-      "        		INNER JOIN Areas A ON S.Id_Area = A.Id\n" +
-      "        		INNER JOIN Gerencias G ON A.Id_Gerencia = G.Id\n" +
-      "        		INNER JOIN Clientes C ON G.Id_Cliente = C.Id \n" +
-      "        	) AS EQ ON Tareas.Id_Equipo = EQ.EqID \n" +
-      "        WHERE \n" +
-      "   Tareas.Id =" +id +" ORDER BY TR_PROT_DESC_CAPI  ASC, FIELD(TR_PROT_CAPTURA,'Observaciones PV', 'Observación PV', 'Observaciones PV SA', 'Observaciones PV SSA', 'Observaciones PV EP'),	TR_PROT_CAPTURA ASC",
-    );
-
-    res.json(info_prot);
+      const gTarea = await pool.query("SELECT\n" +
+      "VD.TAREA,\n" +
+      "VD.SERVICIO,\n" +
+      "VD.CODIGO,\n" +
+      "E.Descripcion AS EQUIPO,\n" +
+      "date_format(VD.FECHA, '%d-%m-%Y') AS FECHA,\n" +
+      "VD.TECNICO,\n" +
+      "VD.ESTADO_TAREA\n" +
+      "FROM\n" +
+      "	VIEW_DetalleEquiposDET VD \n" +
+      "	INNER JOIN Equipos E ON E.Codigo = VD.CODIGO\n" +
+      "WHERE\n" +
+      "	VD.TAREA = ?", [id]);
+      console.log(gTarea[0]);
+      res.json(gTarea[0]);
 
     } catch (error) {
       console.log(error);  

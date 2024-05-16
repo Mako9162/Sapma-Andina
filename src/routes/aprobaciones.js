@@ -193,6 +193,7 @@ router.post('/aprobadas', isLoggedIn, authRole(['Cli_C','Cli_B', 'GerVer', 'Cli_
             case 5:
             case 7:
             case 8:
+            case 10:
 
             if (tarea > 0){
 
@@ -230,7 +231,7 @@ router.post('/aprobadas', isLoggedIn, authRole(['Cli_C','Cli_B', 'GerVer', 'Cli_
 
 });
 
-router.get('/aprobaciones', isLoggedIn, authRole(['Cli_C','Cli_B', 'Cli_A', 'Cli_D', 'Cli_E', 'Admincli', 'Plan']), async (req, res)=>{
+router.get('/aprobaciones', isLoggedIn, authRole(['Cli_C','Cli_B', 'GerVer', 'Cli_A', 'Cli_D', 'Cli_E', 'Admincli', 'Plan']), async (req, res)=>{
 
     try {
 
@@ -259,7 +260,8 @@ router.get('/aprobaciones', isLoggedIn, authRole(['Cli_C','Cli_B', 'Cli_A', 'Cli
             case 5:
             case 7:
             case 8:
-
+            case 10:
+  
                 const actualizar_tareas2 = await pool.query('CALL sp_ActualizarTareaDetalle();');
             
                 const aprobaciones2 = await pool.query('CALL sp_TareasFull ( "CONSULTA_CLIENTE", NULL, NULL, NULL, NULL, ?, ?, ?, 0 );',
@@ -270,7 +272,6 @@ router.get('/aprobaciones', isLoggedIn, authRole(['Cli_C','Cli_B', 'Cli_A', 'Cli
                     res.render('aprob/aprob', { Mensaje: "Sin Tareas Pendientes" });
                 } else {
                     res.render('aprob/aprob', { aprob: aprobaciones2[0] });
-                    console.log(aprobaciones2[0]);
                 }
 
                 break;
@@ -285,7 +286,7 @@ router.get('/aprobaciones', isLoggedIn, authRole(['Cli_C','Cli_B', 'Cli_A', 'Cli
     
 });
 
-router.post('/aprobaciones', isLoggedIn, authRole(['Cli_C','Cli_B', 'Cli_A', 'Cli_D', 'Cli_E', 'Admincli', 'Plan']), async (req, res)=>{
+router.post('/aprobaciones', isLoggedIn, authRole(['Cli_C','Cli_B', 'GerVer', 'Cli_A', 'Cli_D', 'Cli_E', 'Admincli', 'Plan']), async (req, res)=>{
 
     try {
 
