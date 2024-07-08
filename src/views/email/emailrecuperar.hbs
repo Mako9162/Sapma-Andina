@@ -12,15 +12,11 @@
   </head>
   <body>
       <p>Estimado(a) usuario:</p>
-      <p>Le informamos que con fecha {{datemail}}, se ha creado el siguiente de usuario de acceso a la plataforma SAPMA:</p>
+      <p>Le informamos que con fecha {{datemail}}, se ha modificado el siguiente acceso a la plataforma SAPMA:</p>
       <p>Nombre: {{Descripcion}}<br>
-      E-mail: {{Email}}<br>
+      E-mail: {{email}}<br><br>
       Usuario: {{Login}}<br>
-      Contraseña: {{Clave}}
-      {{#if pass}}
-      <br>
-      Clave de Validación: {{pass}}
-      {{/if}}
+      Contraseña: {{randomCode}}
       </p>
 
       <p style="text-align: left;">Atte<br>

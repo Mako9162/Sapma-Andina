@@ -738,13 +738,13 @@ router.post('/generar', isLoggedIn,  authRole(['Plan', 'Admincli']), async (req,
 
         function applyStyle(ws) {
             for (let cell in ws) {
-                // Ignora las propiedades que no son celdas
+
                 if(cell[0] === '!') continue;
         
                 ws[cell].s = {
                     font: {
-                        sz: 9, // Tamaño de fuente 9
-                        name: 'Calibri' // Tipo de fuente Calibri
+                        sz: 9, 
+                        name: 'Calibri' 
                     }
                 };
             }

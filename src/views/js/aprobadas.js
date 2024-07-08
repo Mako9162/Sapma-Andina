@@ -29,7 +29,7 @@ $(document).ready(function () {
             "titleAttr": "Exportar a Excel",
             "className": "btn btn-rounded btn-success",
             "exportOptions": {
-              "columns": [0, 1, 2, 3, 4, 5, 6, 7, 8,9,10,11,12,13],
+              "columns": [0, 1, 2, 3, 4, 5, 6, 7, 8,9,10],
             },
             customize: function (xlsx) {
               const sheet = xlsx.xl.worksheets["sheet1.xml"];

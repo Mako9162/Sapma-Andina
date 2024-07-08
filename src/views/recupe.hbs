@@ -37,7 +37,7 @@
 <div class="page-center grad">
         <div class="page-center-in">
             <div class="container-fluid">
-                <form class="sign-box" action="/login" method="post" >
+                <form class="sign-box" >
                     <div>
                         <style>
                             #imgtipo{
@@ -50,23 +50,16 @@
                     <br><br>
                     {{> message  }}
                     <div class="form-group">
-                        <input type="text" id="Login" name="Login" class="form-control" placeholder="Usuario"/>
-                    </div>
-                    <div class="form-group">
-                        <input type="password" id="Clave" name="Clave" class="form-control" placeholder="Contraseña"/>
-                    </div>
-                    <div class="form-group">
-                        <div class="float-right reset">
-                            <a href="/recuperar">Recuperar contraseña</a>
-                        </div>
+                        <label for="recuperar">Para recuperar su contraseña, ingrese su correo electrónico.</label>
+                        <br>
+                        <input type="email" id="recuperar" name="recuperar" class="form-control" placeholder="e-mail"/>
                     </div>
                     <br>
-                    <button type="submit" class="button-87">Acceder</button>
+                    <button type="button" class="button-87" id="enviar">Enviar</button>
                 </form>
             </div>
-            
         </div>
-    </div><!--.page-center-->
+    </div>
 <style>
 .footer {
   color:#fff;  
@@ -103,6 +96,19 @@
 <script src="/js/lib/tether/tether.min.js"></script>
 <script src="/js/lib/bootstrap/bootstrap.min.js"></script>
 <script src="/js/plugins.js"></script>
+<script src="/js/app.js"></script>
+<script src="/js/lib/datatables-net/datatables.min.js"></script>
+<script src="/js/lib/bootstrap-sweetalert/sweetalert.min.js"></script>
+<script src="/js/lib/summernote/summernote.min.js"></script>
+<script src="/js/lib/fancybox/jquery.fancybox.pack.js"></script> 
+<script src="/js/summernote-ES.js"></script>
+<script src="/js/lib/select2/select2.full.min.js"></script>
+<script src="/js/lib/match-height/jquery.matchHeight.min.js"></script>
+<script src="/js/lib/moment/moment-with-locales.min.js"></script>
+<script src="/js/lib/eonasdan-bootstrap-datetimepicker/bootstrap-datetimepicker.min.js"></script>
+<script src="/js/lib/fullcalendar/fullcalendar.min.js"></script>
+<script src="/js/lib/fullcalendar/scheduler.min.js"></script>
+<script src="/js/lib/fullcalendar/lang-all.js"></script>
 <script type="text/javascript" src="/js/lib/match-height/jquery.matchHeight.min.js"></script>
     <script>
         $(function() {
@@ -118,7 +124,47 @@
                     });
                 },100);
             });
+
         });
+
+        $(document).ready(function () {
+            $('#enviar').on('click', function () {
+                var email = $('#recuperar').val();
+
+                var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+                if (email == '') {
+                    swal("Error","Ingrese un correo electrónico", "error");
+                    return;
+                }
+
+                if (!emailRegex.test(email)) {
+                    swal("Error", "Ingrese un correo electrónico válido", "error");
+                    return;
+                }
+
+                $.ajax({
+                    url: '/correo',
+                    type: 'POST',
+                    data: { email: email },
+                    success: function(response) {
+                        if (response.exists) {
+                            swal("Atención", "Se ha enviado un correo electrónico con sus datos de para inciar sesión.", "success");
+                            setTimeout(function () {
+                                window.location.href = '/';
+                            }, 2000);
+                        } else {
+                            swal("Error","El correo electrónico no está registrado.", "error");
+                        }
+                    },
+                    error: function(error) {
+                        console.log(error);
+                        swal("Error","Ocurrió un error al procesar la solicitud.", "error");
+                    }
+                });
+            });
+        });
+
     </script>
 <script src="/js/app.js"></script>
 
