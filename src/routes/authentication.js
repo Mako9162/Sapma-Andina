@@ -40,7 +40,7 @@ router.post('/login', (req, res, next) => {
     ;
 });
 
-router.get('/recuperar', (req, res, next) => {
+router.get('/reset_pass', (req, res, next) => {
   res.render('recupe');
 });
 

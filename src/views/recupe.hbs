@@ -137,7 +137,7 @@
                     swal("Error","Ingrese un correo electrónico", "error");
                     return;
                 }
-
+  
                 if (!emailRegex.test(email)) {
                     swal("Error", "Ingrese un correo electrónico válido", "error");
                     return;
@@ -149,7 +149,7 @@
                     data: { email: email },
                     success: function(response) {
                         if (response.exists) {
-                            swal("Atención", "Se ha enviado un correo electrónico con sus datos de para inciar sesión.", "success");
+                            swal("Atención", "Se ha enviado un correo electrónico con sus datos de para inciar sesión a: "+email+"", "success");
                             setTimeout(function () {
                                 window.location.href = '/';
                             }, 2000);
